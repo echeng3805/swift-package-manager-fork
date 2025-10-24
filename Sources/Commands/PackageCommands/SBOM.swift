@@ -17,7 +17,6 @@ import PackageGraph
 import Workspace
 import SBOMModel
 
-extension SBOMModel.Spec: ExpressibleByArgument {}
 extension SwiftPackageCommand {
     struct SBOM: AsyncSwiftCommand {
         static let configuration = CommandConfiguration(

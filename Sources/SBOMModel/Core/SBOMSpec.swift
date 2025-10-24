@@ -10,13 +10,28 @@
 //
 //===----------------------------------------------------------------------===//
 
-package enum Spec: String, Codable, Equatable, CaseIterable {
-    case cyclonedx // most recent CycloneDX version
-    case spdx // most recent SPDX version
-    case cyclonedx1 // most recent version of CycloneDX v1 (v1.6)
-    case spdx3 // most recent version of SPDX 3 (v3.0.1)
+import ArgumentParser
+
+package enum Spec: String, Codable, Equatable, CaseIterable, ExpressibleByArgument, Comparable {
+    case cyclonedx
+    case spdx
+    case cyclonedx1
+    case spdx3
     // case cyclonedx2, for future major versions of CycloneDX
     // case spdx4, for future major versions of SPDX
+
+    package var defaultValueDescription: String {
+        switch self {
+        case .cyclonedx: "Most recent major version of CycloneDX supported by SPM (currently: \(CDXConstants.cyclonedx1SpecVersion))"
+        case .spdx: "Most recent major version of SPDX supported by SPM (currently: \(SPDXConstants.spdx3SpecVersion))"
+        case .cyclonedx1: "Most recent minor version of CycloneDX v1 supported by SPM  (currently: \(CDXConstants.cyclonedx1SpecVersion))"
+        case .spdx3: "Most recent minor version supported by SPM of SPDX v3 (currently: \(SPDXConstants.spdx3SpecVersion))"
+        }
+    }
+
+    package static func < (lhs: Spec, rhs: Spec) -> Bool {
+        return lhs.rawValue < rhs.rawValue
+    }
 }
 
 package struct SBOMSpec: Codable, Equatable {
