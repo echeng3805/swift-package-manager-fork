@@ -25,7 +25,7 @@ package enum Spec: String, Codable, Equatable, CaseIterable, ExpressibleByArgume
         case .cyclonedx: "Most recent major version of CycloneDX supported by SPM (currently: \(CDXConstants.cyclonedx1SpecVersion))"
         case .spdx: "Most recent major version of SPDX supported by SPM (currently: \(SPDXConstants.spdx3SpecVersion))"
         case .cyclonedx1: "Most recent minor version of CycloneDX v1 supported by SPM  (currently: \(CDXConstants.cyclonedx1SpecVersion))"
-        case .spdx3: "Most recent minor version supported by SPM of SPDX v3 (currently: \(SPDXConstants.spdx3SpecVersion))"
+        case .spdx3: "Most recent minor version of SPDX v3 supported by SPM (currently: \(SPDXConstants.spdx3SpecVersion))"
         }
     }
 
