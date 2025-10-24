@@ -84,6 +84,18 @@ package func convertToCDXComponent(from comp: SBOMComponent) async throws -> CDX
     )
 }
 
+private func convertToCDXComponent(from tool: SBOMTool) async throws -> CDXComponent {
+    return CDXComponent(
+        type: .application,
+        bomRef: tool.id,
+        name: tool.name,
+        version: tool.version,
+        scope: .excluded,
+        purl: "pkg:generic/\(tool.name)@\(tool.version)",
+        pedigree: nil
+    )
+}
+
 package func convertToCDXDependency(from dep: SBOMDependency) async throws -> CDXDependency {
     return CDXDependency(
         ref: dep.parentID,
@@ -92,9 +104,20 @@ package func convertToCDXDependency(from dep: SBOMDependency) async throws -> CD
 }
 
 package func convertToCDXMetadata(from document: SBOMDocument) async throws -> CDXMetadata {
+    var tools: CDXTools? = nil
+    if let creators = document.metadata.creators, !creators.isEmpty {
+        var toolsComponents: [CDXComponent] = []
+        for creator in creators {
+            let cdxTool = try await convertToCDXComponent(from: creator)
+            toolsComponents.append(cdxTool)
+        }
+        tools = CDXTools(components: toolsComponents)
+    }
+    
     return CDXMetadata(
         timestamp: document.metadata.timestamp,
         component: try await convertToCDXComponent(from: document.primaryComponent),
+        tools: tools
     )
 }
 

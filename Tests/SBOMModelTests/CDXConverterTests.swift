@@ -343,6 +343,7 @@ struct CDXConverterTests {
         #expect(result.component.type == .application)
         #expect(result.component.purl == "pkg:swift/primary@1.0.0")
         #expect(result.component.version == "1.0.0")
+        #expect(result.tools == nil)
     }
     
     @Test("convertToCDXMetadata with nil timestamp")
@@ -376,6 +377,7 @@ struct CDXConverterTests {
         #expect(result.component.type == .framework)
         #expect(result.component.purl == "pkg:swift/primary@2.0.0")
         #expect(result.component.version == "2.0.0")
+        #expect(result.tools == nil)
     }
         
     @Test("convertToCDXDocument with no components or dependencies")
@@ -544,5 +546,97 @@ struct CDXConverterTests {
         
         let dependencies = try #require(result.dependencies)
         #expect(dependencies.isEmpty)
+    }
+    
+    @Test("convertToCDXMetadata with creators/tools")
+    func convertToCDXMetadataWithCreators() async throws {
+        let tool1 = SBOMTool(
+            id: "tool-1",
+            name: "SwiftPM",
+            version: "6.0.0"
+        )
+        let tool2 = SBOMTool(
+            id: "tool-2",
+            name: "Swift",
+            version: "5.9.0"
+        )
+        
+        let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
+        let metadata = SBOMMetadata(
+            spec: spec,
+            timestamp: "2025-01-01T00:00:00Z",
+            creators: [tool1, tool2]
+        )
+        let primaryComponent = SBOMComponent(
+            category: .application,
+            id: "primary-id",
+            purl: "pkg:swift/primary@1.0.0",
+            name: "PrimaryApp",
+            version: "1.0.0",
+            originator: SBOMOriginator(commits: nil),
+            scope: .runtime
+        )
+        
+        let document = SBOMDocument(
+            id: "doc-1",
+            metadata: metadata,
+            primaryComponent: primaryComponent
+        )
+        
+        let result = try await convertToCDXMetadata(from: document)
+        
+        #expect(result.timestamp == "2025-01-01T00:00:00Z")
+        #expect(result.component.bomRef == "primary-id")
+        #expect(result.component.name == "PrimaryApp")
+        
+        let tools = try #require(result.tools)
+        #expect(tools.components.count == 2)
+        
+        let cdxTool1 = tools.components[0]
+        #expect(cdxTool1.bomRef == "tool-1")
+        #expect(cdxTool1.name == "SwiftPM")
+        #expect(cdxTool1.version == "6.0.0")
+        #expect(cdxTool1.type == .application)
+        #expect(cdxTool1.scope == .excluded)
+        #expect(cdxTool1.purl == "pkg:generic/SwiftPM@6.0.0")
+        
+        let cdxTool2 = tools.components[1]
+        #expect(cdxTool2.bomRef == "tool-2")
+        #expect(cdxTool2.name == "Swift")
+        #expect(cdxTool2.version == "5.9.0")
+        #expect(cdxTool2.type == .application)
+        #expect(cdxTool2.scope == .excluded)
+        #expect(cdxTool2.purl == "pkg:generic/Swift@5.9.0")
+    }
+    
+    @Test("convertToCDXMetadata with empty creators")
+    func convertToCDXMetadataWithEmptyCreators() async throws {
+        let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
+        let metadata = SBOMMetadata(
+            spec: spec,
+            timestamp: "2025-01-01T00:00:00Z",
+            creators: []
+        )
+        let primaryComponent = SBOMComponent(
+            category: .application,
+            id: "primary-id",
+            purl: "pkg:swift/primary@1.0.0",
+            name: "PrimaryApp",
+            version: "1.0.0",
+            originator: SBOMOriginator(commits: nil),
+            scope: .runtime
+        )
+        
+        let document = SBOMDocument(
+            id: "doc-1",
+            metadata: metadata,
+            primaryComponent: primaryComponent
+        )
+        
+        let result = try await convertToCDXMetadata(from: document)
+        
+        #expect(result.timestamp == "2025-01-01T00:00:00Z")
+        #expect(result.component.bomRef == "primary-id")
+        #expect(result.tools == nil)
     }
 }
