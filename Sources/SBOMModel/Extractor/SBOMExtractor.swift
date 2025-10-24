@@ -116,6 +116,21 @@ package func extractHeadCommitInfo(from packageIdentity: PackageIdentity, store 
     )
 }
 
+package func extractVersion(from packageIdentity: PackageIdentity, store resolvedPackagesStore: ResolvedPackagesStore) async throws -> String {
+    guard let resolvedPackage = resolvedPackagesStore.resolvedPackages[packageIdentity] else {
+        return "unknown"
+    }
+    
+    switch resolvedPackage.state {
+    case .version(let version, _):
+        return version.description
+    case .branch(_, let revision):
+        return revision
+    case .revision(let revision):
+        return revision
+    }
+}
+
 package func extractComponentID(from package: ResolvedPackage) async -> String {
     return package.identity.description
 }
@@ -126,7 +141,7 @@ package func extractComponentID(from product: ResolvedProduct) async -> String {
 
 package func extractComponent(package: ResolvedPackage,  products: [SBOMComponent]?, store: ResolvedPackagesStore) async throws -> SBOMComponent {
     let commit = try await extractHeadCommitInfo(from: package.identity, store: store)
-    let version = package.manifest.version?.description ?? commit?.sha ?? "unknown"
+    let version = try await extractVersion(from: package.identity, store: store)
     return SBOMComponent(
         category: try await extractCategory(from: package),
         id: await extractComponentID(from: package),
@@ -142,7 +157,7 @@ package func extractComponent(package: ResolvedPackage,  products: [SBOMComponen
 
 package func extractComponent(product: ResolvedProduct, store: ResolvedPackagesStore) async throws -> SBOMComponent {
     let commit = try await extractHeadCommitInfo(from: product.packageIdentity, store: store)
-    let version = commit?.sha ?? "unknown"
+    let version = try await extractVersion(from: product.packageIdentity, store: store)
     return SBOMComponent(
         category: try await extractCategory(from: product),
         id: await extractComponentID(from: product),

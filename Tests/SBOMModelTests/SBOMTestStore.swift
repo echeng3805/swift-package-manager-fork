@@ -31,7 +31,7 @@ struct SBOMTestStore {
         ("swift-system", "https://github.com/apple/swift-system.git", "1.3.2"),
         ("swift-collections", "https://github.com/apple/swift-collections.git", "1.1.4"),
         ("swift-argument-parser", "https://github.com/apple/swift-argument-parser.git", "1.5.1"),
-        ("swift-llbuild", "https://github.com/swiftlang/swift-llbuild.git", "main"),
+        ("swift-llbuild", "https://github.com/swiftlang/swift-llbuild.git", "swift-6.0-branch"),
         ("swift-tools-support-core", "https://github.com/swiftlang/swift-tools-support-core.git", "main"),
         ("swift-driver", "https://github.com/swiftlang/swift-driver.git", "main"),
         ("swift-crypto", "https://github.com/apple/swift-crypto.git", "3.0.0"),
@@ -120,9 +120,11 @@ struct SBOMTestStore {
         version: String,
         revision: String
     ) throws -> ResolvedPackagesStore.ResolutionState {
-        if version.contains(".") {
-            return .version(try Version(versionString: version), revision: revision)
+        // Try to parse as a version first
+        if let parsedVersion = try? Version(versionString: version) {
+            return .version(parsedVersion, revision: revision)
         } else {
+            // If it can't be parsed as a version, treat it as a branch
             return .branch(name: version, revision: revision)
         }
     }
