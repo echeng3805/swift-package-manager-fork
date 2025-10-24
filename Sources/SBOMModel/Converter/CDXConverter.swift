@@ -62,7 +62,7 @@ package func convertToCDXPedigree(from originator: SBOMOriginator) async throws 
         
         return CDXCommit(
             uid: sbomCommit.sha,
-            url: sbomCommit.url,
+            url: sbomCommit.repository,
             author: cdxAuthor,
             message: sbomCommit.message
         )

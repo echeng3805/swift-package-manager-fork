@@ -46,7 +46,7 @@ struct CDXConverterTests {
         
         let cdxCommit = cdxCommits[0]
         #expect(cdxCommit.uid == "abc123")
-        #expect(cdxCommit.url == "https://github.com/swiftlang/swift-package-manager/commit/abc123")
+        #expect(cdxCommit.url == "https://github.com/swiftlang/swift-package-manager")
         #expect(cdxCommit.author == nil)
         #expect(cdxCommit.message == "Initial commit")
     }
@@ -75,7 +75,7 @@ struct CDXConverterTests {
         
         let cdxCommit = cdxCommits[0]
         #expect(cdxCommit.uid == "def456")
-        #expect(cdxCommit.url == "https://github.com/swiftlang/swift-package-manager/commit/def456")
+        #expect(cdxCommit.url == "https://github.com/swiftlang/swift-package-manager")
         #expect(cdxCommit.message == "Add new feature")
         
         let cdxAuthor = try #require(cdxCommit.author)
@@ -123,14 +123,14 @@ struct CDXConverterTests {
         
         let cdxCommit1 = cdxCommits[0]
         #expect(cdxCommit1.uid == "abc123")
-        #expect(cdxCommit1.url == "https://github.com/swiftlang/swift-package-manager/commit/abc123")
+        #expect(cdxCommit1.url == "https://github.com/swiftlang/swift-package-manager")
         #expect(cdxCommit1.message == "First commit")
         let cdxAuthor1 = try #require(cdxCommit1.author)
         #expect(cdxAuthor1.name == "John Doe")
         
         let cdxCommit2 = cdxCommits[1]
         #expect(cdxCommit2.uid == "def456")
-        #expect(cdxCommit2.url == nil)
+        #expect(cdxCommit2.url == "https://github.com/swiftlang/swift-package-manager")
         #expect(cdxCommit2.message == "Second commit")
         let cdxAuthor2 = try #require(cdxCommit2.author)
         #expect(cdxAuthor2.name == "Jane Smith")
@@ -275,7 +275,7 @@ struct CDXConverterTests {
         
         let cdxCommit = commits[0]
         #expect(cdxCommit.uid == "abc123")
-        #expect(cdxCommit.url == "https://github.com/swiftlang/swift-package-manager/commit/abc123")
+        #expect(cdxCommit.url == "https://github.com/swiftlang/swift-package-manager")
         #expect(cdxCommit.message == "Initial commit")
 
         let cdxAuthor = try #require(cdxCommit.author)
