@@ -32,8 +32,8 @@ extension SwiftPackageCommand {
                 help: "The absolute or relative path to generate the SBOM at.")
         var outputPath: AbsolutePath?
 
-        @Option(help: "The target to generate an SBOM for.")
-        var target: String?
+        @Option(help: "The product to generate an SBOM for.")
+        var product: String?
 
         @Option(help: "Whether to validate the generated SBOM against the appropriate specification schema.")
         var validate: Bool = false
@@ -45,7 +45,7 @@ extension SwiftPackageCommand {
         // var includeLicenses: Bool = false TODO ev_cheng
         
         func run(_ swiftCommandState: SwiftCommandState) async throws {
-           let graph = try await swiftCommandState.loadPackageGraph(explicitProduct: target)
+           let graph = try await swiftCommandState.loadPackageGraph(explicitProduct: product)
            let workspace = try swiftCommandState.getActiveWorkspace()
            let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
            
