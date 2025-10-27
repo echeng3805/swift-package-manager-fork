@@ -95,40 +95,44 @@ package func extractScope(from package: ResolvedPackage) async throws -> SBOMCom
     return .runtime
 }
 
-package func extractHeadCommitInfo(from packageIdentity: PackageIdentity, store resolvedPackagesStore: ResolvedPackagesStore ) async throws -> SBOMCommit? {
-    // TODO ev_cheng Extract authors and commit URL using Git CLI?
-    guard let resolvedPackage = resolvedPackagesStore.resolvedPackages[packageIdentity] else {
-        return nil
+private struct ComponentVersion: Codable, Equatable {
+    let version: String
+    let commit: SBOMCommit?
+
+    init(
+        version: String,
+        commit: SBOMCommit? = nil,
+    ) {
+        self.version = version
+        self.commit = commit
     }
-    let sha: String
-    switch resolvedPackage.state {
-    case .branch(_, let revision):
-        sha = revision
-    case .version(_, let revision):
-        guard let revision = revision else { return nil }
-        sha = revision
-    case .revision(let revision):
-        sha = revision
-    }
-    return SBOMCommit(
-        sha: sha,
-        repository: resolvedPackage.packageRef.kind.locationString,
-    )
 }
 
-package func extractVersion(from packageIdentity: PackageIdentity, store resolvedPackagesStore: ResolvedPackagesStore) async throws -> String {
+private func extractComponentVersion(from packageIdentity: PackageIdentity, store resolvedPackagesStore: ResolvedPackagesStore) async throws -> ComponentVersion {
     guard let resolvedPackage = resolvedPackagesStore.resolvedPackages[packageIdentity] else {
-        return "unknown"
+        return ComponentVersion(version: "unknown", commit: nil)
     }
     
+    let version: String
+    let sha: String
+    
     switch resolvedPackage.state {
-    case .version(let version, _):
-        return version.description
-    case .branch(_, let revision):
-        return revision
-    case .revision(let revision):
-        return revision
+    case .version(let versionValue, let revision):
+        version = versionValue.description
+        if let revision = revision {
+            sha = revision
+        } else {
+            sha = ""
+        }
+    case .branch(_, let revision), .revision(let revision):
+        version = revision
+        sha = revision
     }
+    
+    return ComponentVersion(version: version, commit: SBOMCommit(
+        sha: sha,
+        repository: resolvedPackage.packageRef.kind.locationString
+    ))
 }
 
 package func extractComponentID(from package: ResolvedPackage) async -> String {
@@ -139,16 +143,16 @@ package func extractComponentID(from product: ResolvedProduct) async -> String {
     return "\(product.packageIdentity):\(product.name)"
 }
 
-package func extractComponent(package: ResolvedPackage,  products: [SBOMComponent]?, store: ResolvedPackagesStore) async throws -> SBOMComponent {
-    let commit = try await extractHeadCommitInfo(from: package.identity, store: store)
-    let version = try await extractVersion(from: package.identity, store: store)
+package func extractComponent(package: ResolvedPackage, store: ResolvedPackagesStore) async throws -> SBOMComponent {
+    let componentVersion = try await extractComponentVersion(from: package.identity, store: store)
+    let products = try await extractProductsFromPackage(package: package, store: store)
     return SBOMComponent(
         category: try await extractCategory(from: package),
         id: await extractComponentID(from: package),
-        purl: PURL.from(package: package, version: version).description,
+        purl: PURL.from(package: package, version: componentVersion.version).description,
         name: package.identity.description,
-        version: version,
-        originator: SBOMOriginator(commits: commit.map { [$0] }),
+        version: componentVersion.version,
+        originator: SBOMOriginator(commits: componentVersion.commit.map { [$0] }),
         description: package.description,
         scope: try await extractScope(from: package),
         components: products
@@ -156,15 +160,14 @@ package func extractComponent(package: ResolvedPackage,  products: [SBOMComponen
 }
 
 package func extractComponent(product: ResolvedProduct, store: ResolvedPackagesStore) async throws -> SBOMComponent {
-    let commit = try await extractHeadCommitInfo(from: product.packageIdentity, store: store)
-    let version = try await extractVersion(from: product.packageIdentity, store: store)
+    let componentVersion = try await extractComponentVersion(from: product.packageIdentity, store: store)
     return SBOMComponent(
         category: try await extractCategory(from: product),
         id: await extractComponentID(from: product),
-        purl: PURL.from(product: product, version: version).description,
+        purl: PURL.from(product: product, version: componentVersion.version).description,
         name: product.name,
-        version: version,
-        originator: SBOMOriginator(commits: commit.map { [$0] }),
+        version: componentVersion.version,
+        originator: SBOMOriginator(commits: componentVersion.commit.map { [$0] }),
         description: nil,
         scope: try await extractScope(from: product),
     )
@@ -174,8 +177,7 @@ package func extractPrimaryComponent(graph: ModulesGraph, store: ResolvedPackage
     guard let rootPackage = graph.rootPackages.first else {
         throw StringError("No root package found in package graph, cannot determine primary component for SBOM")
     }
-    let products = try await extractProductsFromPackage(package: rootPackage, store: store)
-    return try await extractComponent(package: rootPackage, products: products, store: store)
+    return try await extractComponent(package: rootPackage, store: store)
 }
 
 private func extractProductsFromPackage(package: ResolvedPackage, store: ResolvedPackagesStore) async throws -> [SBOMComponent] {
@@ -193,13 +195,11 @@ package func extractComponents(_ graph: ModulesGraph, store: ResolvedPackagesSto
     }
     var components: [SBOMComponent] = []
     for package in graph.packages {
-        let productComponents: [SBOMComponent] = []
         for product in package.products {
             let productComponent = try await extractComponent(product: product, store: store)
-            // productComponents.append(productComponent) // each package component contains a list of product components TODO: ev_cheng maybe remove?
-            components.append(productComponent) // the flat list of components also includes the product components
+            components.append(productComponent)
         }
-        let packageComponent = try await extractComponent(package: package, products: productComponents, store: store)
+        let packageComponent = try await extractComponent(package: package, store: store)
         components.append(packageComponent)
     }
     return components
