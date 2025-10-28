@@ -170,10 +170,22 @@ package func extractComponent(package: ResolvedPackage, store: ResolvedPackagesS
 
 package func extractComponent(product: ResolvedProduct, store: ResolvedPackagesStore) async throws -> SBOMComponent {
     let componentVersion = try await extractComponentVersion(from: product.packageIdentity, store: store)
+    
+    // Get the package location from the store for proper PURL namespace extraction
+    // If not found in store (e.g., local/root package products), use package identity as fallback
+    let packageLocation: String
+    if let resolvedPackage = store.resolvedPackages[product.packageIdentity] {
+        packageLocation = resolvedPackage.packageRef.kind.locationString
+    } else {
+        // For local packages not in the store, use the package identity as the location
+        // This will be used as the namespace in the PURL
+        packageLocation = product.packageIdentity.description
+    }
+    
     return SBOMComponent(
         category: try await extractCategory(from: product),
         id: await extractComponentID(from: product),
-        purl: PURL.from(product: product, version: componentVersion.version).description,
+        purl: PURL.from(product: product, version: componentVersion.version, packageLocation: packageLocation).description,
         name: product.name,
         version: componentVersion.version,
         originator: SBOMOriginator(commits: componentVersion.commit.map { [$0] }),

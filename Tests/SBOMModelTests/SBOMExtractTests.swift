@@ -76,25 +76,19 @@ struct SBOMExtractTests {
         #expect(sbom.dependencies.relationships?.count == 5)
         #expect(fullSbom.dependencies.relationships?.count == 10)
 
-
-         let componentIDs = Set(sbom.dependencies.components.map { $0.id })
-        
+        let componentIDs = Set(sbom.dependencies.components.map { $0.id })
         #expect(componentIDs.contains("swiftly:swiftly"), "should contain target product")
         #expect(componentIDs.contains("swiftly"), "should contain root package")
-        #expect(componentIDs.contains("swift-tools-support-core:SwiftToolsSupport-auto"), "should contain dependency product")
+        #expect(componentIDs.contains("swift-tools-support-core:SwiftToolsSupport-auto"), "should contain a dependency product")
 
         let swiftlyDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swiftly" }))
         #expect(Set(swiftlyDependency.childrenID) == Set(["swiftly:swiftly", "swift-tools-support-core", "swift-argument-parser", "swift-system"]))
-
         let swiftlyProductDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swiftly:swiftly" }))
         #expect(Set(swiftlyProductDependency.childrenID) == Set(["swift-system:SystemPackage", "swift-tools-support-core:SwiftToolsSupport-auto", "swift-argument-parser:ArgumentParser"]))
-
         let swiftSystemDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swift-system" }))
         #expect(Set(swiftSystemDependency.childrenID) == Set(["swift-system:SystemPackage"]))
-
         let swiftArgumentParserDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swift-argument-parser" }))
         #expect(Set(swiftArgumentParserDependency.childrenID) == Set(["swift-argument-parser:ArgumentParser"]))
-
         let swiftToolsSupportDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swift-tools-support-core" }))
         #expect(Set(swiftToolsSupportDependency.childrenID) == Set(["swift-tools-support-core:SwiftToolsSupport-auto"]))
     }

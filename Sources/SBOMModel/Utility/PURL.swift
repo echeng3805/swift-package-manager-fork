@@ -81,14 +81,15 @@ extension PURL {
         )
     }
 
-    package static func from(product: ResolvedProduct, version: String) -> PURL {
+    package static func from(product: ResolvedProduct, version: String, packageLocation: String) -> PURL {
         // For products, we create a PURL that identifies the product within its package
-        // We use the package's identity as the namespace and the product name as the name
+        // We use the full package path as the namespace (e.g., "github.com/swiftlang/swift-package-manager")
+        // and the package identity + product name as the name (e.g., "SwiftPM:SwiftPMDataModel")
         return PURL(
             scheme: "pkg",
             type: "swift",
-            namespace: product.packageIdentity.description,
-            name: product.name,
+            namespace: extractProductNamespace(from: packageLocation),
+            name: "\(product.packageIdentity):\(product.name)",
             version: version,
         )
     }
@@ -146,5 +147,42 @@ extension PURL {
         }
         
         return nil
+    }
+    
+    package static func extractProductNamespace(from packageLocation: String) -> String? {
+        // For products, extract the full repository path including the repo name
+        // e.g., "https://github.com/swiftlang/swift-package-manager.git" -> "github.com/swiftlang/swift-package-manager"
+        
+        // Handle SSH URLs (git@host:org/repo.git or git@host:org/repo)
+        let sshPattern = #"^[^@]+@([^:]+):(.+?)(?:\.git)?$"#
+        if let regex = try? NSRegularExpression(pattern: sshPattern, options: []),
+           let match = regex.firstMatch(in: packageLocation, options: [], range: NSRange(location: 0, length: packageLocation.count)),
+           match.numberOfRanges == 3 {
+            
+            let hostRange = Range(match.range(at: 1), in: packageLocation)
+            let pathRange = Range(match.range(at: 2), in: packageLocation)
+            
+            if let hostRange = hostRange, let pathRange = pathRange {
+                let host = String(packageLocation[hostRange])
+                let path = String(packageLocation[pathRange])
+                return "\(host)/\(path)"
+            }
+        }
+        
+        // Handle HTTP/HTTPS URLs
+        if let url = URL(string: packageLocation), let host = url.host {
+            var pathComponents = url.pathComponents.filter { $0 != "/" && !$0.isEmpty }
+            // Remove .git extension if present
+            if let last = pathComponents.last, last.hasSuffix(".git") {
+                pathComponents[pathComponents.count - 1] = String(last.dropLast(4))
+            }
+            if pathComponents.count >= 2 {
+                // Return host + full path (org/repo)
+                return "\(host)/\(pathComponents.joined(separator: "/"))"
+            }
+        }
+        
+        // For other cases, fall back to the original extractNamespace behavior
+        return extractNamespace(from: packageLocation)
     }
 }
