@@ -10,24 +10,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMDocument: Codable, Equatable {
-    package let id: String
-    package let metadata: SBOMMetadata
-    package let primaryComponent: SBOMComponent
-    package let dependencies: SBOMDependencies
-    package let licenses: [SBOMLicense]?
+package struct SBOMDependencies: Codable, Equatable {
+    package let components: [SBOMComponent]
+    package let dependencies: [SBOMDependency]?
 
     package init(
-        id: String,
-        metadata: SBOMMetadata,
-        primaryComponent: SBOMComponent,
-        dependencies: SBOMDependencies,
-        licenses: [SBOMLicense]? = nil,
+        components: [SBOMComponent],
+        dependencies: [SBOMDependency]? = nil,
     ) {
-        self.id = id
-        self.metadata = metadata
-        self.primaryComponent = primaryComponent
+        self.components = components
         self.dependencies = dependencies
-        self.licenses = licenses
     }
 }

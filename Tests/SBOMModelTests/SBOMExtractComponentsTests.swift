@@ -98,7 +98,7 @@ struct SBOMExtractComponentsTests {
     func extractComponentsFromSPMModulesGraph() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel.extractComponents(graph, store: store)
+        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
         
         verifyComponents(components: components, graph: graph, expectations: Self.spmExpectations)
     }
@@ -107,7 +107,7 @@ struct SBOMExtractComponentsTests {
     func extractComponentsFromSwiftlyModulesGraph() async throws {
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
-        let components = try await SBOMModel.extractComponents(graph, store: store)
+        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
         
         verifyComponents(components: components, graph: graph, expectations: Self.swiftlyExpectations)
     }
@@ -124,7 +124,7 @@ struct SBOMExtractComponentsTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         
         await #expect(throws: StringError.self) {
-            _ = try await SBOMModel.extractComponents(emptyGraph, store: store)
+            _ = try await SBOMModel.extractDependencies(graph: emptyGraph, store: store).components
         }
     }
     
@@ -132,7 +132,7 @@ struct SBOMExtractComponentsTests {
     func extractComponentsForNonMainBranch() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel.extractComponents(graph, store: store)
+        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
         
         let swiftLLBuildComponent = components.first { component in
             component.id == "swift-llbuild" || component.name == "swift-llbuild"
@@ -157,7 +157,7 @@ struct SBOMExtractComponentsTests {
     func extractComponentsUsesVersionTagWhenAvailable() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel.extractComponents(graph, store: store)
+        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
         
         // Find a version-based dependency (swift-argument-parser uses version "1.5.1")
         let argParserComponent = components.first { component in
@@ -175,5 +175,22 @@ struct SBOMExtractComponentsTests {
         
         #expect(versionComponent.version == "1.5.1", "Component version should be the version tag for version-based dependency")
         #expect(versionComponent.version != commit.sha, "Component version should not be the commit SHA for version-based dependency")
+    }
+
+    @Test("extractComponents with product filter")
+    func extractComponentsWithProductFilter() async throws {
+        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+
+        let components = try await SBOMModel.extractDependencies(graph: graph, store: store, product: "SwiftPMDataModel").components
+        let allComponents = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+        
+        #expect(components.count < allComponents.count)
+        
+        let componentIDs = Set(components.map { $0.id })
+        #expect(componentIDs.contains("SwiftPM:SwiftPMDataModel"))
+        #expect(componentIDs.contains("SwiftPM"))
+
+        // TODO: also check for other stuff
     }
 }

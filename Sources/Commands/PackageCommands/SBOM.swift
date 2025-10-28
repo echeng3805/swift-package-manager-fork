@@ -41,15 +41,12 @@ extension SwiftPackageCommand {
         @Option(help: "Whether to include information about test targets.")
         var includeTestTargets: Bool = false // TODO ev_cheng
 
-        // @Option(help: "Whether to include best attempt at licenses.")
-        // var includeLicenses: Bool = false TODO ev_cheng
-        
         func run(_ swiftCommandState: SwiftCommandState) async throws {
            let graph = try await swiftCommandState.loadPackageGraph(explicitProduct: product)
            let workspace = try swiftCommandState.getActiveWorkspace()
            let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
            
-           let sbom = try await SBOMModel.extractSBOM(spec: spec, graph: graph, store: resolvedPackagesStore)
+           let sbom = try await SBOMModel.extractSBOM(spec: spec, graph: graph, store: resolvedPackagesStore, product: product)
            try await encodeSBOM(from: sbom, validate: validate, outputPath: outputPath)
         }
     }

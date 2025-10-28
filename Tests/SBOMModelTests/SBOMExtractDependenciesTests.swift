@@ -18,8 +18,8 @@ import _InternalTestSupport
 
 struct SBOMExtractDependenciesTests {
 
-    private func verifyDependencies(graph: ModulesGraph) async throws {
-        let dependencies = try await SBOMModel.extractDependencies(graph)
+    private func verifyDependencies(graph: ModulesGraph, store: ResolvedPackagesStore) async throws {
+        let dependencies = try await #require(SBOMModel.extractDependencies(graph: graph, store: store).dependencies)
         let rootPackage = try #require(graph.rootPackages.first)
         let rootPackageID = await extractComponentID(from: rootPackage)
         let packageIDs = graph.packages.map { $0.identity.description }
@@ -60,12 +60,48 @@ struct SBOMExtractDependenciesTests {
     @Test("extractDependencies with sample SPM ModulesGraph")
     func extractDependenciesFromSPMModulesGraph() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
-        try await verifyDependencies(graph: graph)   
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        try await verifyDependencies(graph: graph, store: store)   
     }
 
     @Test("extractDependencies with sample Swiftly ModulesGraph")
     func extractDependenciesFromSwiftlyModulesGraph() async throws {
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
-        try await verifyDependencies(graph: graph)
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        try await verifyDependencies(graph: graph, store: store)
+    }
+
+    @Test("extractDependencies with product filter")
+    func extractDependenciesWithProductFilter() async throws {
+        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let productName = "SwiftPMDataModel"
+        let dependencies = try await #require(SBOMModel.extractDependencies(graph: graph, store: store, product: productName).dependencies)
+        let allDependencies = try await #require(SBOMModel.extractDependencies(graph: graph, store: store).dependencies)
+        
+        #expect(dependencies.count < allDependencies.count)
+        
+        // Should contain dependencies starting from the target product
+        let dependencyParentIDs = Set(dependencies.map { $0.parentID })
+        
+        // The target product might not have dependencies, so let's check if it exists in the graph
+        let rootPackage = try #require(graph.rootPackages.first)
+        let targetProduct = try #require(rootPackage.products.first { $0.name == productName })
+        
+        // Check if the product has any module dependencies
+        var hasModuleDependencies = false
+        for module in targetProduct.modules {
+            if !module.dependencies.isEmpty {
+                hasModuleDependencies = true
+                break
+            }
+        }
+        
+        if hasModuleDependencies {
+            #expect(dependencyParentIDs.contains("SwiftPM:SwiftPMDataModel"))
+        } else {
+            // If the product has no dependencies, that's also valid
+            print("Product \(productName) has no module dependencies")
+        }
     }
 }

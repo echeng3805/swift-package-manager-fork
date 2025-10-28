@@ -129,15 +129,13 @@ package func convertToCDXDocument(from document: SBOMDocument) async throws -> C
     // TODO ev_cheng -> handle spec versions
 
     var components: [CDXComponent] = []
-    if let documentComponents = document.components {
-        for sbomComp in documentComponents {
-            let cdxComp = try await convertToCDXComponent(from: sbomComp)
-            components.append(cdxComp)
-        }
+    for sbomComp in document.dependencies.components {
+        let cdxComp = try await convertToCDXComponent(from: sbomComp)
+        components.append(cdxComp)
     }
 
     var dependencies: [CDXDependency] = []
-    if let documentDependencies = document.dependencies {
+    if let documentDependencies = document.dependencies.dependencies {
         for sbomDep in documentDependencies {
             let cdxDep = try await convertToCDXDependency(from: sbomDep)
             dependencies.append(cdxDep)

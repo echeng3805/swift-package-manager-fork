@@ -140,7 +140,8 @@ struct SPDXConverterTests {
         let document = SBOMDocument(
             id: "doc-1",
             metadata: metadata,
-            primaryComponent: primaryComponent
+            primaryComponent: primaryComponent,
+            dependencies: SBOMDependencies(components: [], dependencies: nil)
         )
         
         await #expect(throws: Error.self) {
@@ -168,7 +169,8 @@ struct SPDXConverterTests {
         let document = SBOMDocument(
             id: "doc-1",
             metadata: metadata,
-            primaryComponent: primaryComponent
+            primaryComponent: primaryComponent,
+            dependencies: SBOMDependencies(components: [], dependencies: nil)
         )
         
         await #expect(throws: Error.self) {
@@ -196,7 +198,8 @@ struct SPDXConverterTests {
         let document = SBOMDocument(
             id: "doc-1",
             metadata: metadata,
-            primaryComponent: primaryComponent
+            primaryComponent: primaryComponent,
+            dependencies: SBOMDependencies(components: [], dependencies: nil)
         )
         
         await #expect(throws: Error.self) {
@@ -229,7 +232,8 @@ struct SPDXConverterTests {
         let document = SBOMDocument(
             id: "doc-1",
             metadata: metadata,
-            primaryComponent: primaryComponent
+            primaryComponent: primaryComponent,
+            dependencies: SBOMDependencies(components: [], dependencies: nil)
         )
         
         let result = try await convertToSPDXDocument(from: document)
@@ -535,7 +539,8 @@ struct SPDXConverterTests {
         let document = SBOMDocument(
             id: "doc-1",
             metadata: metadata,
-            primaryComponent: primaryComponent
+            primaryComponent: primaryComponent,
+            dependencies: SBOMDependencies(components: [], dependencies: []),
         )
         
         await #expect(throws: Error.self) {
@@ -569,8 +574,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            components: nil,
-            dependencies: nil
+            dependencies: SBOMDependencies(components: [], dependencies: []),
         )
         
         let result = try await convertToSPDXGraph(from: document)
@@ -619,8 +623,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            components: [component1],
-            dependencies: [dependency]
+            dependencies: SBOMDependencies(components: [component1], dependencies: [dependency]),
         )
         
         let result = try await convertToSPDXGraph(from: document)
@@ -690,8 +693,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            components: [component1],
-            dependencies: nil
+            dependencies: SBOMDependencies(components: [component1], dependencies: nil),
         )
         
         let result = try await convertToSPDXGraph(from: document)

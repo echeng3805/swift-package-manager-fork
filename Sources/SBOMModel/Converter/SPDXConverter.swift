@@ -187,15 +187,13 @@ package func convertToSPDXGraph(from document: SBOMDocument) async throws -> SPD
     let elements = try await convertToSPDXDocument(from: document)
 
     var packages: [Any] = []
-    if let components = document.components {
-        for comp in components {
-            let p = try await convertToSPDXPackage(from: comp)
-            packages.append(p)
-        }
+    for comp in document.dependencies.components {
+        let p = try await convertToSPDXPackage(from: comp)
+        packages.append(p)
     }
 
-    let relationships = await convertToSPDXRelationships(from: document.dependencies)
-    let commits = await convertToSPDXExternalIdentifiers(from: document.components)
+    let relationships = await convertToSPDXRelationships(from: document.dependencies.dependencies)
+    let commits = await convertToSPDXExternalIdentifiers(from: document.dependencies.components)
 
     return SPDXGraph(
         context: SPDXConstants.spdx3Context,
