@@ -141,7 +141,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: nil)
+            dependencies: SBOMDependencies(components: [], relationships: nil)
         )
         
         await #expect(throws: Error.self) {
@@ -170,7 +170,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: nil)
+            dependencies: SBOMDependencies(components: [], relationships: nil)
         )
         
         await #expect(throws: Error.self) {
@@ -199,7 +199,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: nil)
+            dependencies: SBOMDependencies(components: [], relationships: nil)
         )
         
         await #expect(throws: Error.self) {
@@ -233,7 +233,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: nil)
+            dependencies: SBOMDependencies(components: [], relationships: nil)
         )
         
         let result = try await convertToSPDXDocument(from: document)
@@ -471,7 +471,7 @@ struct SPDXConverterTests {
     
     @Test("convertToSPDXRelationships with single dependency")
     func convertToSPDXRelationshipsWithSingleDependency() async throws {
-        let dependency = SBOMDependency(
+        let dependency = SBOMRelationship(
             id: "dep-1",
             parentID: "parent-component",
             childrenID: ["child1", "child2"]
@@ -492,12 +492,12 @@ struct SPDXConverterTests {
     
     @Test("convertToSPDXRelationships with multiple dependencies")
     func convertToSPDXRelationshipsWithMultipleDependencies() async throws {
-        let dependency1 = SBOMDependency(
+        let dependency1 = SBOMRelationship(
             id: "dep-1",
             parentID: "parent1",
             childrenID: ["child1"]
         )
-        let dependency2 = SBOMDependency(
+        let dependency2 = SBOMRelationship(
             id: "dep-2",
             parentID: "parent2",
             childrenID: ["child2", "child3"]
@@ -540,7 +540,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: []),
+            dependencies: SBOMDependencies(components: [], relationships: []),
         )
         
         await #expect(throws: Error.self) {
@@ -574,7 +574,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: []),
+            dependencies: SBOMDependencies(components: [], relationships: []),
         )
         
         let result = try await convertToSPDXGraph(from: document)
@@ -614,7 +614,7 @@ struct SPDXConverterTests {
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
-        let dependency = SBOMDependency(
+        let dependency = SBOMRelationship(
             id: "dep-1",
             parentID: "primary-id",
             childrenID: ["lib1-id"]
@@ -623,7 +623,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [component1], dependencies: [dependency]),
+            dependencies: SBOMDependencies(components: [component1], relationships: [dependency]),
         )
         
         let result = try await convertToSPDXGraph(from: document)
@@ -693,7 +693,7 @@ struct SPDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [component1], dependencies: nil),
+            dependencies: SBOMDependencies(components: [component1], relationships: nil),
         )
         
         let result = try await convertToSPDXGraph(from: document)

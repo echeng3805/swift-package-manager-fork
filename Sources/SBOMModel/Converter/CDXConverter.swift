@@ -96,7 +96,7 @@ private func convertToCDXComponent(from tool: SBOMTool) async throws -> CDXCompo
     )
 }
 
-package func convertToCDXDependency(from dep: SBOMDependency) async throws -> CDXDependency {
+package func convertToCDXDependency(from dep: SBOMRelationship) async throws -> CDXDependency {
     return CDXDependency(
         ref: dep.parentID,
         dependsOn: dep.childrenID,
@@ -135,7 +135,7 @@ package func convertToCDXDocument(from document: SBOMDocument) async throws -> C
     }
 
     var dependencies: [CDXDependency] = []
-    if let documentDependencies = document.dependencies.dependencies {
+    if let documentDependencies = document.dependencies.relationships {
         for sbomDep in documentDependencies {
             let cdxDep = try await convertToCDXDependency(from: sbomDep)
             dependencies.append(cdxDep)

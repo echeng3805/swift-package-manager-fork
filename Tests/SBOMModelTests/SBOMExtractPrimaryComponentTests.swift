@@ -104,4 +104,24 @@ struct SBOMExtractPrimaryComponentTests {
         #expect(component.originator.commits?.first?.sha == SBOMTestStore.swiftlyRevision)
         #expect(component.originator.commits?.first?.repository == SBOMTestStore.swiftlyURL)
     }
+
+    @Test("extractPrimaryComponent with product filter")
+    func extractPrimaryComponentWithProductFilter() async throws {
+        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        
+        let productName = "SwiftPMDataModel"
+        let component = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, product: productName)
+        
+        #expect(component.name == productName)
+        #expect(component.id == "SwiftPM:SwiftPMDataModel")
+        #expect(component.category == .library)
+        
+        let packageComponent = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store)
+        #expect(packageComponent.name == "SwiftPM")
+        #expect(packageComponent.id == "SwiftPM")
+        #expect(component.category == .library)
+        
+        #expect(component.id != packageComponent.id)
+    }
 }

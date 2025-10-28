@@ -12,13 +12,13 @@
 
 package struct SBOMDependencies: Codable, Equatable {
     package let components: [SBOMComponent]
-    package let dependencies: [SBOMDependency]?
+    package let relationships: [SBOMRelationship]?
 
     package init(
         components: [SBOMComponent],
-        dependencies: [SBOMDependency]? = nil,
+        relationships: [SBOMRelationship]? = nil,
     ) {
         self.components = components
-        self.dependencies = dependencies
+        self.relationships = relationships
     }
 }

@@ -287,7 +287,7 @@ struct CDXConverterTests {
     @Test("convertToCDXDependency basic conversion")
     func convertToCDXDependencyBasicConversion() async throws {
         let result = try await convertToCDXDependency(from:
-            SBOMDependency(
+            SBOMRelationship(
                 id: "dep-1",
                 parentID: "parent-component",
                 childrenID: ["child1", "child2", "child3"]
@@ -301,7 +301,7 @@ struct CDXConverterTests {
     @Test("convertToCDXDependency with empty children")
     func convertToCDXDependencyWithEmptyChildren() async throws {
         let result = try await convertToCDXDependency(from:
-            SBOMDependency(
+            SBOMRelationship(
                 id: "dep-1",
                 parentID: "parent-component",
                 childrenID: []
@@ -333,7 +333,7 @@ struct CDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [primaryComponent], dependencies: nil),
+            dependencies: SBOMDependencies(components: [primaryComponent], relationships: nil),
         )
         
         let result = try await convertToCDXMetadata(from: document)
@@ -368,7 +368,7 @@ struct CDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [primaryComponent], dependencies: nil),
+            dependencies: SBOMDependencies(components: [primaryComponent], relationships: nil),
 
         )
         
@@ -406,8 +406,7 @@ struct CDXConverterTests {
             id: "urn:uuid:12345678-1234-1234-1234-123456789abc",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: nil),
-
+            dependencies: SBOMDependencies(components: [], relationships: nil),
         )
         
         let result = try await convertToCDXDocument(from: document)
@@ -456,12 +455,12 @@ struct CDXConverterTests {
             originator: SBOMOriginator(commits: nil),
             scope: .optional
         )
-        let dependency1 = SBOMDependency(
+        let dependency1 = SBOMRelationship(
             id: "dep-1",
             parentID: "primary-id",
             childrenID: ["lib1-id", "framework1-id"]
         )
-        let dependency2 = SBOMDependency(
+        let dependency2 = SBOMRelationship(
             id: "dep-2",
             parentID: "lib1-id",
             childrenID: ["framework1-id"]
@@ -470,7 +469,7 @@ struct CDXConverterTests {
             id: "urn:uuid:12345678-1234-1234-1234-123456789abc",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [component1, component2], dependencies: [dependency1, dependency2])
+            dependencies: SBOMDependencies(components: [component1, component2], relationships: [dependency1, dependency2])
         )
         
         let result = try await convertToCDXDocument(from: document)
@@ -533,7 +532,7 @@ struct CDXConverterTests {
             id: "urn:uuid:12345678-1234-1234-1234-123456789abc",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: []),
+            dependencies: SBOMDependencies(components: [], relationships: []),
         )
         let result = try await convertToCDXDocument(from: document)
         
@@ -582,7 +581,7 @@ struct CDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: []),
+            dependencies: SBOMDependencies(components: [], relationships: []),
         )
         
         let result = try await convertToCDXMetadata(from: document)
@@ -633,7 +632,7 @@ struct CDXConverterTests {
             id: "doc-1",
             metadata: metadata,
             primaryComponent: primaryComponent,
-            dependencies: SBOMDependencies(components: [], dependencies: []),
+            dependencies: SBOMDependencies(components: [], relationships: []),
         )
         
         let result = try await convertToCDXMetadata(from: document)

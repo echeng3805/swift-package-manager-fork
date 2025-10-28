@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMDependency: Codable, Equatable {
+package struct SBOMRelationship: Codable, Equatable {
     package let id: String
     package let parentID: String
     package let childrenID: [String]

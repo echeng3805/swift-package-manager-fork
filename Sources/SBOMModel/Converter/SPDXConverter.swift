@@ -157,7 +157,7 @@ package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?)
     return externalIdentifiers
 }
 
-package func convertToSPDXRelationships(from dependencies: [SBOMDependency]?) async -> [Any] {
+package func convertToSPDXRelationships(from dependencies: [SBOMRelationship]?) async -> [Any] {
     guard let deps = dependencies, !deps.isEmpty else {
         return []
     }
@@ -192,7 +192,7 @@ package func convertToSPDXGraph(from document: SBOMDocument) async throws -> SPD
         packages.append(p)
     }
 
-    let relationships = await convertToSPDXRelationships(from: document.dependencies.dependencies)
+    let relationships = await convertToSPDXRelationships(from: document.dependencies.relationships)
     let commits = await convertToSPDXExternalIdentifiers(from: document.dependencies.components)
 
     return SPDXGraph(
