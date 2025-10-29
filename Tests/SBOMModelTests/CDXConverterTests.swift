@@ -416,8 +416,8 @@ struct CDXConverterTests {
         #expect(result.serialNumber == "urn:uuid:12345678-1234-1234-1234-123456789abc")
         #expect(result.version == 1)
         #expect(result.metadata.component.bomRef == "primary-id")
-        #expect(result.components?.isEmpty == true)
-        #expect(result.dependencies?.isEmpty == true)
+        #expect(result.components?.isEmpty ?? false)
+        #expect(result.dependencies?.isEmpty ?? false)
     }
     
     @Test("convertToCDXDocument with components and dependencies")

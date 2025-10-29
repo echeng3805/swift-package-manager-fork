@@ -28,7 +28,7 @@ package struct SBOMComponent: Codable, Equatable {
         package let revision: String
         package let commit: SBOMCommit?
 
-        init(
+        package init(
             revision: String,
             commit: SBOMCommit? = nil,
         ) {

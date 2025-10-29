@@ -57,7 +57,7 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
         rootChildrenIDs.append(productID)
     }
     dependencies.append(SBOMRelationship(
-        id: "\(rootPackageID)-depends-on)",
+        id: "\(rootPackageID)-depends-on",
         parentID: rootPackageID,
         childrenID: rootChildrenIDs,
     ))
@@ -73,7 +73,7 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
             productIDs.append(productID)
         }
         dependencies.append(SBOMRelationship(
-            id: "\(packageID)-depends-on))",
+            id: "\(packageID)-depends-on",
             parentID: packageID,
             childrenID: productIDs,
         ))
@@ -104,7 +104,7 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
         if !childrenID.isEmpty {
             dependencies.append(
                 SBOMRelationship(
-                    id: "\(productID)-depends-on)",
+                    id: "\(productID)-depends-on",
                     parentID: productID,
                     childrenID: childrenID,
                 )

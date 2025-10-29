@@ -12,6 +12,7 @@
 
 import Foundation
 import struct TSCBasic.StringError
+import var TSCBasic.stderrStream
 import TSCUtility
 import Basics
 import PackageCollections
@@ -134,7 +135,8 @@ private func extractComponentVersionFromGit(packagePath: AbsolutePath) async thr
             )
         )
     } catch {
-        print("warning: Failed to extract version from Git repository at \(packagePath): \(error)")
+        TSCBasic.stderrStream.write("warning: Failed to extract version from Git repository at \(packagePath): \(error)\n")
+        TSCBasic.stderrStream.flush()
         return nil
     }
 }
@@ -165,7 +167,7 @@ private func extractComponentVersion(from packageIdentity: PackageIdentity, grap
         if let revision = revision {
             sha = revision
         } else {
-            sha = ""
+            sha = "unknown"
         }
     case .branch(_, let revision), .revision(let revision):
         version = revision

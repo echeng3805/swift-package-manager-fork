@@ -27,7 +27,7 @@ struct SPDXConverterTests {
     func convertToSPDXAgentWithNilCreators() async throws {
         let metadata = SBOMMetadata(
             spec: SBOMSpec(type: .spdx, version: "3.0.1"),
-            timestamp: "2025-01-01T00:00:00Z",
+            timestamp: "unknown",
             creators: nil
         )
         let result = await convertToSPDXAgent(from: metadata)
@@ -67,7 +67,7 @@ struct SPDXConverterTests {
         #expect(creationInfoUnwrapped.type == .CreationInfo)
         #expect(creationInfoUnwrapped.specVersion == "3.0.1")
         #expect(creationInfoUnwrapped.createdBy == ["tool-1"])
-        #expect(creationInfoUnwrapped.created == "1970-01-01T00:00:00Z")
+        #expect(creationInfoUnwrapped.created == "unknown")
         
         let agent = result[1] as? SPDXAgent
         let agentUnwrapped = try #require(agent)
@@ -521,7 +521,7 @@ struct SPDXConverterTests {
         #expect(relationship2Unwrapped.category  == .dependsOn)
     }
 
-        @Test("convertToSPDXRelationships with multiple dependencies")
+        @Test("convertToSPDXRelationships with test and optional relationships")
     func convertToSPDXRelationshipsWithTestAndOptionalRelationships() async throws {
         let commit1 = SBOMCommit(
             sha: "abc123",

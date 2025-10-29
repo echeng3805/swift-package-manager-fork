@@ -129,7 +129,7 @@ struct SBOMTestStore {
         }
     }
     
-    private static func generateMockRevision(for packageName: String) -> String {
+    package static func generateMockRevision(for packageName: String) -> String {
         let hash = packageName.hash
         return String(format: "%040x", abs(hash)).prefix(40).padding(toLength: 40, withPad: "0", startingAt: 0)
     }

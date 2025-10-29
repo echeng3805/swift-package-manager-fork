@@ -144,7 +144,7 @@ struct SBOMExtractComponentsTests {
         #expect(!commit.sha.isEmpty, "Commit SHA should not be empty")
         #expect(commit.repository == "https://github.com/swiftlang/swift-llbuild.git", "Repository URL should match")
         
-        let expectedMockRevision = String(format: "%040x", abs("swift-llbuild".hash)).prefix(40).padding(toLength: 40, withPad: "0", startingAt: 0)
+        let expectedMockRevision = SBOMTestStore.generateMockRevision(for: "swift-llbuild")
         #expect(commit.sha == expectedMockRevision, "Commit SHA should match the mock revision for swift-llbuild")
         
         #expect(component.version.revision == commit.sha, "Component version should match commit SHA for branch-based dependency")

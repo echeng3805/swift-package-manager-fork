@@ -13,8 +13,7 @@
 import Foundation
 import struct TSCBasic.StringError
 
-private func generateSPDXID() ->
- String {
+private func generateSPDXID() -> String {
     return "urn:uuid:\(generateSBOMID())"
 }
 
@@ -45,7 +44,7 @@ package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [Any] {
             type: .CreationInfo,
             specVersion: creator.version,
             createdBy: [creator.id],
-            created: ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: 0)), // cannot be nil
+            created: "unknown", // cannot be nil
         )
         let tool = SPDXAgent(
             id: creator.id,
@@ -68,7 +67,7 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
 
     var elements: [Any] = []
 
-    let creationInfoID = "_:creationInfo"
+    let creationInfoID = SPDXConstants.spdxRootCreationInfoID
     let creationInfo = SPDXCreationInfo(
         id: creationInfoID,
         type: .CreationInfo,
@@ -120,7 +119,7 @@ package func convertToSPDXPackage(from component: SBOMComponent) async throws ->
         purl: component.purl,
         name: component.name,
         version: component.version.revision,
-        creationInfoID: "_:creationInfo",
+        creationInfoID: SPDXConstants.spdxRootCreationInfoID,
         description: component.description,
     )
 }
@@ -145,7 +144,7 @@ package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?)
                 id: "\(component.id)-wasGeneratedFrom-\(commit.sha)",
                 type: .Relationship,
                 category: .wasGeneratedFrom,
-                creationInfoID: "_:creationInfo",
+                creationInfoID: SPDXConstants.spdxRootCreationInfoID,
                 parentID: component.id,
                 childrenID: [commit.sha],  
             )
@@ -169,7 +168,7 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
                 id: "\(dependency.parentID)-dependsOn",
                 type: .Relationship,
                 category: .dependsOn,
-                creationInfoID: "_:creationInfo",
+                creationInfoID: SPDXConstants.spdxRootCreationInfoID,
                 parentID: dependency.parentID,
                 childrenID: dependency.childrenID,  
             )
@@ -195,7 +194,7 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
                     id: "\(dependency.parentID)-hasOptionalDependency",
                     type: .Relationship,
                     category: .hasOptionalDependency,
-                    creationInfoID: "_:creationInfo",
+                    creationInfoID: SPDXConstants.spdxRootCreationInfoID,
                     parentID: dependency.parentID,
                     childrenID: optionalDependencies,
                 )
@@ -206,7 +205,7 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
                     id: "\(dependency.parentID)-hasTest",
                     type: .Relationship,
                     category: .hasTest,
-                    creationInfoID: "_:creationInfo",
+                    creationInfoID: SPDXConstants.spdxRootCreationInfoID,
                     parentID: dependency.parentID,
                     childrenID: testDependencies,
                 )
