@@ -35,9 +35,6 @@ extension SwiftPackageCommand {
         @Option(help: "The product to generate an SBOM for.")
         var product: String?
 
-        @Option(help: "Whether to validate the generated SBOM against the appropriate specification schema.")
-        var validate: Bool = false
-
         @Option(help: "Whether to include information about test targets.")
         var includeTestTargets: Bool = false // TODO ev_cheng
 
@@ -47,7 +44,7 @@ extension SwiftPackageCommand {
            let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
            
            let sbom = try await SBOMModel.extractSBOM(spec: spec, graph: graph, store: resolvedPackagesStore, product: product)
-           try await encodeSBOM(from: sbom, validate: validate, outputPath: outputPath)
+           try await encodeSBOM(from: sbom, outputPath: outputPath)
         }
     }
 }

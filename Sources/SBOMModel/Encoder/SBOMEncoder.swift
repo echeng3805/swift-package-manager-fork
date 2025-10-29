@@ -15,8 +15,8 @@ import struct TSCBasic.StringError
 import TSCUtility
 import Basics
 
-package func encodeSBOM(from sbom: SBOMDocument, validate: Bool, outputPath: AbsolutePath?) async throws {
-    let encoded = try await encodeSBOMData(from: sbom, validate: validate)
+package func encodeSBOM(from sbom: SBOMDocument, outputPath: AbsolutePath?) async throws {
+    let encoded = try await encodeSBOMData(from: sbom)
     if let outputPath = outputPath {
         try localFileSystem.writeFileContents(outputPath, data: encoded)
     } else {
@@ -24,7 +24,7 @@ package func encodeSBOM(from sbom: SBOMDocument, validate: Bool, outputPath: Abs
     }
 }
 
-package func encodeSBOMData(from sbom: SBOMDocument, validate: Bool) async throws -> Data {
+package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
     let data: any Encodable
     switch sbom.metadata.spec.type {
         case .cyclonedx, .cyclonedx1:
@@ -38,9 +38,7 @@ package func encodeSBOMData(from sbom: SBOMDocument, validate: Bool) async throw
     encoder.dateEncodingStrategy = .iso8601
     let encoded = try encoder.encode(data)
 
-    if validate {
-        try await validateSBOM(from: encoded, spec: sbom.metadata.spec)
-    }
+    try await validateSBOM(from: encoded, spec: sbom.metadata.spec)
 
     return encoded
 }

@@ -67,7 +67,7 @@ struct SBOMValidationTests {
     @Test("validate SBOM from graphs", arguments: try getValidateGraphSBOMTestCases())
     func validateSBOMFromGraph(testCase: ValidateGraphSBOMTestCase) async throws {
         let document = try await SBOMModel.extractSBOM(spec: testCase.inputSpec, graph: testCase.inputGraph, store: testCase.inputStore)
-        let encodedData = try await encodeSBOMData(from: document, validate: true)
+        let encodedData = try await encodeSBOMData(from: document)
 
         if testCase.wantError {
             await #expect(throws: StringError.self) {
