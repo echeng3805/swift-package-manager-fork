@@ -144,9 +144,6 @@ private func extractComponentVersion(from packageIdentity: PackageIdentity, grap
         return cachedVersion
     }
     
-    guard let resolvedPackage = resolvedPackagesStore.resolvedPackages[packageIdentity] else {
-        return SBOMComponent.Version(revision: "unknown")
-    }
     // root package (try to get version from git)
     if let graph = graph, let rootPackage = graph.rootPackages.first(where: { $0.identity == packageIdentity }) {
         let version = try await extractComponentVersionFromGit(packagePath: rootPackage.path) ?? SBOMComponent.Version(revision: "unknown")
@@ -154,6 +151,10 @@ private func extractComponentVersion(from packageIdentity: PackageIdentity, grap
             await cache.set(packageIdentity, version: version)
         }
         return version
+    }
+    
+    guard let resolvedPackage = resolvedPackagesStore.resolvedPackages[packageIdentity] else {
+        return SBOMComponent.Version(revision: "unknown")
     }
     // non-root package (version is from store)
     let version: String
@@ -184,10 +185,10 @@ package func extractComponentID(from product: ResolvedProduct) async -> String {
     return "\(product.packageIdentity):\(product.name)"
 }
 
-private func extractProductsFromPackage(package: ResolvedPackage, store: ResolvedPackagesStore, cache: SBOMVersionCache? = nil) async throws -> [SBOMComponent] {
+private func extractProductsFromPackage(package: ResolvedPackage, graph: ModulesGraph? = nil, store: ResolvedPackagesStore, cache: SBOMVersionCache? = nil) async throws -> [SBOMComponent] {
     var productComponents: [SBOMComponent] = []
     for product in package.products {
-        let productComponent = try await extractComponent(product: product, store: store, cache: cache)
+        let productComponent = try await extractComponent(product: product, graph: graph, store: store, cache: cache)
         productComponents.append(productComponent)
     }
     return productComponents
@@ -195,7 +196,7 @@ private func extractProductsFromPackage(package: ResolvedPackage, store: Resolve
 
 package func extractComponent(package: ResolvedPackage, graph: ModulesGraph? = nil, store: ResolvedPackagesStore, cache: SBOMVersionCache? = nil) async throws -> SBOMComponent {
     let componentVersion = try await extractComponentVersion(from: package.identity, graph: graph, store: store, cache: cache)
-    let products = try await extractProductsFromPackage(package: package, store: store, cache: cache)
+    let products = try await extractProductsFromPackage(package: package, graph: graph, store: store, cache: cache)
     return SBOMComponent(
         category: try await extractCategory(from: package),
         id: await extractComponentID(from: package),

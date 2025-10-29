@@ -107,6 +107,11 @@ struct SBOMValidationTests {
                 inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CDXConstants.cyclonedx1SpecVersion),
                 wantError: false,
             ),
+            ValidateFileSBOMTestCase(
+                inputFilePath: "testfiles/valid-cyclonedx-1.7-versions",
+                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CDXConstants.cyclonedx1SpecVersion),
+                wantError: false,
+            ),
 
             // valid SPDX SBOMs
             ValidateFileSBOMTestCase(
