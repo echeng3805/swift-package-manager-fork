@@ -344,9 +344,9 @@ struct PURLTests {
         #expect(purl.scheme == "pkg")
         #expect(purl.type == "swift")
         #expect(purl.name == "SwiftPM:SwiftPMDataModel")
-        #expect(purl.namespace == nil)
+        #expect(purl.namespace == "SwiftPM")
         #expect(purl.version == "1.0.0")
-        #expect(purl.description == "pkg:swift/SwiftPM:SwiftPMDataModel@1.0.0")
+        #expect(purl.description == "pkg:swift/SwiftPM/SwiftPM:SwiftPMDataModel@1.0.0")
     }
     
     @Test("Create PURL from ResolvedProduct with SSH URL")
