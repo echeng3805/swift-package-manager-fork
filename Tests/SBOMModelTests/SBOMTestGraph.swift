@@ -17,8 +17,6 @@ import PackageModel
 import _InternalTestSupport
 @testable import SBOMModel
 
-// These are AI-generated test dependency graphs for SBOM tests.
-
 struct SBOMTestGraph {
 
     // MARK: - Helper functions
@@ -117,7 +115,7 @@ struct SBOMTestGraph {
 
     // MARK: - Swift Package Manager Sample ModulesGraph
     
-    static func createSPMModulesGraph() throws -> ModulesGraph {
+    static func createSPMModulesGraph(rootPath: String = "/tmp/SwiftPM-mock") throws -> ModulesGraph {
         let swiftPMIdentity = PackageIdentity.plain("SwiftPM")
         let swiftLLBuildIdentity = PackageIdentity.plain("swift-llbuild")
         let swiftArgumentParserIdentity = PackageIdentity.plain("swift-argument-parser")
@@ -838,7 +836,7 @@ struct SBOMTestGraph {
         let swiftPMPackage = createPackage(
             identity: swiftPMIdentity,
             displayName: "SwiftPM",
-            path: "/SwiftPM",
+            path: rootPath,
             modules: [basicsModule, packageModelModule, packageLoadingModule, packageGraphModule, sourceControlModule, workspaceModule, buildModule, sbomModelModule, commandsModule, swiftPMModule, swiftPMAutoModule, swiftPMDataModelModule, swiftPMDataModelAutoModule, xcBuildSupportModule, packageDescriptionModule, appleProductTypesModule, packagePluginModule, packageCollectionsModelModule, swiftPMPackageCollectionsModule],
             products: [swiftPMDataModelProduct, swiftPMDataModelAutoProduct, swiftPMProduct, swiftPMAutoProduct, xcBuildSupportProduct, packageDescriptionProduct, appleProductTypesProduct, packagePluginProduct, packageCollectionsModelProduct, swiftPMPackageCollectionsProduct]
         )
@@ -1668,7 +1666,7 @@ struct SBOMTestGraph {
 
     // MARK: - Swiftly Sample ModulesGraph
 
-    static func createSwiftlyModulesGraph() throws -> ModulesGraph {
+    static func createSwiftlyModulesGraph(rootPath: String = "/tmp/swiftly-mock") throws -> ModulesGraph {
         let swiftlyIdentity = PackageIdentity.plain("swiftly")
         let argParserIdentity = PackageIdentity.plain("swift-argument-parser")
         let httpClientIdentity = PackageIdentity.plain("async-http-client")
@@ -1760,7 +1758,7 @@ struct SBOMTestGraph {
         let swiftlyPackage = createPackage(
             identity: swiftlyIdentity,
             displayName: "swiftly",
-            path: "/swiftly",
+            path: rootPath,
             modules: [swiftlyModule, testSwiftlyModule, swiftlyWebsiteAPIModule, swiftlyDownloadAPIModule, swiftlyCoreModule, macOSPlatformModule, linuxPlatformModule],
             products: [swiftlyProduct, testSwiftlyProduct]
         )

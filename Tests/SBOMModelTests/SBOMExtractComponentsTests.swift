@@ -99,7 +99,6 @@ struct SBOMExtractComponentsTests {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
-        
         verifyComponents(components: components, graph: graph, expectations: Self.spmExpectations)
     }
 
@@ -108,7 +107,6 @@ struct SBOMExtractComponentsTests {
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
-        
         verifyComponents(components: components, graph: graph, expectations: Self.swiftlyExpectations)
     }
     
@@ -122,7 +120,6 @@ struct SBOMExtractComponentsTests {
             binaryArtifacts: [:]
         )
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        
         await #expect(throws: StringError.self) {
             _ = try await SBOMModel.extractDependencies(graph: emptyGraph, store: store).components
         }
@@ -181,7 +178,6 @@ struct SBOMExtractComponentsTests {
     func extractComponentsWithProductFilter() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store, product: "SwiftPMDataModel").components
         let allComponents = try await SBOMModel.extractDependencies(graph: graph, store: store).components
         
