@@ -39,8 +39,15 @@ extension SwiftPackageCommand {
         var includeTestTargets: Bool = false // TODO ev_cheng
 
         func run(_ swiftCommandState: SwiftCommandState) async throws {
-           let graph = try await swiftCommandState.loadPackageGraph(explicitProduct: product)
+           // Force using Package.resolved to ensure SBOM matches built artifacts
+           // This prevents the race condition where dependencies change between build and SBOM generation
            let workspace = try swiftCommandState.getActiveWorkspace()
+           let graph = try await workspace.loadPackageGraph(
+               rootInput: try swiftCommandState.getWorkspaceRoot(),
+               explicitProduct: product,
+               forceResolvedVersions: true,
+               observabilityScope: swiftCommandState.observabilityScope
+           )
            let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
            
            let sbom = try await SBOMModel.extractSBOM(spec: spec, graph: graph, store: resolvedPackagesStore, product: product)
