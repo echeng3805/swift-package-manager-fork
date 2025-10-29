@@ -599,7 +599,7 @@ struct CDXConverterTests {
         #expect(cdxTool1.version == "6.0.0")
         #expect(cdxTool1.type == .application)
         #expect(cdxTool1.scope == .excluded)
-        #expect(cdxTool1.purl == "pkg:generic/SwiftPM@6.0.0")
+        #expect(cdxTool1.purl == "pkg:swift/github.com/swiftlang/SwiftPM@6.0.0")
         
         let cdxTool2 = tools.components[1]
         #expect(cdxTool2.bomRef == "tool-2")
@@ -607,7 +607,7 @@ struct CDXConverterTests {
         #expect(cdxTool2.version == "5.9.0")
         #expect(cdxTool2.type == .application)
         #expect(cdxTool2.scope == .excluded)
-        #expect(cdxTool2.purl == "pkg:generic/Swift@5.9.0")
+        #expect(cdxTool2.purl == "pkg:swift/github.com/swiftlang/Swift@5.9.0")
     }
     
     @Test("convertToCDXMetadata with empty creators")

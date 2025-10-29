@@ -91,7 +91,7 @@ private func convertToCDXComponent(from tool: SBOMTool) async throws -> CDXCompo
         name: tool.name,
         version: tool.version,
         scope: .excluded,
-        purl: "pkg:generic/\(tool.name)@\(tool.version)",
+        purl: "pkg:swift/github.com/swiftlang/\(tool.name)@\(tool.version)",
         pedigree: nil
     )
 }

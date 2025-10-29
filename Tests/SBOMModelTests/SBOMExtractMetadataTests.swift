@@ -63,7 +63,7 @@ struct SBOMExtractMetadataTests {
         #expect(creators.count == 1)
         let creator = creators[0]
         #expect(!creator.id.isEmpty)
-        #expect(creator.name == "Swift Package Manager")
+        #expect(creator.name == "swift-package-manager")
         #expect(!creator.version.isEmpty)
         
         let licenses = try #require(creator.licenses)

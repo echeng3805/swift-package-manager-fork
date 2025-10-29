@@ -44,7 +44,7 @@ package func extractMetadata(_ spec: Spec) async throws -> SBOMMetadata {
         creators: [
             SBOMTool(
                 id: generateSBOMID(),
-                name: "Swift Package Manager",
+                name: "swift-package-manager",
                 version: SwiftVersion.current.displayString,
                 licenses: [
                     SBOMLicense(
