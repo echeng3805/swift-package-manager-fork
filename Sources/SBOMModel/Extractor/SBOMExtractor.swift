@@ -19,19 +19,6 @@ import PackageGraph
 import PackageModel
 import SourceControl
 
-private struct ComponentVersion: Codable, Equatable {
-    let version: String
-    let commit: SBOMCommit?
-
-    init(
-        version: String,
-        commit: SBOMCommit? = nil,
-    ) {
-        self.version = version
-        self.commit = commit
-    }
-}
-
 package func extractSpec(_ spec: Spec) async throws -> SBOMSpec {
     switch spec {
     // cyclonedx and spdx refer to the most recent versions.
@@ -108,14 +95,12 @@ package func extractScope(from package: ResolvedPackage) async throws -> SBOMCom
     return .runtime
 }
 
-private func extractComponentVersion(from packageIdentity: PackageIdentity, store resolvedPackagesStore: ResolvedPackagesStore) async throws -> ComponentVersion {
+private func extractComponentVersion(from packageIdentity: PackageIdentity, store resolvedPackagesStore: ResolvedPackagesStore) async throws -> SBOMComponent.Version {
     guard let resolvedPackage = resolvedPackagesStore.resolvedPackages[packageIdentity] else {
-        return ComponentVersion(version: "unknown", commit: nil)
+        return SBOMComponent.Version(revision: "unknown", commit: nil)
     }
-    
     let version: String
     let sha: String
-    
     switch resolvedPackage.state {
     case .version(let versionValue, let revision):
         version = versionValue.description
@@ -128,8 +113,7 @@ private func extractComponentVersion(from packageIdentity: PackageIdentity, stor
         version = revision
         sha = revision
     }
-    
-    return ComponentVersion(version: version, commit: SBOMCommit(
+    return SBOMComponent.Version(revision: version, commit: SBOMCommit(
         sha: sha,
         repository: resolvedPackage.packageRef.kind.locationString
     ))
@@ -158,9 +142,9 @@ package func extractComponent(package: ResolvedPackage, store: ResolvedPackagesS
     return SBOMComponent(
         category: try await extractCategory(from: package),
         id: await extractComponentID(from: package),
-        purl: PURL.from(package: package, version: componentVersion.version).description,
+        purl: await PURL.from(package: package, version: componentVersion).description,
         name: package.identity.description,
-        version: componentVersion.version,
+        version: componentVersion,
         originator: SBOMOriginator(commits: componentVersion.commit.map { [$0] }),
         description: package.description,
         scope: try await extractScope(from: package),
@@ -170,24 +154,12 @@ package func extractComponent(package: ResolvedPackage, store: ResolvedPackagesS
 
 package func extractComponent(product: ResolvedProduct, store: ResolvedPackagesStore) async throws -> SBOMComponent {
     let componentVersion = try await extractComponentVersion(from: product.packageIdentity, store: store)
-    
-    // Get the package location from the store for proper PURL namespace extraction
-    // If not found in store (e.g., local/root package products), use package identity as fallback
-    let packageLocation: String
-    if let resolvedPackage = store.resolvedPackages[product.packageIdentity] {
-        packageLocation = resolvedPackage.packageRef.kind.locationString
-    } else {
-        // For local packages not in the store, use the package identity as the location
-        // This will be used as the namespace in the PURL
-        packageLocation = product.packageIdentity.description
-    }
-    
     return SBOMComponent(
         category: try await extractCategory(from: product),
         id: await extractComponentID(from: product),
-        purl: PURL.from(product: product, version: componentVersion.version, packageLocation: packageLocation).description,
+        purl: await PURL.from(product: product, version: componentVersion).description,
         name: product.name,
-        version: componentVersion.version,
+        version: componentVersion,
         originator: SBOMOriginator(commits: componentVersion.commit.map { [$0] }),
         description: nil,
         scope: try await extractScope(from: product),

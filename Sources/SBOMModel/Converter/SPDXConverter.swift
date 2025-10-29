@@ -119,7 +119,7 @@ package func convertToSPDXPackage(from component: SBOMComponent) async throws ->
         purpose: await convertToSPDXPurpose(from: component.category),
         purl: component.purl,
         name: component.name,
-        version: component.version,
+        version: component.version.revision,
         creationInfoID: "_:creationInfo",
         description: component.description,
     )

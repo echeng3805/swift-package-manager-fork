@@ -77,7 +77,7 @@ package func convertToCDXComponent(from comp: SBOMComponent) async throws -> CDX
         type: await convertToCDXCategory(from: comp.category),
         bomRef: comp.id,
         name: comp.name,
-        version: comp.version,
+        version: comp.version.revision,
         scope: await convertToCDXScope(from: comp.scope ?? .runtime),
         purl: comp.purl,
         pedigree: try await convertToCDXPedigree(from: comp.originator),

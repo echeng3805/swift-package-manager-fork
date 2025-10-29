@@ -184,7 +184,7 @@ struct CDXConverterTests {
                 id: "test-id",
                 purl: "pkg:swift/test@1.0.0",
                 name: "TestComponent",
-                version: "1.0.0",
+                version: SBOMComponent.Version(revision: "1.0.0"),
                 originator: SBOMOriginator(commits: nil),
                 scope: .runtime
             )
@@ -215,7 +215,7 @@ struct CDXConverterTests {
                 id: "test-id",
                 purl: "pkg:swift/test@1.0.0",
                 name: "TestComponent",
-                version: "1.0.0",
+                version: SBOMComponent.Version(revision: "1.0.0"),
                 originator: SBOMOriginator(commits: nil),
                 scope: sbomScope
             )
@@ -255,7 +255,7 @@ struct CDXConverterTests {
             id: "test-id",
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: originator,
             scope: .runtime
         )
@@ -324,7 +324,7 @@ struct CDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -360,7 +360,7 @@ struct CDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@2.0.0",
             name: "PrimaryFramework",
-            version: "2.0.0",
+            version: SBOMComponent.Version(revision: "2.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -397,7 +397,7 @@ struct CDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -433,7 +433,7 @@ struct CDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -442,7 +442,7 @@ struct CDXConverterTests {
             id: "lib1-id",
             purl: "pkg:swift/lib1@1.0.0",
             name: "Library1",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -451,7 +451,7 @@ struct CDXConverterTests {
             id: "framework1-id",
             purl: "pkg:swift/framework1@2.0.0",
             name: "Framework1",
-            version: "2.0.0",
+            version: SBOMComponent.Version(revision: "2.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .optional
         )
@@ -524,7 +524,7 @@ struct CDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -572,7 +572,7 @@ struct CDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -623,7 +623,7 @@ struct CDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )

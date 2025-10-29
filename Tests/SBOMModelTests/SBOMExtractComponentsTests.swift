@@ -88,7 +88,7 @@ struct SBOMExtractComponentsTests {
             #expect(!component.id.isEmpty, "Component ID should not be empty")
             #expect(!component.name.isEmpty, "Component name should not be empty")
             #expect(!component.purl.isEmpty, "Component PURL should not be empty")
-            #expect(!component.version.isEmpty, "Component version should not be empty")
+            #expect(!component.version.revision.isEmpty, "Component version should not be empty")
             #expect(component.category == .application || component.category == .library, "Component category should be application or library")
             #expect(component.scope == .runtime || component.scope == .test, "Component scope should be runtime or test")
         }
@@ -150,7 +150,7 @@ struct SBOMExtractComponentsTests {
         let expectedMockRevision = String(format: "%040x", abs("swift-llbuild".hash)).prefix(40).padding(toLength: 40, withPad: "0", startingAt: 0)
         #expect(commit.sha == expectedMockRevision, "Commit SHA should match the mock revision for swift-llbuild")
         
-        #expect(component.version == commit.sha, "Component version should match commit SHA for branch-based dependency")
+        #expect(component.version.revision == commit.sha, "Component version should match commit SHA for branch-based dependency")
     }
     
     @Test("extractComponents uses version tag when available for version, but keeps pedigree as commit sha")
@@ -173,8 +173,8 @@ struct SBOMExtractComponentsTests {
         #expect(!commit.sha.isEmpty, "Commit SHA should not be empty")
         #expect(commit.repository == "https://github.com/apple/swift-argument-parser.git", "Repository URL should match")
         
-        #expect(versionComponent.version == "1.5.1", "Component version should be the version tag for version-based dependency")
-        #expect(versionComponent.version != commit.sha, "Component version should not be the commit SHA for version-based dependency")
+        #expect(versionComponent.version.revision == "1.5.1", "Component version should be the version tag for version-based dependency")
+        #expect(versionComponent.version.revision != commit.sha, "Component version should not be the commit SHA for version-based dependency")
     }
 
     @Test("extractComponents with product filter")

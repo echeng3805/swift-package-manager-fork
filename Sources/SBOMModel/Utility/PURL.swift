@@ -27,9 +27,9 @@ package struct PURL: Codable, Equatable, CustomStringConvertible {
     package init(
         scheme: String,
         type: String,
-        namespace: String?,
+        namespace: String? = nil,
         name: String,
-        version: String?,
+        version: String? = nil,
         qualifiers: [String: String]? = nil,
         subpath: String? = nil,
 
@@ -70,33 +70,34 @@ package struct PURL: Codable, Equatable, CustomStringConvertible {
 }
 
 extension PURL {
-    package static func from(package: ResolvedPackage, version: String) -> PURL {
-
+    package static func from(package: ResolvedPackage, version: SBOMComponent.Version) async -> PURL {
         return PURL(
             scheme: "pkg",
             type: "swift",
-            namespace: extractNamespace(from: package.manifest.packageLocation),
-            name: package.identity.description,
-            version: version,
+            namespace: await extractPackageNamespace(from: version.commit),
+            name: await extractComponentID(from: package),
+            version: version.revision,
         )
     }
 
-    package static func from(product: ResolvedProduct, version: String, packageLocation: String) -> PURL {
-        // For products, we create a PURL that identifies the product within its package
-        // We use the full package path as the namespace (e.g., "github.com/swiftlang/swift-package-manager")
+    package static func from(product: ResolvedProduct, version: SBOMComponent.Version) async -> PURL {
+        // use the full package path as the namespace (e.g., "github.com/swiftlang/swift-package-manager")
         // and the package identity + product name as the name (e.g., "SwiftPM:SwiftPMDataModel")
         return PURL(
             scheme: "pkg",
             type: "swift",
-            namespace: extractProductNamespace(from: packageLocation),
-            name: "\(product.packageIdentity):\(product.name)",
-            version: version,
+            namespace: await extractProductNamespace(from: version.commit) ?? product.packageIdentity.description,
+            name: await extractComponentID(from: product),
+            version: version.revision,
         )
     }
 
-    package static func extractNamespace(from packageLocation: String) -> String? {
+    package static func extractPackageNamespace(from commit: SBOMCommit?) async -> String? {
         // TODO: ev_cheng Rewrite this function, it's an AI stopgap to unblock the rest of the code
         // TODO ev_cheng deal with local paths
+        guard let packageLocation = commit?.repository else {
+            return nil
+        }
 
         // Handle SSH URLs (git@host:org/repo.git or git@host:org/repo)
         // Use regex to match SSH URL pattern: user@host:org/repo with optional path suffix
@@ -149,10 +150,13 @@ extension PURL {
         return nil
     }
     
-    package static func extractProductNamespace(from packageLocation: String) -> String? {
+    package static func extractProductNamespace(from commit: SBOMCommit?) async -> String? {
         // For products, extract the full repository path including the repo name
         // e.g., "https://github.com/swiftlang/swift-package-manager.git" -> "github.com/swiftlang/swift-package-manager"
-        
+        guard let packageLocation = commit?.repository else {
+            return nil
+        }
+
         // Handle SSH URLs (git@host:org/repo.git or git@host:org/repo)
         let sshPattern = #"^[^@]+@([^:]+):(.+?)(?:\.git)?$"#
         if let regex = try? NSRegularExpression(pattern: sshPattern, options: []),
@@ -182,7 +186,6 @@ extension PURL {
             }
         }
         
-        // For other cases, fall back to the original extractNamespace behavior
-        return extractNamespace(from: packageLocation)
+        return await extractPackageNamespace(from: commit)
     }
 }

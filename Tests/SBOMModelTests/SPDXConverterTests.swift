@@ -133,7 +133,7 @@ struct SPDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -162,7 +162,7 @@ struct SPDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -191,7 +191,7 @@ struct SPDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -225,7 +225,7 @@ struct SPDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -286,7 +286,7 @@ struct SPDXConverterTests {
                 id: "test-id",
                 purl: "pkg:swift/test@1.0.0",
                 name: "TestComponent",
-                version: "1.0.0",
+                version: SBOMComponent.Version(revision: "1.0.0"),
                 originator: SBOMOriginator(commits: nil),
                 description: "Test description",
                 scope: .runtime
@@ -312,7 +312,7 @@ struct SPDXConverterTests {
             id: "test-id",
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             description: nil,
             scope: .runtime
@@ -345,7 +345,7 @@ struct SPDXConverterTests {
             id: "test-id",
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -361,7 +361,7 @@ struct SPDXConverterTests {
             id: "test-id",
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: []),
             scope: .runtime
         )
@@ -384,7 +384,7 @@ struct SPDXConverterTests {
             id: "test-id",
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit]),
             scope: .runtime
         )
@@ -430,7 +430,7 @@ struct SPDXConverterTests {
             id: "test-id",
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit1, commit2]),
             scope: .runtime
         )
@@ -532,7 +532,7 @@ struct SPDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -566,7 +566,7 @@ struct SPDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -601,7 +601,7 @@ struct SPDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -610,7 +610,7 @@ struct SPDXConverterTests {
             id: "lib1-id",
             purl: "pkg:swift/lib1@1.0.0",
             name: "Library1",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -669,7 +669,7 @@ struct SPDXConverterTests {
             id: "primary-id",
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
@@ -685,7 +685,7 @@ struct SPDXConverterTests {
             id: "lib1-id",
             purl: "pkg:swift/lib1@1.0.0",
             name: "Library1",
-            version: "1.0.0",
+            version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit]),
             scope: .runtime
         )

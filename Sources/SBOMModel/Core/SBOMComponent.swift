@@ -24,28 +24,39 @@ package struct SBOMComponent: Codable, Equatable {
         case test
     }
 
+    package struct Version: Codable, Equatable {
+        package let revision: String
+        package let commit: SBOMCommit?
+
+        init(
+            revision: String,
+            commit: SBOMCommit? = nil,
+        ) {
+            self.revision = revision
+            self.commit = commit
+        }
+    }
+
     package let category: Category
     package let id: String
     package let purl: String
     package let name: String
-    package let version: String
+    package let version: Version
     package let originator: SBOMOriginator
     package let description: String?
     package let scope: Scope?
     package let components: [SBOMComponent]?
-    package let licenses: [SBOMLicense]?
     
     package init(
         category: Category,
         id: String,
         purl: String,
         name: String,
-        version: String,
+        version: Version,
         originator: SBOMOriginator,
         description: String? = nil,
         scope: Scope?,
         components: [SBOMComponent]? = nil,
-        licenses: [SBOMLicense]? = nil,
     ) {
         self.category = category
         self.id = id
@@ -56,6 +67,5 @@ package struct SBOMComponent: Codable, Equatable {
         self.description = description
         self.scope = scope
         self.components = components
-        self.licenses = licenses
     }
 }
