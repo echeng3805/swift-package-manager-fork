@@ -73,7 +73,7 @@ struct SBOMExtractPrimaryComponentTests {
         #expect(component.id == "SwiftPM:SwiftPMDataModel")
         #expect(component.version.revision == SBOMTestStore.swiftPMRevision)
         #expect(component.scope == .runtime)
-        #expect(component.purl.contains("pkg:swift/github.com/swiftlang/swift-package-manager/SwiftPM:SwiftPMDataModel@\(SBOMTestStore.swiftPMRevision)"))
+        #expect(component.purl.contains("pkg:swift/github.com/swiftlang/SwiftPM:SwiftPMDataModel@\(SBOMTestStore.swiftPMRevision)"))
         #expect(component.description == nil)
 
         #expect(component.originator.commits != nil)
@@ -96,7 +96,7 @@ struct SBOMExtractPrimaryComponentTests {
         #expect(component.id == "swiftly:swiftly")
         #expect(component.version.revision == SBOMTestStore.swiftlyRevision)
         #expect(component.scope == .runtime)
-        #expect(component.purl.contains("pkg:swift/github.com/swiftlang/swiftly/swiftly:swiftly@\(SBOMTestStore.swiftlyRevision)"))
+        #expect(component.purl.contains("pkg:swift/github.com/swiftlang/swiftly:swiftly@\(SBOMTestStore.swiftlyRevision)"))
         #expect(component.description == nil)
 
         #expect(component.originator.commits != nil)

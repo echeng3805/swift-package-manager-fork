@@ -162,6 +162,7 @@ struct PURLTests {
     }
 
     static let packageNamespaceTestCases: [PURLNamespaceTestCase] = [
+        // HTTPS URLs with .git extension
         PURLNamespaceTestCase(
             location: "https://github.com/apple/swift-system.git",
             expectedNamespace: "github.com/apple"
@@ -171,9 +172,23 @@ struct PURLTests {
             expectedNamespace: "github.com/swiftlang"
         ),
         PURLNamespaceTestCase(
+            location: "https://github.com/swiftlang/swift-package-manager.git",
+            expectedNamespace: "github.com/swiftlang"
+        ),
+        PURLNamespaceTestCase(
             location: "https://gitlab.com/myorg/mypackage.git",
             expectedNamespace: "gitlab.com/myorg"
         ),
+        // HTTPS URLs without .git extension
+        PURLNamespaceTestCase(
+            location: "https://github.com/apple/swift-system",
+            expectedNamespace: "github.com/apple"
+        ),
+        PURLNamespaceTestCase(
+            location: "https://github.com/swiftlang/swift-llbuild",
+            expectedNamespace: "github.com/swiftlang"
+        ),
+        // SSH URLs with .git extension
         PURLNamespaceTestCase(
             location: "git@github.com:apple/swift-system.git",
             expectedNamespace: "github.com/apple"
@@ -182,6 +197,16 @@ struct PURLTests {
             location: "git@gitlab.com:myorg/mypackage.git",
             expectedNamespace: "gitlab.com/myorg"
         ),
+        // SSH URLs without .git extension
+        PURLNamespaceTestCase(
+            location: "git@github.com:apple/swift-system",
+            expectedNamespace: "github.com/apple"
+        ),
+        PURLNamespaceTestCase(
+            location: "git@github.com:swiftlang/swiftly",
+            expectedNamespace: "github.com/swiftlang"
+        ),
+        // Registry identities
         PURLNamespaceTestCase(
             location: "org.foo",
             expectedNamespace: "org"
@@ -194,6 +219,7 @@ struct PURLTests {
             location: "scope.package-name",
             expectedNamespace: "scope"
         ),
+        // Local file paths
         PURLNamespaceTestCase(
             location: "/Users/username/MyPackage",
             expectedNamespace: "username"
@@ -210,6 +236,7 @@ struct PURLTests {
             location: "/special.character/in/path.to/package",
             expectedNamespace: "path.to"
         ),
+        // Edge cases
         PURLNamespaceTestCase(
             location: "",
             expectedNamespace: nil
@@ -236,74 +263,11 @@ struct PURLTests {
         ),
     ]
     
-    @Test("Extract package namespace", arguments: packageNamespaceTestCases)
-    func extractNamespaceFromPackageLocation(testCase: PURLNamespaceTestCase) async throws {
-        #expect(await PURL.extractPackageNamespace(from: SBOMCommit(sha: "sha", repository: testCase.location)) == testCase.expectedNamespace)
+    @Test("Extract namespace", arguments: packageNamespaceTestCases)
+    func extractNamespaceFromLocation(testCase: PURLNamespaceTestCase) async throws {
+        #expect(await PURL.extractNamespace(from: SBOMCommit(sha: "sha", repository: testCase.location)) == testCase.expectedNamespace)
     }
 
-    static let productNamespaceTestCases: [PURLNamespaceTestCase] = [
-        PURLNamespaceTestCase(
-            location: "https://github.com/apple/swift-system.git",
-            expectedNamespace: "github.com/apple/swift-system"
-        ),
-        PURLNamespaceTestCase(
-            location: "https://github.com/swiftlang/swift-package-manager.git",
-            expectedNamespace: "github.com/swiftlang/swift-package-manager"
-        ),
-        PURLNamespaceTestCase(
-            location: "https://gitlab.com/myorg/mypackage.git",
-            expectedNamespace: "gitlab.com/myorg/mypackage"
-        ),
-        PURLNamespaceTestCase(
-            location: "https://github.com/apple/swift-system",
-            expectedNamespace: "github.com/apple/swift-system"
-        ),
-        PURLNamespaceTestCase(
-            location: "https://github.com/swiftlang/swift-llbuild",
-            expectedNamespace: "github.com/swiftlang/swift-llbuild"
-        ),
-        PURLNamespaceTestCase(
-            location: "git@github.com:apple/swift-system.git",
-            expectedNamespace: "github.com/apple/swift-system"
-        ),
-        PURLNamespaceTestCase(
-            location: "git@gitlab.com:myorg/mypackage.git",
-            expectedNamespace: "gitlab.com/myorg/mypackage"
-        ),
-        PURLNamespaceTestCase(
-            location: "git@github.com:apple/swift-system",
-            expectedNamespace: "github.com/apple/swift-system"
-        ),
-        PURLNamespaceTestCase(
-            location: "git@github.com:swiftlang/swiftly",
-            expectedNamespace: "github.com/swiftlang/swiftly"
-        ),
-        PURLNamespaceTestCase(
-            location: "org.foo",
-            expectedNamespace: "org"
-        ),
-        PURLNamespaceTestCase(
-            location: "com.example.package",
-            expectedNamespace: "com.example"
-        ),
-        PURLNamespaceTestCase(
-            location: "/Users/username/MyPackage",
-            expectedNamespace: "username"
-        ),
-        PURLNamespaceTestCase(
-            location: "",
-            expectedNamespace: nil
-        ),
-        PURLNamespaceTestCase(
-            location: "https://github.com/",
-            expectedNamespace: nil
-        ),
-    ]
-    
-    @Test("Extract product namespace", arguments: productNamespaceTestCases)
-    func extractNamespaceFromProductLocation(testCase: PURLNamespaceTestCase) async throws {
-        #expect(await PURL.extractProductNamespace(from: SBOMCommit(sha: "sha", repository: testCase.location)) == testCase.expectedNamespace)
-    }
     
     @Test("Create PURL from ResolvedPackage")
     func createPURLFromResolvedPackage() async throws {
@@ -328,10 +292,10 @@ struct PURLTests {
         
         #expect(purl.scheme == "pkg")
         #expect(purl.type == "swift")
-        #expect(purl.namespace == "github.com/swiftlang/swift-package-manager")
+        #expect(purl.namespace == "github.com/swiftlang")
         #expect(purl.name == "SwiftPM:SwiftPMDataModel")
         #expect(purl.version == "1.0.0")
-        #expect(purl.description == "pkg:swift/github.com/swiftlang/swift-package-manager/SwiftPM:SwiftPMDataModel@1.0.0")
+        #expect(purl.description == "pkg:swift/github.com/swiftlang/SwiftPM:SwiftPMDataModel@1.0.0")
     }
     
     @Test("Create PURL from ResolvedProduct with local package")
@@ -358,9 +322,9 @@ struct PURLTests {
         
         #expect(purl.scheme == "pkg")
         #expect(purl.type == "swift")
-        #expect(purl.namespace == "github.com/swiftlang/swiftly")
+        #expect(purl.namespace == "github.com/swiftlang")
         #expect(purl.name == "swiftly:swiftly")
         #expect(purl.version == "1.0.0")
-        #expect(purl.description == "pkg:swift/github.com/swiftlang/swiftly/swiftly:swiftly@1.0.0")
+        #expect(purl.description == "pkg:swift/github.com/swiftlang/swiftly:swiftly@1.0.0")
     }
 }

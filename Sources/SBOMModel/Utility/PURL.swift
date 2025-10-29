@@ -74,25 +74,26 @@ extension PURL {
         return PURL(
             scheme: "pkg",
             type: "swift",
-            namespace: await extractPackageNamespace(from: version.commit),
+            namespace: await extractNamespace(from: version.commit),
             name: await extractComponentID(from: package),
             version: version.revision,
         )
     }
 
     package static func from(product: ResolvedProduct, version: SBOMComponent.Version) async -> PURL {
-        // use the full package path as the namespace (e.g., "github.com/swiftlang/swift-package-manager")
-        // and the package identity + product name as the name (e.g., "SwiftPM:SwiftPMDataModel")
+        // For products, use host/org as namespace (e.g., "github.com/swiftlang")
+        // and packageIdentity:productName as the name (e.g., "swift-package-manager:SwiftPMDataModel")
+        // This avoids duplication since the package name is already in the component ID
         return PURL(
             scheme: "pkg",
             type: "swift",
-            namespace: await extractProductNamespace(from: version.commit) ?? product.packageIdentity.description,
+            namespace: await extractNamespace(from: version.commit) ?? product.packageIdentity.description,
             name: await extractComponentID(from: product),
             version: version.revision,
         )
     }
 
-    package static func extractPackageNamespace(from commit: SBOMCommit?) async -> String? {
+    package static func extractNamespace(from commit: SBOMCommit?) async -> String? {
         // TODO: ev_cheng Rewrite this function, it's an AI stopgap to unblock the rest of the code
         // TODO ev_cheng deal with local paths
         guard let packageLocation = commit?.repository else {
@@ -150,42 +151,4 @@ extension PURL {
         return nil
     }
     
-    package static func extractProductNamespace(from commit: SBOMCommit?) async -> String? {
-        // For products, extract the full repository path including the repo name
-        // e.g., "https://github.com/swiftlang/swift-package-manager.git" -> "github.com/swiftlang/swift-package-manager"
-        guard let packageLocation = commit?.repository else {
-            return nil
-        }
-
-        // Handle SSH URLs (git@host:org/repo.git or git@host:org/repo)
-        let sshPattern = #"^[^@]+@([^:]+):(.+?)(?:\.git)?$"#
-        if let regex = try? NSRegularExpression(pattern: sshPattern, options: []),
-           let match = regex.firstMatch(in: packageLocation, options: [], range: NSRange(location: 0, length: packageLocation.count)),
-           match.numberOfRanges == 3 {
-            
-            let hostRange = Range(match.range(at: 1), in: packageLocation)
-            let pathRange = Range(match.range(at: 2), in: packageLocation)
-            
-            if let hostRange = hostRange, let pathRange = pathRange {
-                let host = String(packageLocation[hostRange])
-                let path = String(packageLocation[pathRange])
-                return "\(host)/\(path)"
-            }
-        }
-        
-        // Handle HTTP/HTTPS URLs
-        if let url = URL(string: packageLocation), let host = url.host {
-            var pathComponents = url.pathComponents.filter { $0 != "/" && !$0.isEmpty }
-            // Remove .git extension if present
-            if let last = pathComponents.last, last.hasSuffix(".git") {
-                pathComponents[pathComponents.count - 1] = String(last.dropLast(4))
-            }
-            if pathComponents.count >= 2 {
-                // Return host + full path (org/repo)
-                return "\(host)/\(pathComponents.joined(separator: "/"))"
-            }
-        }
-        
-        return await extractPackageNamespace(from: commit)
-    }
 }
