@@ -34,10 +34,10 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
     var components: [SBOMComponent] = []
     for package in graph.packages {
         for product in package.products {
-            let productComponent = try await extractComponent(product: product, store: store, cache: cache)
+            let productComponent = try await extractComponent(product: product, graph: graph, store: store, cache: cache)
             components.append(productComponent)
         }
-        let packageComponent = try await extractComponent(package: package, store: store, cache: cache)
+        let packageComponent = try await extractComponent(package: package, graph: graph, store: store, cache: cache)
         components.append(packageComponent)
     }
 
@@ -159,20 +159,20 @@ private func extractProductDependencies(graph: ModulesGraph, store: ResolvedPack
     }
     
     func processProductDependency(from product: ResolvedProduct, dependentProduct: ResolvedProduct) async throws -> ResolvedProduct? {
-        let dependentProductComponent = try await extractComponent(product: dependentProduct, store: store, cache: cache)
+        let dependentProductComponent = try await extractComponent(product: dependentProduct, graph: graph, store: store, cache: cache)
         addComponent(dependentProductComponent)
-        let processedProductComponent = try await extractComponent(product: product, store: store, cache: cache)
+        let processedProductComponent = try await extractComponent(product: product, graph: graph, store: store, cache: cache)
         addComponent(processedProductComponent)
         // add product -> dependentProduct dependency
         trackDependency(parentID: processedProductComponent.id, childID: dependentProductComponent.id)
         
         if let dependentProductPackage = graph.packages.first(where: { $0.identity == dependentProduct.packageIdentity }) {
-            let dependentProductPackageComponent = try await extractComponent(package: dependentProductPackage, store: store, cache: cache)
+            let dependentProductPackageComponent = try await extractComponent(package: dependentProductPackage, graph: graph, store: store, cache: cache)
             addComponent(dependentProductPackageComponent)
             // add dependentProductPackage -> dependentProduct dependency
             trackDependency(parentID: dependentProductPackageComponent.id, childID: dependentProductComponent.id)
             if let productPackage = graph.packages.first(where: { $0.identity == product.packageIdentity }) {
-                let productPackageComponent = try await extractComponent(package: productPackage, store: store, cache: cache)
+                let productPackageComponent = try await extractComponent(package: productPackage, graph: graph, store: store, cache: cache)
                 addComponent(productPackageComponent)
                 // add productPackage -> dependentProductPackage dependency if they're from different packages
                 if product.packageIdentity != dependentProduct.packageIdentity {
@@ -215,8 +215,8 @@ private func extractProductDependencies(graph: ModulesGraph, store: ResolvedPack
     }
     
     // add rootPackage -> targetProduct dependency
-    addComponent(try await extractComponent(product: targetProduct, store: store, cache: cache))
-    addComponent(try await extractComponent(package: rootPackage, store: store, cache: cache))
+    addComponent(try await extractComponent(product: targetProduct, graph: graph, store: store, cache: cache))
+    addComponent(try await extractComponent(package: rootPackage, graph: graph, store: store, cache: cache))
     trackDependency(parentID: rootPackageID, childID: targetID)
     
     var processedProducts = IdentifiableSet<ResolvedProduct>()

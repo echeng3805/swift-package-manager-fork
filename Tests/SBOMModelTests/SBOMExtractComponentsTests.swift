@@ -187,6 +187,37 @@ struct SBOMExtractComponentsTests {
         #expect(componentIDs.contains("SwiftPM:SwiftPMDataModel"))
         #expect(componentIDs.contains("SwiftPM"))
 
-        // TODO: also check for other stuff
+        // TODO: check for the right number of components
+        // TODO: check the right components
+        // TODO: check that there's no duplication
+    }
+    
+    @Test("Root package components should not have 'unknown' versions")
+    func rootPackageComponentsShouldNotHaveUnknownVersions() async throws {
+        let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+        
+        let rootPackage = try #require(graph.rootPackages.first)
+        let rootPackageID = rootPackage.identity.description
+
+        let actualRevision = try spmRepo.getCurrentRevision().identifier
+        
+        let rootComponents = components.filter { component in
+            component.id == rootPackageID || component.id.hasPrefix("\(rootPackageID):")
+        }
+        
+        #expect(!rootComponents.isEmpty, "Should have root package components")
+        
+        for component in rootComponents {
+            #expect(component.version.revision == actualRevision)
+            #expect(component.originator.commits != nil, "Root package component '\(component.id)' should have commit information")
+            if let commits = component.originator.commits {
+                #expect(!commits.isEmpty)
+                #expect(commits[0].sha == actualRevision)
+            }
+        }
     }
 }
+
