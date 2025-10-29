@@ -157,24 +157,64 @@ package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?)
     return externalIdentifiers
 }
 
-package func convertToSPDXRelationships(from dependencies: [SBOMRelationship]?) async -> [Any] {
-    guard let deps = dependencies, !deps.isEmpty else {
+package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) async -> [Any] {
+    guard let dependencies = dependencies else {
         return []
     }
 
     var relationships: [Any] = []
-    for dependency in deps {
-        let relationship = SPDXRelationship(
-            id: "\(dependency.parentID)-dependsOn",
-            type: .Relationship,
-            category: .dependsOn,
-            creationInfoID: "_:creationInfo",
-            parentID: dependency.parentID,
-            childrenID: dependency.childrenID,  
-        )
-        relationships.append(relationship)
+    if let sbomRelationships = dependencies.relationships {
+        for dependency in sbomRelationships {
+            let relationship = SPDXRelationship(
+                id: "\(dependency.parentID)-dependsOn",
+                type: .Relationship,
+                category: .dependsOn,
+                creationInfoID: "_:creationInfo",
+                parentID: dependency.parentID,
+                childrenID: dependency.childrenID,  
+            )
+            relationships.append(relationship)
+            
+            var optionalDependencies: [String] = []
+            var testDependencies: [String] = []
+            for childID in dependency.childrenID {
+                guard let comp = dependencies.components.first(where: { $0.id == childID }) else {
+                    continue
+                }
+                switch comp.scope {
+                case .optional:
+                    optionalDependencies.append(childID)
+                case .test:
+                    testDependencies.append(childID)
+                default:
+                    break
+                }
+            }
+            if !optionalDependencies.isEmpty {
+                let relationship = SPDXRelationship(
+                    id: "\(dependency.parentID)-hasOptionalDependency",
+                    type: .Relationship,
+                    category: .hasOptionalDependency,
+                    creationInfoID: "_:creationInfo",
+                    parentID: dependency.parentID,
+                    childrenID: optionalDependencies,
+                )
+                relationships.append(relationship)
+            }
+            if !testDependencies.isEmpty {
+                let relationship = SPDXRelationship(
+                    id: "\(dependency.parentID)-hasTest",
+                    type: .Relationship,
+                    category: .hasTest,
+                    creationInfoID: "_:creationInfo",
+                    parentID: dependency.parentID,
+                    childrenID: testDependencies,
+                )
+                relationships.append(relationship)
+            }
+        }
     }
-    // TODO ev_cheng handle optionalDependency and hasTest relationships
+
     return relationships
 }
 
@@ -192,7 +232,7 @@ package func convertToSPDXGraph(from document: SBOMDocument) async throws -> SPD
         packages.append(p)
     }
 
-    let relationships = await convertToSPDXRelationships(from: document.dependencies.relationships)
+    let relationships = await convertToSPDXRelationships(from: document.dependencies)
     let commits = await convertToSPDXExternalIdentifiers(from: document.dependencies.components)
 
     return SPDXGraph(

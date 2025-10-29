@@ -465,7 +465,7 @@ struct SPDXConverterTests {
     
     @Test("convertToSPDXRelationships with empty dependencies")
     func convertToSPDXRelationshipsWithEmptyDependencies() async throws {
-        let result = await convertToSPDXRelationships(from: [])
+        let result = await convertToSPDXRelationships(from: SBOMDependencies(components: [], relationships: []))
         #expect(result.isEmpty)
     }
     
@@ -477,7 +477,7 @@ struct SPDXConverterTests {
             childrenID: ["child1", "child2"]
         )
         
-        let result = await convertToSPDXRelationships(from: [dependency])
+        let result = await convertToSPDXRelationships(from: SBOMDependencies(components: [], relationships: [dependency]))
         #expect(result.count == 1)
         
         let relationship = result[0] as? SPDXRelationship
@@ -503,7 +503,7 @@ struct SPDXConverterTests {
             childrenID: ["child2", "child3"]
         )
         
-        let result = await convertToSPDXRelationships(from: [dependency1, dependency2])
+        let result = await convertToSPDXRelationships(from: SBOMDependencies(components: [], relationships: [dependency1, dependency2]))
         #expect(result.count == 2)
         
         let relationship1 = result[0] as? SPDXRelationship
@@ -511,12 +511,74 @@ struct SPDXConverterTests {
         #expect(relationship1Unwrapped.id == "parent1-dependsOn")
         #expect(relationship1Unwrapped.parentID == "parent1")
         #expect(relationship1Unwrapped.childrenID == ["child1"])
+        #expect(relationship1Unwrapped.category  == .dependsOn)
         
         let relationship2 = result[1] as? SPDXRelationship
         let relationship2Unwrapped = try #require(relationship2)
         #expect(relationship2Unwrapped.id == "parent2-dependsOn")
         #expect(relationship2Unwrapped.parentID == "parent2")
         #expect(relationship2Unwrapped.childrenID == ["child2", "child3"])
+        #expect(relationship2Unwrapped.category  == .dependsOn)
+    }
+
+        @Test("convertToSPDXRelationships with multiple dependencies")
+    func convertToSPDXRelationshipsWithTestAndOptionalRelationships() async throws {
+        let commit1 = SBOMCommit(
+            sha: "abc123",
+            repository: "https://github.com/swiftlang/swift-package-manager",
+            url: nil,
+            authors: nil,
+            message: "First commit"
+        )
+        let parent = SBOMComponent(
+            category: .library,
+            id: "parent-id",
+            purl: "pkg:swift/test3@1.0.0",
+            name: "TestComponent3",
+            version: SBOMComponent.Version(revision: "1.0.0"),
+            originator: SBOMOriginator(commits: [commit1]),
+            scope: .runtime
+        )
+        let component = SBOMComponent(
+            category: .library,
+            id: "test-id",
+            purl: "pkg:swift/test@1.0.0",
+            name: "TestComponent",
+            version: SBOMComponent.Version(revision: "1.0.0"),
+            originator: SBOMOriginator(commits: [commit1]),
+            scope: .test
+        )
+        let component2 = SBOMComponent(
+            category: .library,
+            id: "test-id2",
+            purl: "pkg:swift/test2@1.0.0",
+            name: "TestComponent2",
+            version: SBOMComponent.Version(revision: "2.0.0"),
+            originator: SBOMOriginator(commits: [commit1]),
+            scope: .optional
+        )
+        let dependency1 = SBOMRelationship(
+            id: "dep1",
+            parentID: "parent-id",
+            childrenID: ["test-id", "test-id2"]
+        )
+        
+        let result = await convertToSPDXRelationships(from: SBOMDependencies(components: [parent, component, component2], relationships: [dependency1]))
+        #expect(result.count == 3) // 1 dependsOn, 1 hasOptionalDependency, 1 hasTest
+        
+        let relationship2 = result[1] as? SPDXRelationship
+        let relationship2Unwrapped = try #require(relationship2)
+        #expect(relationship2Unwrapped.id == "parent-id-hasOptionalDependency")
+        #expect(relationship2Unwrapped.parentID == "parent-id")
+        #expect(relationship2Unwrapped.childrenID == ["test-id2"])
+        #expect(relationship2Unwrapped.category  == .hasOptionalDependency)
+
+        let relationship1 = result[2] as? SPDXRelationship
+        let relationship1Unwrapped = try #require(relationship1)
+        #expect(relationship1Unwrapped.id == "parent-id-hasTest")
+        #expect(relationship1Unwrapped.parentID == "parent-id")
+        #expect(relationship1Unwrapped.childrenID == ["test-id"])
+        #expect(relationship1Unwrapped.category  == .hasTest)
     }
     
     @Test("convertToSPDXGraph with non-SPDX spec throws error")
