@@ -184,12 +184,18 @@ struct SBOMExtractComponentsTests {
         #expect(components.count < allComponents.count)
         
         let componentIDs = Set(components.map { $0.id })
-        #expect(componentIDs.contains("SwiftPM:SwiftPMDataModel"))
-        #expect(componentIDs.contains("SwiftPM"))
-
-        // TODO: check for the right number of components
-        // TODO: check the right components
-        // TODO: check that there's no duplication
+        #expect(components.count > 0)
+        #expect(components.count < allComponents.count)
+        
+        let expectedComponentIDs: Set<String> = [
+            "SwiftPM:SwiftPMDataModel",
+            "SwiftPM",
+        ]
+        #expect(componentIDs == expectedComponentIDs)
+        
+        let componentIDsList = components.map { $0.id }
+        let uniqueIDs = Set(componentIDsList)
+        #expect(componentIDsList.count == uniqueIDs.count)
     }
     
     @Test("Root package components should not have 'unknown' versions")
