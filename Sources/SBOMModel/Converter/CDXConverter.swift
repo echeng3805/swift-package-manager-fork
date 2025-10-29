@@ -126,8 +126,6 @@ package func convertToCDXDocument(from document: SBOMDocument) async throws -> C
         throw StringError("internal SBOMDocument spec type is not cyclonedx, cannot convert to cyclonedx")
     }
 
-    // TODO ev_cheng -> handle spec versions
-
     var components: [CDXComponent] = []
     for sbomComp in document.dependencies.components {
         let cdxComp = try await convertToCDXComponent(from: sbomComp)
