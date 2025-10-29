@@ -119,6 +119,12 @@ struct SBOMValidationTests {
                 inputSBOMSpec: SBOMSpec(type: .spdx3, version: "3.0.1"),
                 wantError: false,
             ),
+            // valid SPDX SBOMs
+            ValidateFileSBOMTestCase(
+                inputFilePath: "testfiles/valid-spdx-3.0.1-versions",
+                inputSBOMSpec: SBOMSpec(type: .spdx3, version: "3.0.1"),
+                wantError: false,
+            ),
             
             // invalid CycloneDX SBOMs
             ValidateFileSBOMTestCase(
