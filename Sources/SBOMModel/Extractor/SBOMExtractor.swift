@@ -115,7 +115,7 @@ private func extractComponentVersion(from packageIdentity: PackageIdentity, stor
     }
     return SBOMComponent.Version(revision: version, commit: SBOMCommit(
         sha: sha,
-        repository: resolvedPackage.packageRef.kind.locationString
+        repository: resolvedPackage.packageRef.kind.locationString // absolute path, URL string, or package identity
     ))
 }
 

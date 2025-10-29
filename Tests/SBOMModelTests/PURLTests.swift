@@ -219,10 +219,10 @@ struct PURLTests {
             location: "scope.package-name",
             expectedNamespace: "scope"
         ),
-        // Local file paths
+        // Local file paths - should have no namespace (path goes in qualifier instead)
         PURLNamespaceTestCase(
             location: "/Users/username/MyPackage",
-            expectedNamespace: "username"
+            expectedNamespace: nil
         ),
         PURLNamespaceTestCase(
             location: "/swift-system",
@@ -230,11 +230,19 @@ struct PURLTests {
         ),
         PURLNamespaceTestCase(
             location: "/path/to/package",
-            expectedNamespace: "to"
+            expectedNamespace: nil
         ),
         PURLNamespaceTestCase(
             location: "/special.character/in/path.to/package",
-            expectedNamespace: "path.to"
+            expectedNamespace: nil
+        ),
+        PURLNamespaceTestCase(
+            location: "/path/to/MyLocalPackage",
+            expectedNamespace: nil
+        ),
+        PURLNamespaceTestCase(
+            location: "/path/to/git/repo",
+            expectedNamespace: nil
         ),
         // Edge cases
         PURLNamespaceTestCase(
@@ -255,10 +263,6 @@ struct PURLTests {
         ),
         PURLNamespaceTestCase(
             location: "user@email.com",
-            expectedNamespace: nil
-        ),
-        PURLNamespaceTestCase(
-            location: "tcp://host.com:5000",
             expectedNamespace: nil
         ),
     ]
@@ -303,14 +307,16 @@ struct PURLTests {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first { $0.name == "SwiftPMDataModel" })
-        let purl = await PURL.from(product: product, version: SBOMComponent.Version(revision: "1.0.0", commit: SBOMCommit(sha: "sha", repository: "SwiftPM")))
+        let localPath = "/Users/someuser/myCode/SwiftPM/"
+        let purl = await PURL.from(product: product, version: SBOMComponent.Version(revision: "1.0.0", commit: SBOMCommit(sha: "sha", repository: localPath)))
         
         #expect(purl.scheme == "pkg")
         #expect(purl.type == "swift")
         #expect(purl.name == "SwiftPM:SwiftPMDataModel")
-        #expect(purl.namespace == "SwiftPM")
+        #expect(purl.namespace == nil) // No namespace for local paths
         #expect(purl.version == "1.0.0")
-        #expect(purl.description == "pkg:swift/SwiftPM/SwiftPM:SwiftPMDataModel@1.0.0")
+        #expect(purl.qualifiers == ["path": localPath])
+        #expect(purl.description == "pkg:swift/SwiftPM:SwiftPMDataModel@1.0.0?path=/Users/someuser/myCode/SwiftPM/")
     }
     
     @Test("Create PURL from ResolvedProduct with SSH URL")
@@ -326,5 +332,66 @@ struct PURLTests {
         #expect(purl.name == "swiftly:swiftly")
         #expect(purl.version == "1.0.0")
         #expect(purl.description == "pkg:swift/github.com/swiftlang/swiftly:swiftly@1.0.0")
+    }
+    
+    struct PURLQualifiersTestCase {
+        let location: String
+        let expectedQualifiers: [String: String]?
+    }
+    
+    static let qualifiersTestCases: [PURLQualifiersTestCase] = [
+        // Local absolute paths should have path qualifier
+        PURLQualifiersTestCase(
+            location: "/Users/jdoe/workspace/project/lib/foo.a",
+            expectedQualifiers: ["path": "/Users/jdoe/workspace/project/lib/foo.a"],
+        ),
+        PURLQualifiersTestCase(
+            location: "/Users/username/MyPackage",
+            expectedQualifiers: ["path": "/Users/username/MyPackage"],
+        ),
+        PURLQualifiersTestCase(
+            location: "/path/to/package",
+            expectedQualifiers: ["path": "/path/to/package"],
+        ),
+        PURLQualifiersTestCase(
+            location: "/swift-system",
+            expectedQualifiers: ["path": "/swift-system"],
+        ),
+        // Remote URLs should have no qualifiers
+        PURLQualifiersTestCase(
+            location: "https://github.com/apple/swift-system.git",
+            expectedQualifiers: nil,
+        ),
+        PURLQualifiersTestCase(
+            location: "https://github.com/swiftlang/swift-package-manager",
+            expectedQualifiers: nil,
+        ),
+        PURLQualifiersTestCase(
+            location: "git@github.com:apple/swift-system.git",
+            expectedQualifiers: nil,
+        ),
+        PURLQualifiersTestCase(
+            location: "git@github.com:swiftlang/swiftly",
+            expectedQualifiers: nil,
+        ),
+        PURLQualifiersTestCase(
+            location: "org.foo",
+            expectedQualifiers: nil,
+        ),
+        PURLQualifiersTestCase(
+            location: "com.example.package",
+            expectedQualifiers: nil,
+        ),
+        PURLQualifiersTestCase(
+            location: "",
+            expectedQualifiers: nil,
+        ),
+    ]
+    
+    @Test("Extract qualifiers", arguments: qualifiersTestCases)
+    func extractQualifiersFromLocation(testCase: PURLQualifiersTestCase) async throws {
+        let commit = testCase.location.isEmpty ? nil : SBOMCommit(sha: "sha", repository: testCase.location)
+        let actualQualifiers = await PURL.extractQualifiers(from: commit)
+        #expect(actualQualifiers == testCase.expectedQualifiers, "Expected \(String(describing: testCase.expectedQualifiers)) but got \(String(describing: actualQualifiers))")
     }
 }
