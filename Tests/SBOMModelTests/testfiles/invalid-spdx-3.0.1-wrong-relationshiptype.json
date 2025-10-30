@@ -2,25 +2,25 @@
   "@context" : "https://spdx.org/rdf/3.0.1/spdx-context.jsonld",
   "@graph" : [
     {
-      "@id" : "urn:uuid:2a24c08d-e1ae-4e53-a92d-3187ad997dfc:creationInfo",
+      "@id" : "urn:uuid:8893d465-d998-442e-a799-30451b436850:creationInfo",
       "created" : "1970-01-01T00:00:00Z",
       "createdBy" : [
-        "urn:uuid:2a24c08d-e1ae-4e53-a92d-3187ad997dfc"
+        "urn:uuid:8893d465-d998-442e-a799-30451b436850"
       ],
       "specVersion" : "6.3.0-dev",
       "type" : "CreationInfo"
     },
     {
-      "creationInfo" : "urn:uuid:2a24c08d-e1ae-4e53-a92d-3187ad997dfc:creationInfo",
+      "creationInfo" : "urn:uuid:8893d465-d998-442e-a799-30451b436850:creationInfo",
       "name" : "swift-package-manager",
-      "spdxId" : "urn:uuid:2a24c08d-e1ae-4e53-a92d-3187ad997dfc",
+      "spdxId" : "urn:uuid:8893d465-d998-442e-a799-30451b436850",
       "type" : "Agent"
     },
     {
       "@id" : "_:creationInfo",
-      "created" : "2025-10-30T21:29:42Z",
+      "created" : "2025-10-30T21:17:58Z",
       "createdBy" : [
-        "urn:uuid:2a24c08d-e1ae-4e53-a92d-3187ad997dfc"
+        "urn:uuid:8893d465-d998-442e-a799-30451b436850"
       ],
       "specVersion" : "3.0.1",
       "type" : "CreationInfo"
@@ -34,14 +34,14 @@
       "rootElement" : [
         "swift-package-manager-fork"
       ],
-      "spdxId" : "urn:uuid:urn:uuid:438b9a71-7a36-49b6-a550-c049ae628b07",
+      "spdxId" : "urn:uuid:urn:uuid:e50f33db-cc8b-4460-9d39-3082daa65bc4",
       "type" : "software_Sbom"
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "urn:uuid:urn:uuid:438b9a71-7a36-49b6-a550-c049ae628b07",
+      "from" : "urn:uuid:urn:uuid:e50f33db-cc8b-4460-9d39-3082daa65bc4",
       "relationshipType" : "describes",
-      "spdxId" : "urn:uuid:urn:uuid:438b9a71-7a36-49b6-a550-c049ae628b07-describes-swift-package-manager-fork",
+      "spdxId" : "urn:uuid:urn:uuid:e50f33db-cc8b-4460-9d39-3082daa65bc4-describes-swift-package-manager-fork",
       "to" : [
         "swift-package-manager-fork"
       ],
@@ -54,9 +54,9 @@
         "software"
       ],
       "rootElement" : [
-        "urn:uuid:urn:uuid:438b9a71-7a36-49b6-a550-c049ae628b07"
+        "urn:uuid:urn:uuid:e50f33db-cc8b-4460-9d39-3082daa65bc4"
       ],
-      "spdxId" : "urn:uuid:f2e4c92c-bd82-4bd0-b909-b626887c5db3",
+      "spdxId" : "urn:uuid:5bb7a716-a72b-42ab-8a3d-1d76f7e89b58",
       "type" : "SpdxDocument"
     },
     {
@@ -1940,145 +1940,19 @@
     },
     {
       "externalIdentifierType" : "gitoid",
-      "identifier" : "309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
       "identifierLocator" : [
-        "https://github.com/apple/swift-argument-parser.git"
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
       ],
       "type" : "ExternalIdentifier"
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "309a47b2b1d9b5e991f36961c983ecec72275be3",
-      "relationshipType" : "generates",
-      "spdxId" : "309a47b2b1d9b5e991f36961c983ecec72275be3-generates",
+      "from" : "swift-package-manager-fork:SwiftPMPackageTests",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:SwiftPMPackageTests-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
       "to" : [
-        "swift-argument-parser:ArgumentParser",
-        "swift-argument-parser:GenerateDoccReference",
-        "swift-argument-parser:GenerateManual",
-        "swift-argument-parser:generate-manual",
-        "swift-argument-parser:generate-docc-reference",
-        "swift-argument-parser"
-      ],
-      "type" : "Relationship"
-    },
-    {
-      "externalIdentifierType" : "gitoid",
-      "identifier" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
-      "identifierLocator" : [
-        "https://github.com/swiftlang/swift-docc-plugin"
-      ],
-      "type" : "ExternalIdentifier"
-    },
-    {
-      "creationInfo" : "_:creationInfo",
-      "from" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
-      "relationshipType" : "generates",
-      "spdxId" : "3e4f133a77e644a5812911a0513aeb7288b07d06-generates",
-      "to" : [
-        "swift-docc-plugin:Swift-DocC",
-        "swift-docc-plugin:Swift-DocC Preview",
-        "swift-docc-plugin:snippet-extract",
-        "swift-docc-plugin"
-      ],
-      "type" : "Relationship"
-    },
-    {
-      "externalIdentifierType" : "gitoid",
-      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
-      "identifierLocator" : [
-        "https://github.com/swiftlang/swift-syntax.git"
-      ],
-      "type" : "ExternalIdentifier"
-    },
-    {
-      "creationInfo" : "_:creationInfo",
-      "from" : "ef033f4611f44b911592b609e2df015f01086d69",
-      "relationshipType" : "generates",
-      "spdxId" : "ef033f4611f44b911592b609e2df015f01086d69-generates",
-      "to" : [
-        "swift-syntax:SwiftBasicFormat",
-        "swift-syntax:SwiftCompilerPlugin",
-        "swift-syntax:SwiftDiagnostics",
-        "swift-syntax:SwiftIDEUtils",
-        "swift-syntax:SwiftIfConfig",
-        "swift-syntax:SwiftLexicalLookup",
-        "swift-syntax:SwiftOperators",
-        "swift-syntax:SwiftParser",
-        "swift-syntax:SwiftParserDiagnostics",
-        "swift-syntax:SwiftRefactor",
-        "swift-syntax:SwiftSyntax",
-        "swift-syntax:SwiftSyntaxBuilder",
-        "swift-syntax:SwiftSyntaxMacros",
-        "swift-syntax:SwiftSyntaxMacroExpansion",
-        "swift-syntax:SwiftSyntaxMacrosTestSupport",
-        "swift-syntax:SwiftSyntaxMacrosGenericTestSupport",
-        "swift-syntax:_SwiftCompilerPluginMessageHandling",
-        "swift-syntax:_SwiftLibraryPluginProvider",
-        "swift-syntax"
-      ],
-      "type" : "Relationship"
-    },
-    {
-      "externalIdentifierType" : "gitoid",
-      "identifier" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
-      "identifierLocator" : [
-        "https://github.com/swiftlang/swift-build.git"
-      ],
-      "type" : "ExternalIdentifier"
-    },
-    {
-      "creationInfo" : "_:creationInfo",
-      "from" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
-      "relationshipType" : "generates",
-      "spdxId" : "6bffad0230473416f5c6faccf5fdebcc5478b507-generates",
-      "to" : [
-        "swift-build:swbuild",
-        "swift-build:SWBBuildServiceBundle",
-        "swift-build:SwiftBuild",
-        "swift-build:SWBProtocol",
-        "swift-build:SWBUtil",
-        "swift-build:SWBProjectModel",
-        "swift-build:SWBBuildService",
-        "swift-build"
-      ],
-      "type" : "Relationship"
-    },
-    {
-      "externalIdentifierType" : "gitoid",
-      "identifier" : "61e4ca4b81b9e09e2ec863b00c340eb13497dac6",
-      "identifierLocator" : [
-        "https://github.com/apple/swift-system.git"
-      ],
-      "type" : "ExternalIdentifier"
-    },
-    {
-      "creationInfo" : "_:creationInfo",
-      "from" : "61e4ca4b81b9e09e2ec863b00c340eb13497dac6",
-      "relationshipType" : "generates",
-      "spdxId" : "61e4ca4b81b9e09e2ec863b00c340eb13497dac6-generates",
-      "to" : [
-        "swift-system:SystemPackage",
-        "swift-system"
-      ],
-      "type" : "Relationship"
-    },
-    {
-      "externalIdentifierType" : "gitoid",
-      "identifier" : "b45b80b943e88db3cb8ddea798fa3fa9912375ff",
-      "identifierLocator" : [
-        "https://github.com/swiftlang/swift-toolchain-sqlite.git"
-      ],
-      "type" : "ExternalIdentifier"
-    },
-    {
-      "creationInfo" : "_:creationInfo",
-      "from" : "b45b80b943e88db3cb8ddea798fa3fa9912375ff",
-      "relationshipType" : "generates",
-      "spdxId" : "b45b80b943e88db3cb8ddea798fa3fa9912375ff-generates",
-      "to" : [
-        "swift-toolchain-sqlite:sqlite",
-        "swift-toolchain-sqlite:SwiftToolchainCSQLite",
-        "swift-toolchain-sqlite"
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
       ],
       "type" : "Relationship"
     },
@@ -2092,75 +1966,587 @@
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
-      "relationshipType" : "generates",
-      "spdxId" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70-generates",
+      "from" : "swift-package-manager-fork:SwiftPM",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:SwiftPM-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
       "to" : [
-        "swift-package-manager-fork:SwiftPMPackageTests",
-        "swift-package-manager-fork:SwiftPM",
-        "swift-package-manager-fork:SwiftPM-auto",
-        "swift-package-manager-fork:SwiftPMDataModel",
-        "swift-package-manager-fork:SwiftPMDataModel-auto",
-        "swift-package-manager-fork:XCBuildSupport",
-        "swift-package-manager-fork:PackageDescription",
-        "swift-package-manager-fork:AppleProductTypes",
-        "swift-package-manager-fork:PackagePlugin",
-        "swift-package-manager-fork:PackageCollectionsModel",
-        "swift-package-manager-fork:SwiftPMPackageCollections",
-        "swift-package-manager-fork:swiftpm-testing-helper",
-        "swift-package-manager-fork:swift-test",
-        "swift-package-manager-fork:swift-sdk",
-        "swift-package-manager-fork:swift-run",
-        "swift-package-manager-fork:swift-package-registry",
-        "swift-package-manager-fork:swift-package-manager",
-        "swift-package-manager-fork:swift-package-collection",
-        "swift-package-manager-fork:swift-package",
-        "swift-package-manager-fork:swift-experimental-sdk",
-        "swift-package-manager-fork:swift-build-prebuilts",
-        "swift-package-manager-fork:swift-build",
-        "swift-package-manager-fork:swift-bootstrap",
-        "swift-package-manager-fork:package-info",
-        "swift-package-manager-fork:dummy-swiftc",
-        "swift-package-manager-fork"
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
       ],
       "type" : "Relationship"
     },
     {
       "externalIdentifierType" : "gitoid",
-      "identifier" : "d79c573e1b400d670ed12c0cb29d33f2c0f5ab70",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
       "identifierLocator" : [
-        "https://github.com/apple/swift-crypto.git"
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
       ],
       "type" : "ExternalIdentifier"
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "d79c573e1b400d670ed12c0cb29d33f2c0f5ab70",
-      "relationshipType" : "generates",
-      "spdxId" : "d79c573e1b400d670ed12c0cb29d33f2c0f5ab70-generates",
+      "from" : "swift-package-manager-fork:SwiftPM-auto",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:SwiftPM-auto-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
       "to" : [
-        "swift-crypto:Crypto",
-        "swift-crypto:_CryptoExtras",
-        "swift-crypto"
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
       ],
       "type" : "Relationship"
     },
     {
       "externalIdentifierType" : "gitoid",
-      "identifier" : "386001a92200c70fd06217b3ccad58d7226edb84",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
       "identifierLocator" : [
-        "https://github.com/apple/swift-certificates.git"
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
       ],
       "type" : "ExternalIdentifier"
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "386001a92200c70fd06217b3ccad58d7226edb84",
-      "relationshipType" : "generates",
-      "spdxId" : "386001a92200c70fd06217b3ccad58d7226edb84-generates",
+      "from" : "swift-package-manager-fork:SwiftPMDataModel",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:SwiftPMDataModel-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
       "to" : [
-        "swift-certificates:X509",
-        "swift-certificates"
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:SwiftPMDataModel-auto",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:SwiftPMDataModel-auto-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:XCBuildSupport",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:XCBuildSupport-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:PackageDescription",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:PackageDescription-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:AppleProductTypes",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:AppleProductTypes-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:PackagePlugin",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:PackagePlugin-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:PackageCollectionsModel",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:PackageCollectionsModel-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:SwiftPMPackageCollections",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:SwiftPMPackageCollections-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swiftpm-testing-helper",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swiftpm-testing-helper-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-test",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-test-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-sdk",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-sdk-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-run",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-run-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-package-registry",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-package-registry-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-package-manager",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-package-manager-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-package-collection",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-package-collection-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-package",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-package-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-experimental-sdk",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-experimental-sdk-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-build-prebuilts",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-build-prebuilts-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-build",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-build-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:swift-bootstrap",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:swift-bootstrap-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:package-info",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:package-info-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork:dummy-swiftc",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork:dummy-swiftc-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "identifierLocator" : [
+        "git@github.com:echeng3805/swift-package-manager-fork.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-package-manager-fork",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-package-manager-fork-wasGeneratedFrom-3047c0857293a958ab0ffa5c8b57a148f0c36a70",
+      "to" : [
+        "3047c0857293a958ab0ffa5c8b57a148f0c36a70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-build.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-build:swbuild",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-build:swbuild-wasGeneratedFrom-6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "to" : [
+        "6bffad0230473416f5c6faccf5fdebcc5478b507"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-build.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-build:SWBBuildServiceBundle",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-build:SWBBuildServiceBundle-wasGeneratedFrom-6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "to" : [
+        "6bffad0230473416f5c6faccf5fdebcc5478b507"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-build.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-build:SwiftBuild",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-build:SwiftBuild-wasGeneratedFrom-6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "to" : [
+        "6bffad0230473416f5c6faccf5fdebcc5478b507"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-build.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-build:SWBProtocol",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-build:SWBProtocol-wasGeneratedFrom-6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "to" : [
+        "6bffad0230473416f5c6faccf5fdebcc5478b507"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-build.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-build:SWBUtil",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-build:SWBUtil-wasGeneratedFrom-6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "to" : [
+        "6bffad0230473416f5c6faccf5fdebcc5478b507"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-build.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-build:SWBProjectModel",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-build:SWBProjectModel-wasGeneratedFrom-6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "to" : [
+        "6bffad0230473416f5c6faccf5fdebcc5478b507"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-build.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-build:SWBBuildService",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-build:SWBBuildService-wasGeneratedFrom-6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "to" : [
+        "6bffad0230473416f5c6faccf5fdebcc5478b507"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-build.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-build",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-build-wasGeneratedFrom-6bffad0230473416f5c6faccf5fdebcc5478b507",
+      "to" : [
+        "6bffad0230473416f5c6faccf5fdebcc5478b507"
       ],
       "type" : "Relationship"
     },
@@ -2174,104 +2560,137 @@
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "c54107dac2e89bd31a1224a3cb7f7186ab73173d",
-      "relationshipType" : "generates",
-      "spdxId" : "c54107dac2e89bd31a1224a3cb7f7186ab73173d-generates",
+      "from" : "swift-driver:swift-driver",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-driver:swift-driver-wasGeneratedFrom-c54107dac2e89bd31a1224a3cb7f7186ab73173d",
       "to" : [
-        "swift-driver:swift-driver",
-        "swift-driver:swift-help",
-        "swift-driver:swift-build-sdk-interfaces",
-        "swift-driver:SwiftDriver",
-        "swift-driver:SwiftDriverDynamic",
-        "swift-driver:SwiftOptions",
-        "swift-driver:SwiftDriverExecution",
-        "swift-driver"
+        "c54107dac2e89bd31a1224a3cb7f7186ab73173d"
       ],
       "type" : "Relationship"
     },
     {
       "externalIdentifierType" : "gitoid",
-      "identifier" : "b45d1f2ed151d057b54504d653e0da5552844e34",
+      "identifier" : "c54107dac2e89bd31a1224a3cb7f7186ab73173d",
       "identifierLocator" : [
-        "https://github.com/swiftlang/swift-docc-symbolkit"
+        "https://github.com/swiftlang/swift-driver.git"
       ],
       "type" : "ExternalIdentifier"
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "b45d1f2ed151d057b54504d653e0da5552844e34",
-      "relationshipType" : "generates",
-      "spdxId" : "b45d1f2ed151d057b54504d653e0da5552844e34-generates",
+      "from" : "swift-driver:swift-help",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-driver:swift-help-wasGeneratedFrom-c54107dac2e89bd31a1224a3cb7f7186ab73173d",
       "to" : [
-        "swift-docc-symbolkit:SymbolKit",
-        "swift-docc-symbolkit"
+        "c54107dac2e89bd31a1224a3cb7f7186ab73173d"
       ],
       "type" : "Relationship"
     },
     {
       "externalIdentifierType" : "gitoid",
-      "identifier" : "c11818f3cae0780656baa430b49e7f163f08dffd",
+      "identifier" : "c54107dac2e89bd31a1224a3cb7f7186ab73173d",
       "identifierLocator" : [
-        "https://github.com/apple/swift-collections.git"
+        "https://github.com/swiftlang/swift-driver.git"
       ],
       "type" : "ExternalIdentifier"
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "c11818f3cae0780656baa430b49e7f163f08dffd",
-      "relationshipType" : "generates",
-      "spdxId" : "c11818f3cae0780656baa430b49e7f163f08dffd-generates",
+      "from" : "swift-driver:swift-build-sdk-interfaces",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-driver:swift-build-sdk-interfaces-wasGeneratedFrom-c54107dac2e89bd31a1224a3cb7f7186ab73173d",
       "to" : [
-        "swift-collections:BitCollections",
-        "swift-collections:DequeModule",
-        "swift-collections:HashTreeCollections",
-        "swift-collections:HeapModule",
-        "swift-collections:OrderedCollections",
-        "swift-collections:_RopeModule",
-        "swift-collections:Collections",
-        "swift-collections"
+        "c54107dac2e89bd31a1224a3cb7f7186ab73173d"
       ],
       "type" : "Relationship"
     },
     {
       "externalIdentifierType" : "gitoid",
-      "identifier" : "9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "identifier" : "c54107dac2e89bd31a1224a3cb7f7186ab73173d",
       "identifierLocator" : [
-        "https://github.com/swiftlang/swift-llbuild.git"
+        "https://github.com/swiftlang/swift-driver.git"
       ],
       "type" : "ExternalIdentifier"
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "9cd06072bc98869d6058ecf0cbb62533ca10c02f",
-      "relationshipType" : "generates",
-      "spdxId" : "9cd06072bc98869d6058ecf0cbb62533ca10c02f-generates",
+      "from" : "swift-driver:SwiftDriver",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-driver:SwiftDriver-wasGeneratedFrom-c54107dac2e89bd31a1224a3cb7f7186ab73173d",
       "to" : [
-        "swift-llbuild:llbuild",
-        "swift-llbuild:libllbuild",
-        "swift-llbuild:llbuildSwift",
-        "swift-llbuild:llbuildAnalysis",
-        "swift-llbuild:llbuildSwiftDynamic",
-        "swift-llbuild"
+        "c54107dac2e89bd31a1224a3cb7f7186ab73173d"
       ],
       "type" : "Relationship"
     },
     {
       "externalIdentifierType" : "gitoid",
-      "identifier" : "40d25bbb2fc5b557a9aa8512210bded327c0f60d",
+      "identifier" : "c54107dac2e89bd31a1224a3cb7f7186ab73173d",
       "identifierLocator" : [
-        "https://github.com/apple/swift-asn1.git"
+        "https://github.com/swiftlang/swift-driver.git"
       ],
       "type" : "ExternalIdentifier"
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "40d25bbb2fc5b557a9aa8512210bded327c0f60d",
-      "relationshipType" : "generates",
-      "spdxId" : "40d25bbb2fc5b557a9aa8512210bded327c0f60d-generates",
+      "from" : "swift-driver:SwiftDriverDynamic",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-driver:SwiftDriverDynamic-wasGeneratedFrom-c54107dac2e89bd31a1224a3cb7f7186ab73173d",
       "to" : [
-        "swift-asn1:SwiftASN1",
-        "swift-asn1"
+        "c54107dac2e89bd31a1224a3cb7f7186ab73173d"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c54107dac2e89bd31a1224a3cb7f7186ab73173d",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-driver.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-driver:SwiftOptions",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-driver:SwiftOptions-wasGeneratedFrom-c54107dac2e89bd31a1224a3cb7f7186ab73173d",
+      "to" : [
+        "c54107dac2e89bd31a1224a3cb7f7186ab73173d"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c54107dac2e89bd31a1224a3cb7f7186ab73173d",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-driver.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-driver:SwiftDriverExecution",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-driver:SwiftDriverExecution-wasGeneratedFrom-c54107dac2e89bd31a1224a3cb7f7186ab73173d",
+      "to" : [
+        "c54107dac2e89bd31a1224a3cb7f7186ab73173d"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c54107dac2e89bd31a1224a3cb7f7186ab73173d",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-driver.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-driver",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-driver-wasGeneratedFrom-c54107dac2e89bd31a1224a3cb7f7186ab73173d",
+      "to" : [
+        "c54107dac2e89bd31a1224a3cb7f7186ab73173d"
       ],
       "type" : "Relationship"
     },
@@ -2285,15 +2704,1109 @@
     },
     {
       "creationInfo" : "_:creationInfo",
-      "from" : "c26cd00ec0ee74769993169cfb196122ca4f62e1",
-      "relationshipType" : "generates",
-      "spdxId" : "c26cd00ec0ee74769993169cfb196122ca4f62e1-generates",
+      "from" : "swift-tools-support-core:TSCBasic",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-tools-support-core:TSCBasic-wasGeneratedFrom-c26cd00ec0ee74769993169cfb196122ca4f62e1",
       "to" : [
-        "swift-tools-support-core:TSCBasic",
-        "swift-tools-support-core:SwiftToolsSupport",
-        "swift-tools-support-core:SwiftToolsSupport-auto",
-        "swift-tools-support-core:TSCTestSupport",
-        "swift-tools-support-core"
+        "c26cd00ec0ee74769993169cfb196122ca4f62e1"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c26cd00ec0ee74769993169cfb196122ca4f62e1",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-tools-support-core.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-tools-support-core:SwiftToolsSupport",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-tools-support-core:SwiftToolsSupport-wasGeneratedFrom-c26cd00ec0ee74769993169cfb196122ca4f62e1",
+      "to" : [
+        "c26cd00ec0ee74769993169cfb196122ca4f62e1"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c26cd00ec0ee74769993169cfb196122ca4f62e1",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-tools-support-core.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-tools-support-core:SwiftToolsSupport-auto",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-tools-support-core:SwiftToolsSupport-auto-wasGeneratedFrom-c26cd00ec0ee74769993169cfb196122ca4f62e1",
+      "to" : [
+        "c26cd00ec0ee74769993169cfb196122ca4f62e1"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c26cd00ec0ee74769993169cfb196122ca4f62e1",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-tools-support-core.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-tools-support-core:TSCTestSupport",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-tools-support-core:TSCTestSupport-wasGeneratedFrom-c26cd00ec0ee74769993169cfb196122ca4f62e1",
+      "to" : [
+        "c26cd00ec0ee74769993169cfb196122ca4f62e1"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c26cd00ec0ee74769993169cfb196122ca4f62e1",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-tools-support-core.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-tools-support-core",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-tools-support-core-wasGeneratedFrom-c26cd00ec0ee74769993169cfb196122ca4f62e1",
+      "to" : [
+        "c26cd00ec0ee74769993169cfb196122ca4f62e1"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-docc-plugin"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-docc-plugin:Swift-DocC",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-docc-plugin:Swift-DocC-wasGeneratedFrom-3e4f133a77e644a5812911a0513aeb7288b07d06",
+      "to" : [
+        "3e4f133a77e644a5812911a0513aeb7288b07d06"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-docc-plugin"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-docc-plugin:Swift-DocC Preview",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-docc-plugin:Swift-DocC Preview-wasGeneratedFrom-3e4f133a77e644a5812911a0513aeb7288b07d06",
+      "to" : [
+        "3e4f133a77e644a5812911a0513aeb7288b07d06"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-docc-plugin"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-docc-plugin:snippet-extract",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-docc-plugin:snippet-extract-wasGeneratedFrom-3e4f133a77e644a5812911a0513aeb7288b07d06",
+      "to" : [
+        "3e4f133a77e644a5812911a0513aeb7288b07d06"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-docc-plugin"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-docc-plugin",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-docc-plugin-wasGeneratedFrom-3e4f133a77e644a5812911a0513aeb7288b07d06",
+      "to" : [
+        "3e4f133a77e644a5812911a0513aeb7288b07d06"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "b45d1f2ed151d057b54504d653e0da5552844e34",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-docc-symbolkit"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-docc-symbolkit:SymbolKit",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-docc-symbolkit:SymbolKit-wasGeneratedFrom-b45d1f2ed151d057b54504d653e0da5552844e34",
+      "to" : [
+        "b45d1f2ed151d057b54504d653e0da5552844e34"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "b45d1f2ed151d057b54504d653e0da5552844e34",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-docc-symbolkit"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-docc-symbolkit",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-docc-symbolkit-wasGeneratedFrom-b45d1f2ed151d057b54504d653e0da5552844e34",
+      "to" : [
+        "b45d1f2ed151d057b54504d653e0da5552844e34"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "b45b80b943e88db3cb8ddea798fa3fa9912375ff",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-toolchain-sqlite.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-toolchain-sqlite:sqlite",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-toolchain-sqlite:sqlite-wasGeneratedFrom-b45b80b943e88db3cb8ddea798fa3fa9912375ff",
+      "to" : [
+        "b45b80b943e88db3cb8ddea798fa3fa9912375ff"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "b45b80b943e88db3cb8ddea798fa3fa9912375ff",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-toolchain-sqlite.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-toolchain-sqlite:SwiftToolchainCSQLite",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-toolchain-sqlite:SwiftToolchainCSQLite-wasGeneratedFrom-b45b80b943e88db3cb8ddea798fa3fa9912375ff",
+      "to" : [
+        "b45b80b943e88db3cb8ddea798fa3fa9912375ff"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "b45b80b943e88db3cb8ddea798fa3fa9912375ff",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-toolchain-sqlite.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-toolchain-sqlite",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-toolchain-sqlite-wasGeneratedFrom-b45b80b943e88db3cb8ddea798fa3fa9912375ff",
+      "to" : [
+        "b45b80b943e88db3cb8ddea798fa3fa9912375ff"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "386001a92200c70fd06217b3ccad58d7226edb84",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-certificates.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-certificates:X509",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-certificates:X509-wasGeneratedFrom-386001a92200c70fd06217b3ccad58d7226edb84",
+      "to" : [
+        "386001a92200c70fd06217b3ccad58d7226edb84"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "386001a92200c70fd06217b3ccad58d7226edb84",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-certificates.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-certificates",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-certificates-wasGeneratedFrom-386001a92200c70fd06217b3ccad58d7226edb84",
+      "to" : [
+        "386001a92200c70fd06217b3ccad58d7226edb84"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "40d25bbb2fc5b557a9aa8512210bded327c0f60d",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-asn1.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-asn1:SwiftASN1",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-asn1:SwiftASN1-wasGeneratedFrom-40d25bbb2fc5b557a9aa8512210bded327c0f60d",
+      "to" : [
+        "40d25bbb2fc5b557a9aa8512210bded327c0f60d"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "40d25bbb2fc5b557a9aa8512210bded327c0f60d",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-asn1.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-asn1",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-asn1-wasGeneratedFrom-40d25bbb2fc5b557a9aa8512210bded327c0f60d",
+      "to" : [
+        "40d25bbb2fc5b557a9aa8512210bded327c0f60d"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c11818f3cae0780656baa430b49e7f163f08dffd",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-collections.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-collections:BitCollections",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-collections:BitCollections-wasGeneratedFrom-c11818f3cae0780656baa430b49e7f163f08dffd",
+      "to" : [
+        "c11818f3cae0780656baa430b49e7f163f08dffd"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c11818f3cae0780656baa430b49e7f163f08dffd",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-collections.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-collections:DequeModule",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-collections:DequeModule-wasGeneratedFrom-c11818f3cae0780656baa430b49e7f163f08dffd",
+      "to" : [
+        "c11818f3cae0780656baa430b49e7f163f08dffd"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c11818f3cae0780656baa430b49e7f163f08dffd",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-collections.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-collections:HashTreeCollections",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-collections:HashTreeCollections-wasGeneratedFrom-c11818f3cae0780656baa430b49e7f163f08dffd",
+      "to" : [
+        "c11818f3cae0780656baa430b49e7f163f08dffd"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c11818f3cae0780656baa430b49e7f163f08dffd",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-collections.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-collections:HeapModule",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-collections:HeapModule-wasGeneratedFrom-c11818f3cae0780656baa430b49e7f163f08dffd",
+      "to" : [
+        "c11818f3cae0780656baa430b49e7f163f08dffd"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c11818f3cae0780656baa430b49e7f163f08dffd",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-collections.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-collections:OrderedCollections",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-collections:OrderedCollections-wasGeneratedFrom-c11818f3cae0780656baa430b49e7f163f08dffd",
+      "to" : [
+        "c11818f3cae0780656baa430b49e7f163f08dffd"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c11818f3cae0780656baa430b49e7f163f08dffd",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-collections.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-collections:_RopeModule",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-collections:_RopeModule-wasGeneratedFrom-c11818f3cae0780656baa430b49e7f163f08dffd",
+      "to" : [
+        "c11818f3cae0780656baa430b49e7f163f08dffd"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c11818f3cae0780656baa430b49e7f163f08dffd",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-collections.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-collections:Collections",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-collections:Collections-wasGeneratedFrom-c11818f3cae0780656baa430b49e7f163f08dffd",
+      "to" : [
+        "c11818f3cae0780656baa430b49e7f163f08dffd"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "c11818f3cae0780656baa430b49e7f163f08dffd",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-collections.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-collections",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-collections-wasGeneratedFrom-c11818f3cae0780656baa430b49e7f163f08dffd",
+      "to" : [
+        "c11818f3cae0780656baa430b49e7f163f08dffd"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "61e4ca4b81b9e09e2ec863b00c340eb13497dac6",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-system.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-system:SystemPackage",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-system:SystemPackage-wasGeneratedFrom-61e4ca4b81b9e09e2ec863b00c340eb13497dac6",
+      "to" : [
+        "61e4ca4b81b9e09e2ec863b00c340eb13497dac6"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "61e4ca4b81b9e09e2ec863b00c340eb13497dac6",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-system.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-system",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-system-wasGeneratedFrom-61e4ca4b81b9e09e2ec863b00c340eb13497dac6",
+      "to" : [
+        "61e4ca4b81b9e09e2ec863b00c340eb13497dac6"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "d79c573e1b400d670ed12c0cb29d33f2c0f5ab70",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-crypto.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-crypto:Crypto",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-crypto:Crypto-wasGeneratedFrom-d79c573e1b400d670ed12c0cb29d33f2c0f5ab70",
+      "to" : [
+        "d79c573e1b400d670ed12c0cb29d33f2c0f5ab70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "d79c573e1b400d670ed12c0cb29d33f2c0f5ab70",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-crypto.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-crypto:_CryptoExtras",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-crypto:_CryptoExtras-wasGeneratedFrom-d79c573e1b400d670ed12c0cb29d33f2c0f5ab70",
+      "to" : [
+        "d79c573e1b400d670ed12c0cb29d33f2c0f5ab70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "d79c573e1b400d670ed12c0cb29d33f2c0f5ab70",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-crypto.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-crypto",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-crypto-wasGeneratedFrom-d79c573e1b400d670ed12c0cb29d33f2c0f5ab70",
+      "to" : [
+        "d79c573e1b400d670ed12c0cb29d33f2c0f5ab70"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-argument-parser.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-argument-parser:ArgumentParser",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-argument-parser:ArgumentParser-wasGeneratedFrom-309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "to" : [
+        "309a47b2b1d9b5e991f36961c983ecec72275be3"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-argument-parser.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-argument-parser:GenerateDoccReference",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-argument-parser:GenerateDoccReference-wasGeneratedFrom-309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "to" : [
+        "309a47b2b1d9b5e991f36961c983ecec72275be3"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-argument-parser.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-argument-parser:GenerateManual",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-argument-parser:GenerateManual-wasGeneratedFrom-309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "to" : [
+        "309a47b2b1d9b5e991f36961c983ecec72275be3"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-argument-parser.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-argument-parser:generate-manual",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-argument-parser:generate-manual-wasGeneratedFrom-309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "to" : [
+        "309a47b2b1d9b5e991f36961c983ecec72275be3"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-argument-parser.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-argument-parser:generate-docc-reference",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-argument-parser:generate-docc-reference-wasGeneratedFrom-309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "to" : [
+        "309a47b2b1d9b5e991f36961c983ecec72275be3"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "identifierLocator" : [
+        "https://github.com/apple/swift-argument-parser.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-argument-parser",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-argument-parser-wasGeneratedFrom-309a47b2b1d9b5e991f36961c983ecec72275be3",
+      "to" : [
+        "309a47b2b1d9b5e991f36961c983ecec72275be3"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftBasicFormat",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftBasicFormat-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftCompilerPlugin",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftCompilerPlugin-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftDiagnostics",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftDiagnostics-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftIDEUtils",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftIDEUtils-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftIfConfig",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftIfConfig-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftLexicalLookup",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftLexicalLookup-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftOperators",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftOperators-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftParser",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftParser-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftParserDiagnostics",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftParserDiagnostics-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftRefactor",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftRefactor-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftSyntax",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftSyntax-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftSyntaxBuilder",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftSyntaxBuilder-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftSyntaxMacros",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftSyntaxMacros-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftSyntaxMacroExpansion",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftSyntaxMacroExpansion-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftSyntaxMacrosTestSupport",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftSyntaxMacrosTestSupport-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:SwiftSyntaxMacrosGenericTestSupport",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:SwiftSyntaxMacrosGenericTestSupport-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:_SwiftCompilerPluginMessageHandling",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:_SwiftCompilerPluginMessageHandling-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax:_SwiftLibraryPluginProvider",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax:_SwiftLibraryPluginProvider-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "ef033f4611f44b911592b609e2df015f01086d69",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-syntax.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-syntax",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-syntax-wasGeneratedFrom-ef033f4611f44b911592b609e2df015f01086d69",
+      "to" : [
+        "ef033f4611f44b911592b609e2df015f01086d69"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-llbuild.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-llbuild:llbuild",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-llbuild:llbuild-wasGeneratedFrom-9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "to" : [
+        "9cd06072bc98869d6058ecf0cbb62533ca10c02f"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-llbuild.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-llbuild:libllbuild",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-llbuild:libllbuild-wasGeneratedFrom-9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "to" : [
+        "9cd06072bc98869d6058ecf0cbb62533ca10c02f"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-llbuild.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-llbuild:llbuildSwift",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-llbuild:llbuildSwift-wasGeneratedFrom-9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "to" : [
+        "9cd06072bc98869d6058ecf0cbb62533ca10c02f"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-llbuild.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-llbuild:llbuildAnalysis",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-llbuild:llbuildAnalysis-wasGeneratedFrom-9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "to" : [
+        "9cd06072bc98869d6058ecf0cbb62533ca10c02f"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-llbuild.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-llbuild:llbuildSwiftDynamic",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-llbuild:llbuildSwiftDynamic-wasGeneratedFrom-9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "to" : [
+        "9cd06072bc98869d6058ecf0cbb62533ca10c02f"
+      ],
+      "type" : "Relationship"
+    },
+    {
+      "externalIdentifierType" : "gitoid",
+      "identifier" : "9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "identifierLocator" : [
+        "https://github.com/swiftlang/swift-llbuild.git"
+      ],
+      "type" : "ExternalIdentifier"
+    },
+    {
+      "creationInfo" : "_:creationInfo",
+      "from" : "swift-llbuild",
+      "relationshipType" : "wasGeneratedFrom",
+      "spdxId" : "swift-llbuild-wasGeneratedFrom-9cd06072bc98869d6058ecf0cbb62533ca10c02f",
+      "to" : [
+        "9cd06072bc98869d6058ecf0cbb62533ca10c02f"
       ],
       "type" : "Relationship"
     }

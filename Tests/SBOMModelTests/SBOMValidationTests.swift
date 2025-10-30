@@ -119,12 +119,6 @@ struct SBOMValidationTests {
                 inputSBOMSpec: SBOMSpec(type: .spdx3, version: "3.0.1"),
                 wantError: false,
             ),
-            // valid SPDX SBOMs
-            ValidateFileSBOMTestCase(
-                inputFilePath: "testfiles/valid-spdx-3.0.1-versions",
-                inputSBOMSpec: SBOMSpec(type: .spdx3, version: "3.0.1"),
-                wantError: false,
-            ),
             
             // invalid CycloneDX SBOMs
             ValidateFileSBOMTestCase(
@@ -152,6 +146,21 @@ struct SBOMValidationTests {
             ValidateFileSBOMTestCase(
                 inputFilePath: "testfiles/invalid-spdx-3-small",
                 inputSBOMSpec: SBOMSpec(type: .spdx3, version: SPDXConstants.spdx3SpecVersion),
+                wantError: true,
+            ),
+            ValidateFileSBOMTestCase(
+                inputFilePath: "testfiles/invalid-spdx-3.0.1-no-iri",
+                inputSBOMSpec: SBOMSpec(type: .spdx3, version: "3.0.1"),
+                wantError: true,
+            ),
+            ValidateFileSBOMTestCase(
+                inputFilePath: "testfiles/invalid-spdx-3.0.1-spm",
+                inputSBOMSpec: SBOMSpec(type: .spdx3, version: "3.0.1"),
+                wantError: true,
+            ),
+            ValidateFileSBOMTestCase(
+                inputFilePath: "testfiles/invalid-spdx-3.0.1-wrong-relationshiptype",
+                inputSBOMSpec: SBOMSpec(type: .spdx3, version: "3.0.1"),
                 wantError: true,
             ),
         ]

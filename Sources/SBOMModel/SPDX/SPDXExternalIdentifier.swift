@@ -17,13 +17,13 @@ package struct SPDXExternalIdentifier: Codable, Equatable {
     }
 
     package let identifier: String
-    package let identifierLocator: String
+    package let identifierLocator: [String]
     package let type: SPDXType
     package let category: Category
 
     package init(
         identifier: String,
-        identifierLocator: String,
+        identifierLocator: [String],
         type: SPDXType,
         category: Category,
     ) {

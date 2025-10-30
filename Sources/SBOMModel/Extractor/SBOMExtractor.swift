@@ -244,7 +244,7 @@ package func extractPrimaryComponent(graph: ModulesGraph, store: ResolvedPackage
 package func extractSBOM(spec: Spec, graph: ModulesGraph, store: ResolvedPackagesStore, product: String? = nil) async throws -> SBOMDocument {
     let cache = SBOMVersionCache()
     return SBOMDocument(
-        id: "urn:uuid:\(generateSBOMID())",
+        id: "\(generateSBOMID())",
         metadata: try await extractMetadata(spec),
         primaryComponent:  try await extractPrimaryComponent(graph: graph, store: store, product: product, cache: cache),
         dependencies: try await extractDependencies(graph: graph, store: store, product: product, cache: cache)

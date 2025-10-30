@@ -1,4 +1,3 @@
-
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift open source project
@@ -27,7 +26,7 @@ struct SPDXConverterTests {
     func convertToSPDXAgentWithNilCreators() async throws {
         let metadata = SBOMMetadata(
             spec: SBOMSpec(type: .spdx, version: "3.0.1"),
-            timestamp: "unknown",
+            timestamp: "1970-01-01T00:00:00Z",
             creators: nil
         )
         let result = await convertToSPDXAgent(from: metadata)
@@ -67,7 +66,7 @@ struct SPDXConverterTests {
         #expect(creationInfoUnwrapped.type == .CreationInfo)
         #expect(creationInfoUnwrapped.specVersion == "3.0.1")
         #expect(creationInfoUnwrapped.createdBy == ["tool-1"])
-        #expect(creationInfoUnwrapped.created == "unknown")
+        #expect(creationInfoUnwrapped.created == "1970-01-01T00:00:00Z")
         
         let agent = result[1] as? SPDXAgent
         let agentUnwrapped = try #require(agent)
@@ -353,7 +352,6 @@ struct SPDXConverterTests {
         let result = await convertToSPDXExternalIdentifiers(from: [component])
         #expect(result.isEmpty)
     }
-    
     @Test("convertToSPDXExternalIdentifiers with components with empty commits")
     func convertToSPDXExternalIdentifiersWithComponentsWithEmptyCommits() async throws {
         let component = SBOMComponent(
@@ -365,7 +363,6 @@ struct SPDXConverterTests {
             originator: SBOMOriginator(commits: []),
             scope: .runtime
         )
-        
         let result = await convertToSPDXExternalIdentifiers(from: [component])
         #expect(result.isEmpty)
     }
@@ -390,23 +387,23 @@ struct SPDXConverterTests {
         )
         
         let result = await convertToSPDXExternalIdentifiers(from: [component])
-        #expect(result.count == 2) // ExternalIdentifier and Relationship
+        #expect(result.count == 2)
         
         let externalIdentifier = result[0] as? SPDXExternalIdentifier
         let externalIdentifierUnwrapped = try #require(externalIdentifier)
         #expect(externalIdentifierUnwrapped.identifier == "abc123")
-        #expect(externalIdentifierUnwrapped.identifierLocator == "https://github.com/swiftlang/swift-package-manager")
+        #expect(externalIdentifierUnwrapped.identifierLocator == ["https://github.com/swiftlang/swift-package-manager"])
         #expect(externalIdentifierUnwrapped.type == .ExternalIdentifier)
         #expect(externalIdentifierUnwrapped.category == .gitoid)
         
         let relationship = result[1] as? SPDXRelationship
         let relationshipUnwrapped = try #require(relationship)
-        #expect(relationshipUnwrapped.id == "test-id-wasGeneratedFrom-abc123")
+        #expect(relationshipUnwrapped.id == "abc123-generates")
         #expect(relationshipUnwrapped.type == .Relationship)
-        #expect(relationshipUnwrapped.category == .wasGeneratedFrom)
+        #expect(relationshipUnwrapped.category == .generates)
         #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
-        #expect(relationshipUnwrapped.parentID == "test-id")
-        #expect(relationshipUnwrapped.childrenID == ["abc123"])
+        #expect(relationshipUnwrapped.parentID == "abc123")
+        #expect(relationshipUnwrapped.childrenID == ["test-id"])
     }
     
     @Test("convertToSPDXExternalIdentifiers with multiple commits")
@@ -438,23 +435,73 @@ struct SPDXConverterTests {
         let result = await convertToSPDXExternalIdentifiers(from: [component])
         #expect(result.count == 4) // 2 ExternalIdentifiers and 2 Relationships
         
-        let externalIdentifier1 = result[0] as? SPDXExternalIdentifier
-        let externalIdentifier1Unwrapped = try #require(externalIdentifier1)
-        #expect(externalIdentifier1Unwrapped.identifier == "abc123")
+        let externalIdentifiers = result.compactMap { $0 as? SPDXExternalIdentifier }
+        let relationships = result.compactMap { $0 as? SPDXRelationship }
         
-        let relationship1 = result[1] as? SPDXRelationship
-        let relationship1Unwrapped = try #require(relationship1)
-        #expect(relationship1Unwrapped.id == "test-id-wasGeneratedFrom-abc123")
-        #expect(relationship1Unwrapped.childrenID == ["abc123"])
+        #expect(externalIdentifiers.count == 2)
+        #expect(relationships.count == 2)
         
-        let externalIdentifier2 = result[2] as? SPDXExternalIdentifier
-        let externalIdentifier2Unwrapped = try #require(externalIdentifier2)
-        #expect(externalIdentifier2Unwrapped.identifier == "def456")
+        let identifiers = externalIdentifiers.map { $0.identifier }
+        #expect(identifiers.contains("abc123"))
+        #expect(identifiers.contains("def456"))
         
-        let relationship2 = result[3] as? SPDXRelationship
-        let relationship2Unwrapped = try #require(relationship2)
-        #expect(relationship2Unwrapped.id == "test-id-wasGeneratedFrom-def456")
-        #expect(relationship2Unwrapped.childrenID == ["def456"])
+        for relationship in relationships {
+            #expect(relationship.type == .Relationship)
+            #expect(relationship.category == .generates)
+            #expect(relationship.creationInfoID == "_:creationInfo")
+            #expect(relationship.childrenID == ["test-id"])
+            #expect(["abc123", "def456"].contains(relationship.parentID))
+        }
+    }
+    
+    @Test("convertToSPDXExternalIdentifiers with multiple components sharing same commit")
+    func convertToSPDXExternalIdentifiersWithMultipleComponentsSharingSameCommit() async throws {
+        let commit = SBOMCommit(
+            sha: "abc123",
+            repository: "https://github.com/swiftlang/swift-package-manager",
+            url: nil,
+            authors: nil,
+            message: "Shared commit"
+        )
+        let component1 = SBOMComponent(
+            category: .library,
+            id: "test-id-1",
+            purl: "pkg:swift/test1@1.0.0",
+            name: "TestComponent1",
+            version: SBOMComponent.Version(revision: "1.0.0"),
+            originator: SBOMOriginator(commits: [commit]),
+            scope: .runtime
+        )
+        let component2 = SBOMComponent(
+            category: .library,
+            id: "test-id-2",
+            purl: "pkg:swift/test2@1.0.0",
+            name: "TestComponent2",
+            version: SBOMComponent.Version(revision: "1.0.0"),
+            originator: SBOMOriginator(commits: [commit]),
+            scope: .runtime
+        )
+        
+        let result = await convertToSPDXExternalIdentifiers(from: [component1, component2])
+        #expect(result.count == 2) // 1 ExternalIdentifier and 1 Relationship
+        
+        let externalIdentifier = result[0] as? SPDXExternalIdentifier
+        let externalIdentifierUnwrapped = try #require(externalIdentifier)
+        #expect(externalIdentifierUnwrapped.identifier == "abc123")
+        #expect(externalIdentifierUnwrapped.identifierLocator == ["https://github.com/swiftlang/swift-package-manager"])
+        #expect(externalIdentifierUnwrapped.type == .ExternalIdentifier)
+        #expect(externalIdentifierUnwrapped.category == .gitoid)
+        
+        let relationship = result[1] as? SPDXRelationship
+        let relationshipUnwrapped = try #require(relationship)
+        #expect(relationshipUnwrapped.type == .Relationship)
+        #expect(relationshipUnwrapped.category == .generates)
+        #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
+        #expect(relationshipUnwrapped.parentID == "abc123")
+
+        #expect(relationshipUnwrapped.childrenID.count == 2)
+        #expect(relationshipUnwrapped.childrenID.contains("test-id-1"))
+        #expect(relationshipUnwrapped.childrenID.contains("test-id-2"))
     }
     
     @Test("convertToSPDXRelationships with nil dependencies")
@@ -767,9 +814,9 @@ struct SPDXConverterTests {
         #expect(externalIdentifiers[0].identifier == "abc123")
         
         let relationships = result.graph.compactMap { $0.getValue() as SPDXRelationship? }
-        let wasGeneratedFromRelationships = relationships.filter { $0.category == .wasGeneratedFrom }
-        #expect(wasGeneratedFromRelationships.count == 1)
-        #expect(wasGeneratedFromRelationships[0].parentID == "lib1-id")
-        #expect(wasGeneratedFromRelationships[0].childrenID == ["abc123"])
+        let generatesRelationships = relationships.filter { $0.category == .generates }
+        #expect(generatesRelationships.count == 1)
+        #expect(generatesRelationships[0].parentID == "abc123")
+        #expect(generatesRelationships[0].childrenID == ["lib1-id"])
     }
 }

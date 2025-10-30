@@ -13,5 +13,5 @@
 import Foundation
 
 package func generateSBOMID() -> String {
-    return "\(UUID().uuidString.lowercased())"
+    return "urn:uuid:\(UUID().uuidString.lowercased())"
 }

@@ -17,7 +17,7 @@ package struct SPDXRelationship: Codable, Equatable {
         case dependsOn
         case hasOptionalDependency
         case hasTest
-        case wasGeneratedFrom
+        case generates
     }
 
     package let id: String

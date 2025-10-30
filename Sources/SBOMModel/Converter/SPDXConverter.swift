@@ -44,7 +44,7 @@ package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [Any] {
             type: .CreationInfo,
             specVersion: creator.version,
             createdBy: [creator.id],
-            created: "unknown", // cannot be nil
+            created: "1970-01-01T00:00:00Z",
         )
         let tool = SPDXAgent(
             id: creator.id,
@@ -68,11 +68,12 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
     var elements: [Any] = []
 
     let creationInfoID = SPDXConstants.spdxRootCreationInfoID
+    
     let creationInfo = SPDXCreationInfo(
         id: creationInfoID,
         type: .CreationInfo,
         specVersion: document.metadata.spec.version,
-        createdBy: creators.map{ $0.id },
+        createdBy: creators.map { $0.id },
         created: timestamp,
     )
     elements.append(creationInfo)
@@ -130,27 +131,35 @@ package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?)
     }
 
     var externalIdentifiers: [Any] = []
+    var commitToComponents: [String: (repository: String, componentIDs: [String])] = [:]
     for component in comps {
         if let commits = component.originator.commits {
             for commit in commits {
-            let externalIdentifier = SPDXExternalIdentifier(
-                identifier: commit.sha,
-                identifierLocator: commit.repository,
-                type: .ExternalIdentifier,
-                category: .gitoid
-            )
-            externalIdentifiers.append(externalIdentifier)
-            let relationship = SPDXRelationship(
-                id: "\(component.id)-wasGeneratedFrom-\(commit.sha)",
-                type: .Relationship,
-                category: .wasGeneratedFrom,
-                creationInfoID: SPDXConstants.spdxRootCreationInfoID,
-                parentID: component.id,
-                childrenID: [commit.sha],  
-            )
-            externalIdentifiers.append(relationship)
+                if commitToComponents[commit.sha] != nil {
+                    commitToComponents[commit.sha]?.componentIDs.append(component.id)
+                } else {
+                    commitToComponents[commit.sha] = (repository: commit.repository, componentIDs: [component.id])
+                }
             }
         }
+    }
+    for (commitSHA, commitInfo) in commitToComponents {
+        let externalIdentifier = SPDXExternalIdentifier(
+            identifier: commitSHA,
+            identifierLocator: [commitInfo.repository],
+            type: .ExternalIdentifier,
+            category: .gitoid
+        )
+        externalIdentifiers.append(externalIdentifier)
+        let relationship = SPDXRelationship(
+            id: "\(commitSHA)-generates",
+            type: .Relationship,
+            category: .generates,
+            creationInfoID: SPDXConstants.spdxRootCreationInfoID,
+            parentID: commitSHA,
+            childrenID: commitInfo.componentIDs
+        )
+        externalIdentifiers.append(relationship)
     }
     
     return externalIdentifiers
