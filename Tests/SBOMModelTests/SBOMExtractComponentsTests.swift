@@ -201,6 +201,8 @@ struct SBOMExtractComponentsTests {
     @Test("Root package components should not have 'unknown' versions")
     func rootPackageComponentsShouldNotHaveUnknownVersions() async throws {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+        
         let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components

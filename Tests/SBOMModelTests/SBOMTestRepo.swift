@@ -41,4 +41,11 @@ struct SBOMTestRepo {
         
         return (GitRepository(path: path), path)
     }
+    
+    /// Clean up a test repository directory
+    static func cleanup(_ path: AbsolutePath) throws {
+        if localFileSystem.exists(path) {
+            try localFileSystem.removeFileTree(path)
+        }
+    }
 }

@@ -85,27 +85,52 @@ package struct JSONSchema {
     
     private func validateType(_ value: Any, expectedType: String, path: String) throws {
         let actualType: String
+        let debugInfo: String
         
+        // Determine the actual type with detailed debugging information
         switch value {
         case is String:
             actualType = "string"
-        case is NSNumber:
-            let number = value as! NSNumber
-            if CFNumberIsFloatType(number) {
+            debugInfo = "value: \"\(value)\""
+        case let number as NSNumber:
+            // Check if it's a boolean first (booleans are NSNumber in Objective-C)
+            // Use CFBooleanGetTypeID to distinguish actual booleans from numeric values
+            let objCType = String(cString: number.objCType)
+            if objCType == "c" || objCType == "B" {
+                // 'c' is char (used for BOOL in Objective-C), 'B' is C++ bool
+                // But we need to be careful: JSON numbers can also be 'c' type
+                // Check if the number is exactly 0 or 1 and came from JSON boolean context
+                if number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber {
+                    actualType = "boolean"
+                    debugInfo = "value: \(number.boolValue)"
+                } else if CFNumberIsFloatType(number) {
+                    actualType = "number"
+                    debugInfo = "value: \(number.doubleValue)"
+                } else {
+                    actualType = "integer"
+                    debugInfo = "value: \(number.intValue)"
+                }
+            } else if CFNumberIsFloatType(number) {
                 actualType = "number"
+                debugInfo = "value: \(number.doubleValue)"
             } else {
                 actualType = "integer"
+                debugInfo = "value: \(number.intValue)"
             }
-        case is Bool:
-            actualType = "boolean"
         case is [Any]:
+            let array = value as! [Any]
             actualType = "array"
+            debugInfo = "length: \(array.count)"
         case is [String: Any]:
+            let dict = value as! [String: Any]
             actualType = "object"
+            debugInfo = "keys: \(dict.keys.sorted().joined(separator: ", "))"
         case is NSNull:
             actualType = "null"
+            debugInfo = "null"
         default:
             actualType = "unknown"
+            debugInfo = "type: \(type(of: value))"
         }
         
         if expectedType == "number" && actualType == "integer" {
@@ -113,7 +138,7 @@ package struct JSONSchema {
         }
         
         if actualType != expectedType {
-            throw StringError("Type mismatch at \(path): expected \(expectedType), got \(actualType)")
+            throw StringError("Type mismatch at \(path): expected \(expectedType), got \(actualType) (\(debugInfo))")
         }
     }
     
@@ -145,7 +170,9 @@ package struct JSONSchema {
         }
         
         if !isValid {
-            throw StringError("Value at \(path) is not one of the allowed enum values")
+            let valueStr = describeValue(value)
+            let allowedStr = allowedValues.map { describeValue($0) }.joined(separator: ", ")
+            throw StringError("Value at \(path) is not one of the allowed enum values. Got: \(valueStr), allowed: [\(allowedStr)]")
         }
     }
     
@@ -155,8 +182,13 @@ package struct JSONSchema {
         }
         
         let range = NSRange(location: 0, length: value.utf16.count)
-        if regex.firstMatch(in: value, options: [], range: range) == nil {
-            throw StringError("String at \(path) does not match pattern: \(pattern)")
+        guard let match = regex.firstMatch(in: value, options: [], range: range) else {
+            throw StringError("String at \(path) does not match pattern: \(pattern). Value: \"\(value)\"")
+        }
+        
+        // Verify the match covers the entire string (JSON Schema pattern must match the whole string)
+        if match.range.location != 0 || match.range.length != value.utf16.count {
+            throw StringError("String at \(path) does not match pattern: \(pattern). Value: \"\(value)\"")
         }
     }
     
@@ -190,13 +222,13 @@ package struct JSONSchema {
     private func validateNumericConstraints(_ value: NSNumber, schema: [String: Any], path: String) throws {
         if let minimum = schema["minimum"] as? NSNumber {
             if value.compare(minimum) == .orderedAscending {
-                throw StringError("Value at \(path) is below minimum: \(minimum)")
+                throw StringError("Value at \(path) is below minimum: \(minimum). Got: \(value)")
             }
         }
         
         if let maximum = schema["maximum"] as? NSNumber {
             if value.compare(maximum) == .orderedDescending {
-                throw StringError("Value at \(path) is above maximum: \(maximum)")
+                throw StringError("Value at \(path) is above maximum: \(maximum). Got: \(value)")
             }
         }
     }
@@ -239,61 +271,46 @@ package struct JSONSchema {
         }
         
         if validCount != 1 {
+            let valueDesc = describeValue(value, maxLength: 200)
             if validCount == 0 {
-                let allErrors = validationErrors.joined(separator: "; ")
-                throw StringError("Value at \(path) does not match any oneOf schemas. Errors: \(allErrors)")
+                let allErrors = validationErrors.joined(separator: "\n  ")
+                throw StringError("Value at \(path) does not match any oneOf schemas.\nValue: \(valueDesc)\nErrors:\n  \(allErrors)")
             } else {
                 let matchingIndices = matchingSchemas.map(String.init).joined(separator: ", ")
-                throw StringError("Value at \(path) matches multiple oneOf schemas (expected exactly one). Matched \(validCount) schemas at indices: \(matchingIndices)")
+                throw StringError("Value at \(path) matches multiple oneOf schemas (expected exactly one). Matched \(validCount) schemas at indices: \(matchingIndices)\nValue: \(valueDesc)")
             }
         }
     }
     
     private func validateAnyOf(_ value: Any, schemas: [[String: Any]], path: String) throws {
-        for schema in schemas {
+        var errors: [String] = []
+        
+        for (index, schema) in schemas.enumerated() {
             do {
                 try validateValue(value, against: schema, path: path)
                 return
             } catch {
-                continue
+                errors.append("Schema \(index): \(error.localizedDescription)")
             }
         }
         
-        throw StringError("Value at \(path) does not match any anyOf schemas")
+        let valueDesc = describeValue(value, maxLength: 200)
+        let allErrors = errors.joined(separator: "\n  ")
+        throw StringError("Value at \(path) does not match any anyOf schemas.\nValue: \(valueDesc)\nErrors:\n  \(allErrors)")
     }
     
     private func resolveReference(components: [String], in schema: [String: Any]) -> [String: Any]? {
         var current: Any = schema
         
         for component in components {
-            if let dict = current as? [String: Any] {
-                current = dict[component] ?? [:]
-            } else {
+            guard let dict = current as? [String: Any],
+                  let next = dict[component] else {
                 return nil
             }
+            current = next
         }
         
         return current as? [String: Any]
-    }
-    
-    private func validateUnevaluatedProperties(_ object: [String: Any], schema: [String: Any], path: String) throws {
-        let properties = schema["properties"] as? [String: Any] ?? [:]
-        let allowedProperties = Set(properties.keys)
-        let requiredProperties = Set(schema["required"] as? [String] ?? [])
-        
-        var parentProperties: Set<String> = []
-        if path == "$" {
-            let rootProperties = self.schema["properties"] as? [String: Any] ?? [:]
-            parentProperties = Set(rootProperties.keys)
-        }
-        
-        let allAllowedProperties = allowedProperties.union(requiredProperties).union(parentProperties)
-        
-        for key in object.keys {
-            if !allAllowedProperties.contains(key) {
-                throw StringError("Unevaluated property '\(key)' not allowed at \(path)")
-            }
-        }
     }
     
     private func areEqual(_ lhs: Any, _ rhs: Any) -> Bool {
@@ -307,5 +324,44 @@ package struct JSONSchema {
             return lhsBool == rhsBool
         }
         return false
+    }
+    
+    /// Helper function to describe a value for debugging purposes
+    private func describeValue(_ value: Any, maxLength: Int = 100) -> String {
+        let description: String
+        
+        switch value {
+        case let str as String:
+            description = "\"\(str)\""
+        case let num as NSNumber:
+            let objCType = String(cString: num.objCType)
+            if objCType == "c" || objCType == "B" {
+                if num === kCFBooleanTrue as NSNumber || num === kCFBooleanFalse as NSNumber {
+                    description = "\(num.boolValue) (boolean)"
+                } else {
+                    description = "\(num.intValue) (integer)"
+                }
+            } else if CFNumberIsFloatType(num) {
+                description = "\(num.doubleValue) (number)"
+            } else {
+                description = "\(num.intValue) (integer)"
+            }
+        case let array as [Any]:
+            description = "[\(array.count) items]"
+        case let dict as [String: Any]:
+            let keys = dict.keys.sorted().prefix(5).joined(separator: ", ")
+            let more = dict.keys.count > 5 ? ", ..." : ""
+            description = "{keys: \(keys)\(more)}"
+        case is NSNull:
+            description = "null"
+        default:
+            description = "\(type(of: value))"
+        }
+        
+        if description.count > maxLength {
+            let truncated = description.prefix(maxLength - 3)
+            return "\(truncated)..."
+        }
+        return description
     }
 }
