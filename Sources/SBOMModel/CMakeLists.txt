@@ -9,17 +9,47 @@
 add_library(SBOMModel
   Core/SBOMCommit.swift
   Core/SBOMComponent.swift
-  Core/SBOMDependency.swift
+  Core/SBOMDependencies.swift
   Core/SBOMDocument.swift
   Core/SBOMLicense.swift
   Core/SBOMMetadata.swift
   Core/SBOMOriginator.swift
   Core/SBOMPerson.swift
-  Core/SBOMTool.swift)
+  Core/SBOMRelationship.swift
+  Core/SBOMSpec.swift
+  Core/SBOMTool.swift
+  Converter/CDXConverter.swift
+  Converter/SPDXConverter.swift
+  CycloneDX/CDXComponent.swift
+  CycloneDX/CDXConstants.swift
+  CycloneDX/CDXDependency.swift
+  CycloneDX/CDXDocument.swift
+  CycloneDX/CDXMetadata.swift
+  CycloneDX/CDXPedigree.swift
+  Encoder/SBOMEncoder.swift
+  Extractor/SBOMDependenciesExtractor.swift
+  Extractor/SBOMExtractor.swift
+  SPDX/SPDXAgent.swift
+  SPDX/SPDXConstants.swift
+  SPDX/SPDXCreationInfo.swift
+  SPDX/SPDXDocument.swift
+  SPDX/SPDXExternalIdentifier.swift
+  SPDX/SPDXGraph.swift
+  SPDX/SPDXPackage.swift
+  SPDX/SPDXRelationship.swift
+  SPDX/SPDXSBOM.swift
+  SPDX/SPDXType.swift
+  Utility/JSONSchema.swift
+  Utility/PURL.swift
+  Utility/SBOMID.swift)
 target_link_libraries(SBOMModel PUBLIC
   TSCBasic
   TSCUtility
-  Basics)
+  Basics
+  PackageCollections
+  PackageGraph
+  PackageModel
+  SourceControl)
 # NOTE(compnerd) workaround for CMake not setting up include flags yet
 set_target_properties(SBOMModel PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_Swift_MODULE_DIRECTORY})
