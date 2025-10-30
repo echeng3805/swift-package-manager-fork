@@ -30,7 +30,7 @@ package enum Spec: String, Codable, Equatable, CaseIterable, ExpressibleByArgume
     }
 
     package static func < (lhs: Spec, rhs: Spec) -> Bool {
-        return lhs.rawValue < rhs.rawValue
+        lhs.rawValue < rhs.rawValue
     }
 }
 
@@ -40,7 +40,7 @@ package struct SBOMSpec: Codable, Equatable {
 
     package init(
         type: Spec,
-        version: String,
+        version: String
     ) {
         self.type = type
         self.version = version

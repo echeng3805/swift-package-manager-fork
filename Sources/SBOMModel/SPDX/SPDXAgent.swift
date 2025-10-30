@@ -27,7 +27,7 @@ package struct SPDXAgent: Codable, Equatable {
         self.name = name
         self.creationInfoID = creationInfoID
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case id = "spdxId"
         case type

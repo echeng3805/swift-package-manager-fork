@@ -20,7 +20,7 @@ package struct SBOMTool: Codable, Equatable {
         id: String,
         name: String,
         version: String,
-        licenses: [SBOMLicense]? = nil,
+        licenses: [SBOMLicense]? = nil
     ) {
         self.id = id
         self.name = name

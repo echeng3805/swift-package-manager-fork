@@ -28,7 +28,7 @@ package struct CDXDocument: Codable, Equatable {
         version: Int,
         metadata: CDXMetadata,
         components: [CDXComponent]? = nil,
-        dependencies: [CDXDependency]? = nil,
+        dependencies: [CDXDependency]? = nil
     ) {
         self.schema = schema
         self.bomFormat = bomFormat
@@ -39,7 +39,7 @@ package struct CDXDocument: Codable, Equatable {
         self.components = components
         self.dependencies = dependencies
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case schema = "$schema"
         case bomFormat

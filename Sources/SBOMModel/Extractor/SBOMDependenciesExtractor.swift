@@ -10,23 +10,32 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
-import struct TSCBasic.StringError
-import TSCUtility
 import Basics
+import Foundation
 import PackageCollections
 import PackageGraph
 import PackageModel
 import SourceControl
+import struct TSCBasic.StringError
+import TSCUtility
 
-package func extractDependencies(graph: ModulesGraph, store: ResolvedPackagesStore, product: String? = nil, cache: SBOMVersionCache? = nil) async throws -> SBOMDependencies {
+package func extractDependencies(
+    graph: ModulesGraph,
+    store: ResolvedPackagesStore,
+    product: String? = nil,
+    cache: SBOMVersionCache? = nil
+) async throws -> SBOMDependencies {
     if let name = product {
         return try await extractProductDependencies(graph: graph, store: store, product: name, cache: cache)
     }
     return try await extractRootPackageDependencies(graph: graph, store: store, cache: cache)
 }
 
-private func extractRootPackageDependencies(graph: ModulesGraph, store: ResolvedPackagesStore, cache: SBOMVersionCache? = nil) async throws -> SBOMDependencies {
+private func extractRootPackageDependencies(
+    graph: ModulesGraph,
+    store: ResolvedPackagesStore,
+    cache: SBOMVersionCache? = nil
+) async throws -> SBOMDependencies {
     guard let rootPackage = graph.rootPackages.first else {
         throw StringError("No root package found in package graph, cannot extract dependencies")
     }
@@ -34,7 +43,12 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
     var components: [SBOMComponent] = []
     for package in graph.packages {
         for product in package.products {
-            let productComponent = try await extractComponent(product: product, graph: graph, store: store, cache: cache)
+            let productComponent = try await extractComponent(
+                product: product,
+                graph: graph,
+                store: store,
+                cache: cache
+            )
             components.append(productComponent)
         }
         let packageComponent = try await extractComponent(package: package, graph: graph, store: store, cache: cache)
@@ -59,7 +73,7 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
     dependencies.append(SBOMRelationship(
         id: "\(rootPackageID)-depends-on",
         parentID: rootPackageID,
-        childrenID: rootChildrenIDs,
+        childrenID: rootChildrenIDs
     ))
     // non-root packages depend on their own products
     for package in graph.packages {
@@ -75,7 +89,7 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
         dependencies.append(SBOMRelationship(
             id: "\(packageID)-depends-on",
             parentID: packageID,
-            childrenID: productIDs,
+            childrenID: productIDs
         ))
     }
     // products depend on other products
@@ -90,7 +104,9 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
                 case .product(let dependentProduct, _): // dependencies on products from other packages
                     dependencyID = await extractComponentID(from: dependentProduct)
                 case .module(let dependentModule, _): // dependencies within the same package
-                    if let containerProduct = graph.allProducts.first(where: { $0.modules.contains(id: dependentModule.id) }) {
+                    if let containerProduct = graph.allProducts
+                        .first(where: { $0.modules.contains(id: dependentModule.id) })
+                    {
                         dependencyID = await extractComponentID(from: containerProduct)
                     } else {
                         continue
@@ -106,7 +122,7 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
                 SBOMRelationship(
                     id: "\(productID)-depends-on",
                     parentID: productID,
-                    childrenID: childrenID,
+                    childrenID: childrenID
                 )
             )
         }
@@ -114,7 +130,12 @@ private func extractRootPackageDependencies(graph: ModulesGraph, store: Resolved
     return SBOMDependencies(components: components, relationships: dependencies)
 }
 
-private func extractProductDependencies(graph: ModulesGraph, store: ResolvedPackagesStore, product: String, cache: SBOMVersionCache? = nil) async throws -> SBOMDependencies {
+private func extractProductDependencies(
+    graph: ModulesGraph,
+    store: ResolvedPackagesStore,
+    product: String,
+    cache: SBOMVersionCache? = nil
+) async throws -> SBOMDependencies {
     guard let rootPackage = graph.rootPackages.first else {
         throw StringError("No root package found in package graph, cannot get product \(product) from root package")
     }
@@ -123,18 +144,18 @@ private func extractProductDependencies(graph: ModulesGraph, store: ResolvedPack
     }
     let rootPackageID = await extractComponentID(from: rootPackage)
     let targetID = await extractComponentID(from: targetProduct)
-    
+
     var components: [SBOMComponent] = []
     var dependencies: [SBOMRelationship] = []
 
     var dependenciesDict: [String: Set<String>] = [:] // parentID:childrenID
 
     func addComponent(_ component: SBOMComponent) {
-        if !components.map( { $0.id }).contains(component.id) {
+        if !components.map(\.id).contains(component.id) {
             components.append(component)
         }
     }
-    
+
     func trackDependency(parentID: String, childID: String) {
         var dependencies = dependenciesDict[parentID] ?? Set<String>()
         dependencies.insert(childID)
@@ -151,28 +172,57 @@ private func extractProductDependencies(graph: ModulesGraph, store: ResolvedPack
         }
     }
 
-    func processModuleDependency(from product: ResolvedProduct, dependentModule: ResolvedModule) async throws -> ResolvedProduct? {
-        guard let containerProduct = graph.allProducts.first(where: { $0.modules.contains(id: dependentModule.id) }) else {
+    func processModuleDependency(
+        from product: ResolvedProduct,
+        dependentModule: ResolvedModule
+    ) async throws -> ResolvedProduct? {
+        guard let containerProduct = graph.allProducts.first(where: { $0.modules.contains(id: dependentModule.id) })
+        else {
             return nil
         }
         return try await processProductDependency(from: product, dependentProduct: containerProduct)
     }
-    
-    func processProductDependency(from product: ResolvedProduct, dependentProduct: ResolvedProduct) async throws -> ResolvedProduct? {
-        let dependentProductComponent = try await extractComponent(product: dependentProduct, graph: graph, store: store, cache: cache)
+
+    func processProductDependency(
+        from product: ResolvedProduct,
+        dependentProduct: ResolvedProduct
+    ) async throws -> ResolvedProduct? {
+        let dependentProductComponent = try await extractComponent(
+            product: dependentProduct,
+            graph: graph,
+            store: store,
+            cache: cache
+        )
         addComponent(dependentProductComponent)
-        let processedProductComponent = try await extractComponent(product: product, graph: graph, store: store, cache: cache)
+        let processedProductComponent = try await extractComponent(
+            product: product,
+            graph: graph,
+            store: store,
+            cache: cache
+        )
         addComponent(processedProductComponent)
         // add product -> dependentProduct dependency
         trackDependency(parentID: processedProductComponent.id, childID: dependentProductComponent.id)
-        
-        if let dependentProductPackage = graph.packages.first(where: { $0.identity == dependentProduct.packageIdentity }) {
-            let dependentProductPackageComponent = try await extractComponent(package: dependentProductPackage, graph: graph, store: store, cache: cache)
+
+        if let dependentProductPackage = graph.packages
+            .first(where: { $0.identity == dependentProduct.packageIdentity })
+        {
+            let dependentProductPackageComponent = try await extractComponent(
+                package: dependentProductPackage,
+                graph: graph,
+                store: store,
+                cache: cache
+            )
             addComponent(dependentProductPackageComponent)
             // add dependentProductPackage -> dependentProduct dependency
             trackDependency(parentID: dependentProductPackageComponent.id, childID: dependentProductComponent.id)
             if let productPackage = graph.packages.first(where: { $0.identity == product.packageIdentity }) {
-                let productPackageComponent = try await extractComponent(package: productPackage, graph: graph, store: store, cache: cache)
+                let productPackageComponent = try await extractComponent(
+                    package: productPackage,
+                    graph: graph,
+                    store: store,
+                    cache: cache
+                )
                 addComponent(productPackageComponent)
                 // add productPackage -> dependentProductPackage dependency if they're from different packages
                 if product.packageIdentity != dependentProduct.packageIdentity {
@@ -190,21 +240,20 @@ private func extractProductDependencies(graph: ModulesGraph, store: ResolvedPack
         }
         return dependentProduct // needs to be processed
     }
-    
+
     func findProduct(byID productID: ResolvedProduct.ID) -> ResolvedProduct? {
-        return graph.allProducts[productID]
+        graph.allProducts[productID]
     }
-    
+
     func processDependencies(for product: ResolvedProduct) async throws -> [ResolvedProduct] {
         var productsToProcess = IdentifiableSet<ResolvedProduct>()
         for module in product.modules {
             for dependency in module.dependencies {
-                let toProcess: ResolvedProduct?
-                switch dependency {
+                let toProcess: ResolvedProduct? = switch dependency {
                 case .product(let dependentProduct, _): // dependencies on products from other packages
-                    toProcess = try await processProductDependency(from: product, dependentProduct: dependentProduct)
+                    try await processProductDependency(from: product, dependentProduct: dependentProduct)
                 case .module(let dependentModule, _): // dependencies within the same package
-                    toProcess = try await processModuleDependency(from: product, dependentModule: dependentModule)
+                    try await processModuleDependency(from: product, dependentModule: dependentModule)
                 }
                 if let productToProcess = toProcess {
                     productsToProcess.insert(productToProcess)
@@ -213,16 +262,16 @@ private func extractProductDependencies(graph: ModulesGraph, store: ResolvedPack
         }
         return Array(productsToProcess)
     }
-    
+
     // add rootPackage -> targetProduct dependency
-    addComponent(try await extractComponent(product: targetProduct, graph: graph, store: store, cache: cache))
-    addComponent(try await extractComponent(package: rootPackage, graph: graph, store: store, cache: cache))
+    try await addComponent(extractComponent(product: targetProduct, graph: graph, store: store, cache: cache))
+    try await addComponent(extractComponent(package: rootPackage, graph: graph, store: store, cache: cache))
     trackDependency(parentID: rootPackageID, childID: targetID)
-    
+
     var processedProducts = IdentifiableSet<ResolvedProduct>()
     processedProducts.insert(targetProduct)
     var productsToProcess = try await processDependencies(for: targetProduct)
-    
+
     while !productsToProcess.isEmpty {
         let currentProduct = productsToProcess.removeFirst()
         guard !processedProducts.contains(id: currentProduct.id) else {
@@ -230,7 +279,9 @@ private func extractProductDependencies(graph: ModulesGraph, store: ResolvedPack
         }
         processedProducts.insert(currentProduct)
         let transitiveDeps = try await processDependencies(for: currentProduct)
-        for dep in transitiveDeps where !processedProducts.contains(id: dep.id) && !productsToProcess.contains(where: { $0.id == dep.id }) {
+        for dep in transitiveDeps
+            where !processedProducts.contains(id: dep.id) && !productsToProcess.contains(where: { $0.id == dep.id })
+        {
             productsToProcess.append(dep)
         }
     }

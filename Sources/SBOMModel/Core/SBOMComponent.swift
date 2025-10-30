@@ -30,7 +30,7 @@ package struct SBOMComponent: Codable, Equatable {
 
         package init(
             revision: String,
-            commit: SBOMCommit? = nil,
+            commit: SBOMCommit? = nil
         ) {
             self.revision = revision
             self.commit = commit
@@ -46,7 +46,7 @@ package struct SBOMComponent: Codable, Equatable {
     package let description: String?
     package let scope: Scope?
     package let components: [SBOMComponent]?
-    
+
     package init(
         category: Category,
         id: String,
@@ -56,7 +56,7 @@ package struct SBOMComponent: Codable, Equatable {
         originator: SBOMOriginator,
         description: String? = nil,
         scope: Scope?,
-        components: [SBOMComponent]? = nil,
+        components: [SBOMComponent]? = nil
     ) {
         self.category = category
         self.id = id

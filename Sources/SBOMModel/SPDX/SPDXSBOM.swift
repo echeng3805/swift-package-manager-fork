@@ -30,7 +30,7 @@ package struct SPDXSBOM: Codable, Equatable {
         self.profileConformance = profileConformance
         self.rootElementIDs = rootElementIDs
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case id = "spdxId"
         case type

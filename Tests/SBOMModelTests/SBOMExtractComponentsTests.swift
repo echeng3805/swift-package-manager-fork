@@ -10,16 +10,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Testing
-import Foundation
-import Basics
-import PackageModel
-import PackageGraph
-@testable import SBOMModel
 import _InternalTestSupport
+import Basics
+import Foundation
+import PackageGraph
+import PackageModel
+@testable import SBOMModel
+import Testing
 
 struct SBOMExtractComponentsTests {
-    
     struct TestExpectations {
         let totalComponentCount: Int
         let expectedPackageIds: Set<String>
@@ -28,37 +27,37 @@ struct SBOMExtractComponentsTests {
         let expectedRootProductNames: Set<String>
         let expectedDependencyProductCount: Int
     }
-    
+
     private static let spmExpectations = TestExpectations(
         totalComponentCount: 42,
         expectedPackageIds: Set([
             "SwiftPM", "swift-system", "swift-collections", "swift-argument-parser",
             "swift-llbuild", "swift-tools-support-core", "swift-driver",
-            "swift-crypto", "swift-certificates"
+            "swift-crypto", "swift-certificates",
         ]),
         rootPackagePrefix: "SwiftPM:",
         expectedRootProductCount: 10,
         expectedRootProductNames: Set([
             "PackageCollectionsModel", "SwiftPM-auto", "PackageDescription",
             "PackagePlugin", "XCBuildSupport", "SwiftPMDataModel-auto", "SwiftPMPackageCollections",
-            "AppleProductTypes", "SwiftPM", "SwiftPMDataModel"
+            "AppleProductTypes", "SwiftPM", "SwiftPMDataModel",
         ]),
         expectedDependencyProductCount: 32
     )
-    
+
     private static let swiftlyExpectations = TestExpectations(
         totalComponentCount: 17,
         expectedPackageIds: Set([
             "swiftly", "swift-argument-parser", "async-http-client",
             "swift-openapi-async-http-client", "swift-nio", "swift-tools-support-core",
-            "swift-openapi-runtime", "swift-system"
+            "swift-openapi-runtime", "swift-system",
         ]),
         rootPackagePrefix: "swiftly:",
         expectedRootProductCount: 2,
         expectedRootProductNames: Set(["swiftly", "test-swiftly"]),
         expectedDependencyProductCount: 15
     )
-    
+
     private func verifyComponents(
         components: [SBOMComponent],
         graph: ModulesGraph,
@@ -66,9 +65,9 @@ struct SBOMExtractComponentsTests {
     ) {
         #expect(components.count == expectations.totalComponentCount)
 
-        let graphPackages = Set(graph.packages.map { $0.identity.description })
+        let graphPackages = Set(graph.packages.map(\.identity.description))
         let packageComponents = components.filter { !$0.id.contains(":") }
-        let packageComponentIds = Set(packageComponents.map { $0.id })
+        let packageComponentIds = Set(packageComponents.map(\.id))
         #expect(packageComponentIds == graphPackages, "All packages from graph should be converted to components")
 
         let componentPackageIds = Set(components.compactMap { component in
@@ -78,7 +77,7 @@ struct SBOMExtractComponentsTests {
 
         let rootProducts = components.filter { $0.id.hasPrefix(expectations.rootPackagePrefix) }
         #expect(rootProducts.count == expectations.expectedRootProductCount)
-        let rootProductNames = Set(rootProducts.map { $0.name })
+        let rootProductNames = Set(rootProducts.map(\.name))
         #expect(rootProductNames == expectations.expectedRootProductNames)
 
         let dependencyProducts = components.filter { !$0.id.hasPrefix(expectations.rootPackagePrefix) }
@@ -89,17 +88,23 @@ struct SBOMExtractComponentsTests {
             #expect(!component.name.isEmpty, "Component name should not be empty")
             #expect(!component.purl.isEmpty, "Component PURL should not be empty")
             #expect(!component.version.revision.isEmpty, "Component version should not be empty")
-            #expect(component.category == .application || component.category == .library, "Component category should be application or library")
-            #expect(component.scope == .runtime || component.scope == .test, "Component scope should be runtime or test")
+            #expect(
+                component.category == .application || component.category == .library,
+                "Component category should be application or library"
+            )
+            #expect(
+                component.scope == .runtime || component.scope == .test,
+                "Component scope should be runtime or test"
+            )
         }
     }
-    
+
     @Test("extractComponents with sample SPM ModulesGraph")
     func extractComponentsFromSPMModulesGraph() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
-        verifyComponents(components: components, graph: graph, expectations: Self.spmExpectations)
+        self.verifyComponents(components: components, graph: graph, expectations: Self.spmExpectations)
     }
 
     @Test("extractComponents with sample Swiftly ModulesGraph")
@@ -107,9 +112,9 @@ struct SBOMExtractComponentsTests {
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
-        verifyComponents(components: components, graph: graph, expectations: Self.swiftlyExpectations)
+        self.verifyComponents(components: components, graph: graph, expectations: Self.swiftlyExpectations)
     }
-    
+
     @Test("extractComponents fails with empty root packages")
     func extractComponentsFailsWithEmptyRootPackages() async throws {
         let emptyGraph = try ModulesGraph(
@@ -124,103 +129,125 @@ struct SBOMExtractComponentsTests {
             _ = try await SBOMModel.extractDependencies(graph: emptyGraph, store: store).components
         }
     }
-    
+
     @Test("extractComponents verifies commit extraction for non-main branch dependency")
     func extractComponentsForNonMainBranch() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
-        
+
         let swiftLLBuildComponent = components.first { component in
             component.id == "swift-llbuild" || component.name == "swift-llbuild"
         }
-        
+
         let component = try #require(swiftLLBuildComponent, "swift-llbuild component should be found")
-        
-        let commits = try #require(component.originator.commits, "swift-llbuild component should have commit information")
+
+        let commits = try #require(
+            component.originator.commits,
+            "swift-llbuild component should have commit information"
+        )
         #expect(!commits.isEmpty, "swift-llbuild should have at least one commit")
-        
+
         let commit = commits[0]
         #expect(!commit.sha.isEmpty, "Commit SHA should not be empty")
         #expect(commit.repository == "https://github.com/swiftlang/swift-llbuild.git", "Repository URL should match")
-        
+
         let expectedMockRevision = SBOMTestStore.generateMockRevision(for: "swift-llbuild")
         #expect(commit.sha == expectedMockRevision, "Commit SHA should match the mock revision for swift-llbuild")
-        
-        #expect(component.version.revision == commit.sha, "Component version should match commit SHA for branch-based dependency")
+
+        #expect(
+            component.version.revision == commit.sha,
+            "Component version should match commit SHA for branch-based dependency"
+        )
     }
-    
+
     @Test("extractComponents uses version tag when available for version, but keeps pedigree as commit sha")
     func extractComponentsUsesVersionTagWhenAvailable() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
-        
+
         // Find a version-based dependency (swift-argument-parser uses version "1.5.1")
         let argParserComponent = components.first { component in
             component.id == "swift-argument-parser" || component.name == "swift-argument-parser"
         }
-        
+
         let versionComponent = try #require(argParserComponent, "swift-argument-parser component should be found")
-        
-        let commits = try #require(versionComponent.originator.commits, "swift-argument-parser component should have commit information")
+
+        let commits = try #require(
+            versionComponent.originator.commits,
+            "swift-argument-parser component should have commit information"
+        )
         #expect(!commits.isEmpty, "swift-argument-parser should have at least one commit")
-        
+
         let commit = commits[0]
         #expect(!commit.sha.isEmpty, "Commit SHA should not be empty")
-        #expect(commit.repository == "https://github.com/apple/swift-argument-parser.git", "Repository URL should match")
-        
-        #expect(versionComponent.version.revision == "1.5.1", "Component version should be the version tag for version-based dependency")
-        #expect(versionComponent.version.revision != commit.sha, "Component version should not be the commit SHA for version-based dependency")
+        #expect(
+            commit.repository == "https://github.com/apple/swift-argument-parser.git",
+            "Repository URL should match"
+        )
+
+        #expect(
+            versionComponent.version.revision == "1.5.1",
+            "Component version should be the version tag for version-based dependency"
+        )
+        #expect(
+            versionComponent.version.revision != commit.sha,
+            "Component version should not be the commit SHA for version-based dependency"
+        )
     }
 
     @Test("extractComponents with product filter")
     func extractComponentsWithProductFilter() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel.extractDependencies(graph: graph, store: store, product: "SwiftPMDataModel").components
+        let components = try await SBOMModel
+            .extractDependencies(graph: graph, store: store, product: "SwiftPMDataModel").components
         let allComponents = try await SBOMModel.extractDependencies(graph: graph, store: store).components
-        
+
         #expect(components.count < allComponents.count)
-        
-        let componentIDs = Set(components.map { $0.id })
+
+        let componentIDs = Set(components.map(\.id))
         #expect(components.count > 0)
         #expect(components.count < allComponents.count)
-        
+
         let expectedComponentIDs: Set<String> = [
             "SwiftPM:SwiftPMDataModel",
             "SwiftPM",
         ]
         #expect(componentIDs == expectedComponentIDs)
-        
-        let componentIDsList = components.map { $0.id }
+
+        let componentIDsList = components.map(\.id)
         let uniqueIDs = Set(componentIDsList)
         #expect(componentIDsList.count == uniqueIDs.count)
     }
-    
+
     @Test("Root package components should not have 'unknown' versions")
     func rootPackageComponentsShouldNotHaveUnknownVersions() async throws {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
-        
+
         let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
-        
+
         let rootPackage = try #require(graph.rootPackages.first)
         let rootPackageID = rootPackage.identity.description
 
         let actualRevision = try spmRepo.getCurrentRevision().identifier
-        
+
         let rootComponents = components.filter { component in
             component.id == rootPackageID || component.id.hasPrefix("\(rootPackageID):")
         }
-        
+
         #expect(!rootComponents.isEmpty, "Should have root package components")
-        
+
         for component in rootComponents {
             #expect(component.version.revision == actualRevision)
-            #expect(component.originator.commits != nil, "Root package component '\(component.id)' should have commit information")
+            #expect(
+                component.originator.commits != nil,
+                "Root package component '\(component.id)' should have commit information"
+            )
             if let commits = component.originator.commits {
                 #expect(!commits.isEmpty)
                 #expect(commits[0].sha == actualRevision)
@@ -228,4 +255,3 @@ struct SBOMExtractComponentsTests {
         }
     }
 }
-

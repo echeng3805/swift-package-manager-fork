@@ -10,26 +10,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Testing
-import Foundation
-import struct TSCBasic.StringError
-@testable import SBOMModel
 import _InternalTestSupport
+import Foundation
+@testable import SBOMModel
+import Testing
+import struct TSCBasic.StringError
 
 struct SBOMExtractTests {
-
     @Test("extractSBOM with product filter for SwiftPM")
     func extractSBOMWithProductFilterForSwiftPM() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        
+
         let productName = "SwiftPMPackageCollections"
         let sbom = try await SBOMModel.extractSBOM(spec: .cyclonedx, graph: graph, store: store, product: productName)
-        
+
         #expect(sbom.primaryComponent.name == productName)
         #expect(sbom.primaryComponent.id == "SwiftPM:\(productName)")
         #expect(sbom.primaryComponent.category == .library)
-        
+
         let fullSbom = try await SBOMModel.extractSBOM(spec: .cyclonedx, graph: graph, store: store)
         #expect(fullSbom.primaryComponent.name == "SwiftPM")
         #expect(fullSbom.primaryComponent.id == "SwiftPM")
@@ -41,15 +40,20 @@ struct SBOMExtractTests {
         #expect(sbom.dependencies.relationships?.count == 2)
         #expect(fullSbom.dependencies.relationships?.count == 10)
 
-        let componentIDs = Set(sbom.dependencies.components.map { $0.id })
-        
+        let componentIDs = Set(sbom.dependencies.components.map(\.id))
+
         #expect(componentIDs.contains("SwiftPM:SwiftPMPackageCollections"), "should contain target product")
         #expect(componentIDs.contains("SwiftPM"), "should contain root package")
         #expect(componentIDs.contains("SwiftPM:PackageCollectionsModel"), "should contain dependency product")
 
-        let swiftPMDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "SwiftPM" }))
-        #expect(Set(swiftPMDependency.childrenID) == Set(["SwiftPM:PackageCollectionsModel", "SwiftPM:SwiftPMPackageCollections"]))
-        let packageCollectionsDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "SwiftPM:SwiftPMPackageCollections" }))
+        let swiftPMDependency = try #require(sbom.dependencies.relationships?
+            .first(where: { $0.parentID == "SwiftPM" }))
+        #expect(Set(swiftPMDependency.childrenID) == Set([
+            "SwiftPM:PackageCollectionsModel",
+            "SwiftPM:SwiftPMPackageCollections",
+        ]))
+        let packageCollectionsDependency = try #require(sbom.dependencies.relationships?
+            .first(where: { $0.parentID == "SwiftPM:SwiftPMPackageCollections" }))
         #expect(packageCollectionsDependency.childrenID == ["SwiftPM:PackageCollectionsModel"])
     }
 
@@ -57,10 +61,10 @@ struct SBOMExtractTests {
     func extractSBOMWithProductFilterForSwiftly() async throws {
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
-        
+
         let productName = "swiftly"
         let sbom = try await SBOMModel.extractSBOM(spec: .spdx, graph: graph, store: store, product: productName)
-        
+
         #expect(sbom.primaryComponent.name == productName)
         #expect(sbom.primaryComponent.id == "swiftly:swiftly")
         #expect(sbom.primaryComponent.category == .application)
@@ -76,20 +80,37 @@ struct SBOMExtractTests {
         #expect(sbom.dependencies.relationships?.count == 5)
         #expect(fullSbom.dependencies.relationships?.count == 10)
 
-        let componentIDs = Set(sbom.dependencies.components.map { $0.id })
+        let componentIDs = Set(sbom.dependencies.components.map(\.id))
         #expect(componentIDs.contains("swiftly:swiftly"), "should contain target product")
         #expect(componentIDs.contains("swiftly"), "should contain root package")
-        #expect(componentIDs.contains("swift-tools-support-core:SwiftToolsSupport-auto"), "should contain a dependency product")
+        #expect(
+            componentIDs.contains("swift-tools-support-core:SwiftToolsSupport-auto"),
+            "should contain a dependency product"
+        )
 
-        let swiftlyDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swiftly" }))
-        #expect(Set(swiftlyDependency.childrenID) == Set(["swiftly:swiftly", "swift-tools-support-core", "swift-argument-parser", "swift-system"]))
-        let swiftlyProductDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swiftly:swiftly" }))
-        #expect(Set(swiftlyProductDependency.childrenID) == Set(["swift-system:SystemPackage", "swift-tools-support-core:SwiftToolsSupport-auto", "swift-argument-parser:ArgumentParser"]))
-        let swiftSystemDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swift-system" }))
+        let swiftlyDependency = try #require(sbom.dependencies.relationships?
+            .first(where: { $0.parentID == "swiftly" }))
+        #expect(Set(swiftlyDependency.childrenID) == Set([
+            "swiftly:swiftly",
+            "swift-tools-support-core",
+            "swift-argument-parser",
+            "swift-system",
+        ]))
+        let swiftlyProductDependency = try #require(sbom.dependencies.relationships?
+            .first(where: { $0.parentID == "swiftly:swiftly" }))
+        #expect(Set(swiftlyProductDependency.childrenID) == Set([
+            "swift-system:SystemPackage",
+            "swift-tools-support-core:SwiftToolsSupport-auto",
+            "swift-argument-parser:ArgumentParser",
+        ]))
+        let swiftSystemDependency = try #require(sbom.dependencies.relationships?
+            .first(where: { $0.parentID == "swift-system" }))
         #expect(Set(swiftSystemDependency.childrenID) == Set(["swift-system:SystemPackage"]))
-        let swiftArgumentParserDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swift-argument-parser" }))
+        let swiftArgumentParserDependency = try #require(sbom.dependencies.relationships?
+            .first(where: { $0.parentID == "swift-argument-parser" }))
         #expect(Set(swiftArgumentParserDependency.childrenID) == Set(["swift-argument-parser:ArgumentParser"]))
-        let swiftToolsSupportDependency = try #require(sbom.dependencies.relationships?.first(where: { $0.parentID == "swift-tools-support-core" }))
+        let swiftToolsSupportDependency = try #require(sbom.dependencies.relationships?
+            .first(where: { $0.parentID == "swift-tools-support-core" }))
         #expect(Set(swiftToolsSupportDependency.childrenID) == Set(["swift-tools-support-core:SwiftToolsSupport-auto"]))
     }
 
@@ -97,10 +118,15 @@ struct SBOMExtractTests {
     func extractSBOMWithInvalidProductNameThrowsError() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        
+
         // Try to extract SBOM for a non-existent product
         await #expect(throws: StringError.self) {
-            _ = try await SBOMModel.extractSBOM(spec: .cyclonedx, graph: graph, store: store, product: "NonExistentProduct")
+            _ = try await SBOMModel.extractSBOM(
+                spec: .cyclonedx,
+                graph: graph,
+                store: store,
+                product: "NonExistentProduct"
+            )
         }
     }
 }

@@ -10,62 +10,61 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Testing
 import Foundation
-import struct TSCBasic.StringError
 @testable import SBOMModel
+import Testing
+import struct TSCBasic.StringError
 
 struct SBOMExtractMetadataTests {
-
     struct ExtractMetadataTestCase {
         let input: Spec
         let expectedSpecType: Spec
         let expectedSpecVersion: String
     }
-    
+
     static let metadataTestCases: [ExtractMetadataTestCase] = [
         ExtractMetadataTestCase(
             input: .cyclonedx,
             expectedSpecType: .cyclonedx1,
-            expectedSpecVersion: CDXConstants.cyclonedx1SpecVersion,
+            expectedSpecVersion: CDXConstants.cyclonedx1SpecVersion
         ),
         ExtractMetadataTestCase(
             input: .cyclonedx1,
             expectedSpecType: .cyclonedx1,
-            expectedSpecVersion: CDXConstants.cyclonedx1SpecVersion,
+            expectedSpecVersion: CDXConstants.cyclonedx1SpecVersion
         ),
         ExtractMetadataTestCase(
             input: .spdx,
             expectedSpecType: .spdx3,
-            expectedSpecVersion: SPDXConstants.spdx3SpecVersion,
+            expectedSpecVersion: SPDXConstants.spdx3SpecVersion
         ),
         ExtractMetadataTestCase(
             input: .spdx3,
             expectedSpecType: .spdx3,
-            expectedSpecVersion:  SPDXConstants.spdx3SpecVersion,
-        )
+            expectedSpecVersion: SPDXConstants.spdx3SpecVersion
+        ),
     ]
-    
+
     @Test("extractMetadata good weather", arguments: metadataTestCases)
     func extractMetadataParameterized(testCase: ExtractMetadataTestCase) async throws {
         let metadata = try await SBOMModel.extractMetadata(testCase.input)
-        
+
         #expect(metadata.spec.type == testCase.expectedSpecType)
         #expect(metadata.spec.version == testCase.expectedSpecVersion)
-        
+
         let timestamp = try #require(metadata.timestamp)
         #expect(!timestamp.isEmpty)
-        
+
         let formatter = ISO8601DateFormatter()
-        let _ = try #require(formatter.date(from: timestamp))
-        
+        _ = try #require(formatter.date(from: timestamp))
+
         let creators = try #require(metadata.creators)
         #expect(creators.count == 1)
         let creator = creators[0]
         #expect(!creator.id.isEmpty)
         #expect(creator.name == "swift-package-manager")
         #expect(!creator.version.isEmpty)
-        
+
         let licenses = try #require(creator.licenses)
         #expect(licenses.count == 1)
         let license = licenses[0]

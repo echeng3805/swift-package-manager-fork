@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 package struct SPDXPackage: Codable, Equatable {
-
     package enum Purpose: String, Codable, Equatable {
         case application
         case framework
@@ -27,7 +26,7 @@ package struct SPDXPackage: Codable, Equatable {
     package let version: String
     package let creationInfoID: String
     package let description: String?
-    
+
     package init(
         id: String,
         type: SPDXType,
@@ -36,7 +35,7 @@ package struct SPDXPackage: Codable, Equatable {
         name: String,
         version: String,
         creationInfoID: String,
-        description: String?,
+        description: String?
     ) {
         self.id = id
         self.type = type
@@ -47,7 +46,7 @@ package struct SPDXPackage: Codable, Equatable {
         self.creationInfoID = creationInfoID
         self.description = description
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case id = "spdxId"
         case type
@@ -56,6 +55,6 @@ package struct SPDXPackage: Codable, Equatable {
         case name
         case version = "software_packageVersion"
         case creationInfoID = "creationInfo"
-        case description 
+        case description
     }
 }

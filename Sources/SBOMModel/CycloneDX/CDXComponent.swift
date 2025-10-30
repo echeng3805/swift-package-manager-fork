@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 package struct CDXComponent: Codable, Equatable {
-    
     package enum Category: String, Codable, Equatable {
         case application
         case framework
@@ -53,7 +52,7 @@ package struct CDXComponent: Codable, Equatable {
         self.components = components
         self.pedigree = pedigree
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case type
         case bomRef = "bom-ref"

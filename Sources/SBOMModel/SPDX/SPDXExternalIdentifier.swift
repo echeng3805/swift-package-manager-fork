@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 package struct SPDXExternalIdentifier: Codable, Equatable {
-
     package enum Category: String, Codable, Equatable {
         case gitoid
     }
@@ -25,14 +24,14 @@ package struct SPDXExternalIdentifier: Codable, Equatable {
         identifier: String,
         identifierLocator: [String],
         type: SPDXType,
-        category: Category,
+        category: Category
     ) {
         self.identifier = identifier
         self.identifierLocator = identifierLocator
         self.type = type
         self.category = category
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case identifier
         case identifierLocator

@@ -16,7 +16,7 @@ package struct SBOMDependencies: Codable, Equatable {
 
     package init(
         components: [SBOMComponent],
-        relationships: [SBOMRelationship]? = nil,
+        relationships: [SBOMRelationship]? = nil
     ) {
         self.components = components
         self.relationships = relationships

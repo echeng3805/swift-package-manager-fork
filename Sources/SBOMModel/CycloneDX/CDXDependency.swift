@@ -10,7 +10,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 package struct CDXDependency: Codable, Equatable {
     package let ref: String
     package let dependsOn: [String]
@@ -22,7 +21,7 @@ package struct CDXDependency: Codable, Equatable {
         self.ref = ref
         self.dependsOn = dependsOn
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case ref
         case dependsOn

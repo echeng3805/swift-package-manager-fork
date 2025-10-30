@@ -14,12 +14,12 @@ package struct CDXAction: Codable, Equatable {
     package let timestamp: String?
     package let name: String?
     package let email: String?
-    
+
     package init(
         timestamp: String? = nil,
         name: String? = nil,
-        email: String? = nil)
-    {
+        email: String? = nil
+    ) {
         self.timestamp = timestamp
         self.name = name
         self.email = email
@@ -31,7 +31,7 @@ package struct CDXCommit: Codable, Equatable {
     package let url: String?
     package let author: CDXAction?
     package let message: String?
-    
+
     package init(
         uid: String? = nil,
         url: String? = nil,

@@ -12,7 +12,7 @@
 
 package struct CDXTools: Codable, Equatable {
     package let components: [CDXComponent]
-    
+
     package init(components: [CDXComponent]) {
         self.components = components
     }

@@ -22,7 +22,7 @@ package struct SBOMDocument: Codable, Equatable {
         metadata: SBOMMetadata,
         primaryComponent: SBOMComponent,
         dependencies: SBOMDependencies,
-        licenses: [SBOMLicense]? = nil,
+        licenses: [SBOMLicense]? = nil
     ) {
         self.id = id
         self.metadata = metadata

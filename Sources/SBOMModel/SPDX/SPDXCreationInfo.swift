@@ -22,7 +22,7 @@ package struct SPDXCreationInfo: Codable, Equatable {
         type: SPDXType,
         specVersion: String? = nil,
         createdBy: [String],
-        created: String,
+        created: String
     ) {
         self.id = id
         self.type = type
@@ -30,7 +30,7 @@ package struct SPDXCreationInfo: Codable, Equatable {
         self.createdBy = createdBy
         self.created = created
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case id = "@id"
         case type

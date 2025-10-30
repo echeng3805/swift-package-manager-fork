@@ -14,18 +14,18 @@ import Foundation
 
 package struct SPDXGraphElement: Encodable {
     private let value: any Encodable
-    
-    package init<T: Encodable>(_ value: T) {
+
+    package init(_ value: some Encodable) {
         self.value = value
     }
-    
+
     package func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        try container.encode(value)
+        try container.encode(self.value)
     }
-    
+
     package func getValue<T>() -> T? {
-        return value as? T
+        self.value as? T
     }
 }
 
@@ -40,7 +40,7 @@ package struct SPDXGraph: Encodable {
         self.context = context
         self.graph = graph
     }
-    
+
     package init(
         context: String,
         graph: [Any]
@@ -53,7 +53,7 @@ package struct SPDXGraph: Encodable {
             return nil
         }
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case context = "@context"
         case graph = "@graph"

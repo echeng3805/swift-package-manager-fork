@@ -10,25 +10,24 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Testing
+import _InternalTestSupport
 import Foundation
 import PackageGraph
 @testable import SBOMModel
-import _InternalTestSupport
+import Testing
 
 struct SBOMExtractDependenciesTests {
-
     private func verifyDependencies(graph: ModulesGraph, store: ResolvedPackagesStore) async throws {
         let dependencies = try await #require(SBOMModel.extractDependencies(graph: graph, store: store).relationships)
         let rootPackage = try #require(graph.rootPackages.first)
         let rootPackageID = await extractComponentID(from: rootPackage)
-        let packageIDs = graph.packages.map { $0.identity.description }
+        let packageIDs = graph.packages.map(\.identity.description)
 
         #expect(!dependencies.isEmpty)
 
-        let parentIDs = dependencies.map { $0.parentID }
+        let parentIDs = dependencies.map(\.parentID)
         #expect(parentIDs.count == Set(parentIDs).count, "Parent IDs should be unique")
-        
+
         for dependency in dependencies {
             #expect(!dependency.id.isEmpty, "Dependency ID should not be empty")
             #expect(!dependency.parentID.isEmpty, "Parent ID should not be empty")
@@ -45,32 +44,30 @@ struct SBOMExtractDependenciesTests {
                         #expect(packageIDs.contains(child))
                     }
                 }
-            }
-            else if packageIDs.contains(dependency.parentID) { // package comp, should have package-to-product deps
+            } else if packageIDs.contains(dependency.parentID) { // package comp, should have package-to-product deps
                 for child in dependency.childrenID {
                     #expect(child.hasPrefix(dependency.parentID))
                 }
-            }
-            else {  // product comp, should have product-to-product deps
+            } else { // product comp, should have product-to-product deps
                 for child in dependency.childrenID {
                     #expect(child.contains(":"), "child ID should be product")
                 }
             }
         }
     }
-    
+
     @Test("extractDependencies with sample SPM ModulesGraph")
     func extractDependenciesFromSPMModulesGraph() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        try await verifyDependencies(graph: graph, store: store)   
+        try await self.verifyDependencies(graph: graph, store: store)
     }
 
     @Test("extractDependencies with sample Swiftly ModulesGraph")
     func extractDependenciesFromSwiftlyModulesGraph() async throws {
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
-        try await verifyDependencies(graph: graph, store: store)
+        try await self.verifyDependencies(graph: graph, store: store)
     }
 
     @Test("extractDependencies with product filter SwiftPMPackageCollections")
@@ -79,12 +76,20 @@ struct SBOMExtractDependenciesTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         let productName = "SwiftPMPackageCollections"
-        let dependencies = try await #require(SBOMModel.extractDependencies(graph: graph, store: store, product: productName).relationships)
+        let dependencies = try await #require(SBOMModel.extractDependencies(
+            graph: graph,
+            store: store,
+            product: productName
+        ).relationships)
         #expect(dependencies.count == 2)
 
         let swiftPMDependency = try #require(dependencies.first(where: { $0.parentID == "SwiftPM" }))
-        #expect(Set(swiftPMDependency.childrenID) == Set(["SwiftPM:PackageCollectionsModel", "SwiftPM:SwiftPMPackageCollections"]))
-        let packageCollectionsDependency = try #require(dependencies.first(where: { $0.parentID == "SwiftPM:SwiftPMPackageCollections" }))
+        #expect(Set(swiftPMDependency.childrenID) == Set([
+            "SwiftPM:PackageCollectionsModel",
+            "SwiftPM:SwiftPMPackageCollections",
+        ]))
+        let packageCollectionsDependency = try #require(dependencies
+            .first(where: { $0.parentID == "SwiftPM:SwiftPMPackageCollections" }))
         #expect(packageCollectionsDependency.childrenID == ["SwiftPM:PackageCollectionsModel"])
     }
 }

@@ -11,11 +11,10 @@
 //===----------------------------------------------------------------------===//
 
 package struct SBOMOriginator: Codable, Equatable {
-
     package let commits: [SBOMCommit]?
 
     package init(
-        commits: [SBOMCommit]? = nil,
+        commits: [SBOMCommit]? = nil
     ) {
         self.commits = commits
     }

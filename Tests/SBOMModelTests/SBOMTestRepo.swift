@@ -10,38 +10,53 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
-import Basics
-import SourceControl
 import _InternalTestSupport
+import Basics
+import Foundation
+import SourceControl
 import class TSCBasic.Process
 
-struct SBOMTestRepo {
-    
+enum SBOMTestRepo {
     static func setupSPMTestRepo() throws -> (GitRepository, AbsolutePath) {
         let uniqueID = UUID().uuidString
         let path = AbsolutePath("/tmp/SwiftPM-mock-\(uniqueID)")
-        
+
         try localFileSystem.createDirectory(path, recursive: true)
         initGitRepo(path, addFile: true)
 
-        try Process.checkNonZeroExit(args: "git", "-C", path.pathString, "remote", "add", "origin", SBOMTestStore.swiftPMURL)
-        
+        try Process.checkNonZeroExit(
+            args: "git",
+            "-C",
+            path.pathString,
+            "remote",
+            "add",
+            "origin",
+            SBOMTestStore.swiftPMURL
+        )
+
         return (GitRepository(path: path), path)
     }
-    
+
     static func setupSwiftlyTestRepo() throws -> (GitRepository, AbsolutePath) {
         let uniqueID = UUID().uuidString
         let path = AbsolutePath("/tmp/swiftly-mock-\(uniqueID)")
-        
+
         try localFileSystem.createDirectory(path, recursive: true)
         initGitRepo(path, tag: "v1.0.0", addFile: true)
-        
-        try Process.checkNonZeroExit(args: "git", "-C", path.pathString, "remote", "add", "origin", SBOMTestStore.swiftlyURL)
-        
+
+        try Process.checkNonZeroExit(
+            args: "git",
+            "-C",
+            path.pathString,
+            "remote",
+            "add",
+            "origin",
+            SBOMTestStore.swiftlyURL
+        )
+
         return (GitRepository(path: path), path)
     }
-    
+
     /// Clean up a test repository directory
     static func cleanup(_ path: AbsolutePath) throws {
         if localFileSystem.exists(path) {

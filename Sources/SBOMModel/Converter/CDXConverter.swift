@@ -16,33 +16,33 @@ import struct TSCBasic.StringError
 private func convertToCDXScope(from scope: SBOMComponent.Scope) async -> CDXComponent.Scope {
     switch scope {
     case .runtime:
-        return .required
+        .required
     case .optional:
-        return .optional
+        .optional
     case .test:
-        return .excluded
+        .excluded
     }
 }
 
 private func convertToCDXCategory(from category: SBOMComponent.Category) async -> CDXComponent.Category {
     switch category {
     case .application:
-        return .application
+        .application
     case .framework:
-        return .framework
+        .framework
     case .library:
-        return .library
+        .library
     case .file:
-        return .file
+        .file
     }
 }
 
 package func convertToCDXSchema(from spec: SBOMSpec) async throws -> String {
     switch spec.type {
-        case .cyclonedx, .cyclonedx1:
-            return CDXConstants.cyclonedx1Schema
-        case .spdx, .spdx3: 
-            throw StringError("expected cyclonedx spec")
+    case .cyclonedx, .cyclonedx1:
+        return CDXConstants.cyclonedx1Schema
+    case .spdx, .spdx3:
+        throw StringError("expected cyclonedx spec")
     }
 }
 
@@ -50,7 +50,7 @@ package func convertToCDXPedigree(from originator: SBOMOriginator) async throws 
     guard let sbomCommits = originator.commits else {
         return CDXPedigree(commits: nil)
     }
-    
+
     let cdxCommits = sbomCommits.map { sbomCommit in
         let cdxAuthor: CDXAction? = sbomCommit.authors?.first.map { sbomPerson in
             CDXAction(
@@ -59,7 +59,7 @@ package func convertToCDXPedigree(from originator: SBOMOriginator) async throws 
                 email: sbomPerson.email
             )
         }
-        
+
         return CDXCommit(
             uid: sbomCommit.sha,
             url: sbomCommit.repository,
@@ -67,25 +67,25 @@ package func convertToCDXPedigree(from originator: SBOMOriginator) async throws 
             message: sbomCommit.message
         )
     }
-    
+
     return CDXPedigree(commits: cdxCommits)
 }
 
 package func convertToCDXComponent(from comp: SBOMComponent) async throws -> CDXComponent {
-    // TODO ev_cheng, handle nested components?
-    return CDXComponent(
-        type: await convertToCDXCategory(from: comp.category),
+    // TODO: ev_cheng, handle nested components?
+    try await CDXComponent(
+        type: convertToCDXCategory(from: comp.category),
         bomRef: comp.id,
         name: comp.name,
         version: comp.version.revision,
-        scope: await convertToCDXScope(from: comp.scope ?? .runtime),
+        scope: convertToCDXScope(from: comp.scope ?? .runtime),
         purl: comp.purl,
-        pedigree: try await convertToCDXPedigree(from: comp.originator),
+        pedigree: convertToCDXPedigree(from: comp.originator)
     )
 }
 
 private func convertToCDXComponent(from tool: SBOMTool) async throws -> CDXComponent {
-    return CDXComponent(
+    CDXComponent(
         type: .application,
         bomRef: tool.id,
         name: tool.name,
@@ -97,9 +97,9 @@ private func convertToCDXComponent(from tool: SBOMTool) async throws -> CDXCompo
 }
 
 package func convertToCDXDependency(from dep: SBOMRelationship) async throws -> CDXDependency {
-    return CDXDependency(
+    CDXDependency(
         ref: dep.parentID,
-        dependsOn: dep.childrenID,
+        dependsOn: dep.childrenID
     )
 }
 
@@ -113,10 +113,10 @@ package func convertToCDXMetadata(from document: SBOMDocument) async throws -> C
         }
         tools = CDXTools(components: toolsComponents)
     }
-    
-    return CDXMetadata(
+
+    return try await CDXMetadata(
         timestamp: document.metadata.timestamp,
-        component: try await convertToCDXComponent(from: document.primaryComponent),
+        component: convertToCDXComponent(from: document.primaryComponent),
         tools: tools
     )
 }
@@ -140,14 +140,14 @@ package func convertToCDXDocument(from document: SBOMDocument) async throws -> C
         }
     }
 
-    return CDXDocument(
-        schema: try await convertToCDXSchema(from: document.metadata.spec),
+    return try await CDXDocument(
+        schema: convertToCDXSchema(from: document.metadata.spec),
         bomFormat: "CycloneDX",
         specVersion: document.metadata.spec.version,
         serialNumber: document.id,
         version: 1,
-        metadata: try await convertToCDXMetadata(from: document),
+        metadata: convertToCDXMetadata(from: document),
         components: components,
-        dependencies: dependencies,
+        dependencies: dependencies
     )
 }

@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 package struct SPDXRelationship: Codable, Equatable {
-
     package enum Category: String, Codable, Equatable {
         case describes
         case dependsOn
@@ -26,14 +25,14 @@ package struct SPDXRelationship: Codable, Equatable {
     package let creationInfoID: String
     package let parentID: String
     package let childrenID: [String]
-    
+
     package init(
         id: String,
         type: SPDXType,
         category: Category,
         creationInfoID: String,
         parentID: String,
-        childrenID: [String],
+        childrenID: [String]
     ) {
         self.id = id
         self.type = type
@@ -42,7 +41,7 @@ package struct SPDXRelationship: Codable, Equatable {
         self.parentID = parentID
         self.childrenID = childrenID
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case id = "spdxId"
         case type

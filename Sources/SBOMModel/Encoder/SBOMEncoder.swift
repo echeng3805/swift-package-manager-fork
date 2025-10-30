@@ -10,14 +10,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Basics
 import Foundation
 import struct TSCBasic.StringError
 import TSCUtility
-import Basics
 
 package func encodeSBOM(from sbom: SBOMDocument, outputPath: AbsolutePath?) async throws {
     let encoded = try await encodeSBOMData(from: sbom)
-    if let outputPath = outputPath {
+    if let outputPath {
         try localFileSystem.writeFileContents(outputPath, data: encoded)
     } else {
         print(String(decoding: encoded, as: UTF8.self))
@@ -25,12 +25,11 @@ package func encodeSBOM(from sbom: SBOMDocument, outputPath: AbsolutePath?) asyn
 }
 
 package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
-    let data: any Encodable
-    switch sbom.metadata.spec.type {
-        case .cyclonedx, .cyclonedx1:
-            data = try await convertToCDXDocument(from: sbom)
-        case .spdx, .spdx3:
-            data = try await convertToSPDXGraph(from: sbom)
+    let data: any Encodable = switch sbom.metadata.spec.type {
+    case .cyclonedx, .cyclonedx1:
+        try await convertToCDXDocument(from: sbom)
+    case .spdx, .spdx3:
+        try await convertToSPDXGraph(from: sbom)
     }
 
     let encoder = JSONEncoder()
@@ -38,25 +37,24 @@ package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
     encoder.dateEncodingStrategy = .iso8601
     let encoded = try encoder.encode(data)
 
-    //try await validateSBOM(from: encoded, spec: sbom.metadata.spec)
+    // try await validateSBOM(from: encoded, spec: sbom.metadata.spec)
 
     return encoded
 }
 
 package func validateSBOM(from encoded: Foundation.Data, spec: SBOMSpec) async throws {
-    guard let sbomJSONObject = (try JSONSerialization.jsonObject(with: encoded)) as? [String: Any] else {
+    guard let sbomJSONObject = try (JSONSerialization.jsonObject(with: encoded)) as? [String: Any] else {
         throw StringError("Could not convert generated SBOM file into JSON object for validation")
     }
     let schema = try JSONSchema(from: getSchemaFilename(from: spec.type))
     try schema.validate(sbomJSONObject)
 }
 
-
 private func getSchemaFilename(from spec: Spec) -> String {
     switch spec {
     case .cyclonedx, .cyclonedx1:
-        return CDXConstants.cyclonedx1SchemaFile
+        CDXConstants.cyclonedx1SchemaFile
     case .spdx, .spdx3:
-        return SPDXConstants.spdx3SchemaFile
+        SPDXConstants.spdx3SchemaFile
     }
 }

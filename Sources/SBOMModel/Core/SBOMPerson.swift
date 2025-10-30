@@ -20,7 +20,7 @@ package struct SBOMPerson: Codable, Equatable {
         id: String,
         name: String,
         email: String?,
-        timestamp: String?,
+        timestamp: String?
     ) {
         self.id = id
         self.name = name

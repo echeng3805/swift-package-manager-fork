@@ -22,7 +22,7 @@ package struct SBOMCommit: Codable, Equatable {
         repository: String,
         url: String? = nil, // url to the commit
         authors: [SBOMPerson]? = nil,
-        message: String? = nil,
+        message: String? = nil
     ) {
         self.sha = sha
         self.repository = repository

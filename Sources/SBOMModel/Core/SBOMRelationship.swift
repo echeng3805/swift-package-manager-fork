@@ -18,7 +18,7 @@ package struct SBOMRelationship: Codable, Equatable {
     package init(
         id: String,
         parentID: String,
-        childrenID: [String],
+        childrenID: [String]
     ) {
         self.id = id
         self.parentID = parentID

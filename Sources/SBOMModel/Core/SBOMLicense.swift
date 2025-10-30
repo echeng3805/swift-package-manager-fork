@@ -16,7 +16,7 @@ package struct SBOMLicense: Codable, Equatable {
 
     package init(
         name: String,
-        url: String?,
+        url: String?
     ) {
         self.name = name
         self.url = url

@@ -10,20 +10,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Testing
+import _InternalTestSupport
+import Basics
 import Foundation
 @testable import SBOMModel
-import _InternalTestSupport
 import SourceControl
-import Basics
+import Testing
 
 struct SBOMExtractPrimaryComponentTests {
-
     @Test("extractPrimaryComponent from sample SwiftPM ModulesGraph")
     func extractPrimaryComponentFromSPMModulesGraph() async throws {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
-        
+
         let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let component = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store)
@@ -39,7 +38,7 @@ struct SBOMExtractPrimaryComponentTests {
         #expect(component.version.commit?.repository == SBOMTestStore.swiftPMURL)
         #expect(component.scope == .runtime)
         #expect(component.description == rootPackage.description)
-        
+
         #expect(component.originator.commits != nil)
         #expect(component.originator.commits?.count == 1)
         #expect(component.originator.commits?.first?.sha == expectedRevision)
@@ -50,7 +49,7 @@ struct SBOMExtractPrimaryComponentTests {
     func extractPrimaryComponentFromSwiftlyModulesGraph() async throws {
         let (swiftlyRepo, swiftlyPath) = try SBOMTestRepo.setupSwiftlyTestRepo()
         defer { try? SBOMTestRepo.cleanup(swiftlyPath) }
-        
+
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let component = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store)
@@ -76,7 +75,7 @@ struct SBOMExtractPrimaryComponentTests {
     func extractComponentFromProductFromSPMModulesGraph() async throws {
         let (gitRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
-        
+
         let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
@@ -84,7 +83,7 @@ struct SBOMExtractPrimaryComponentTests {
         let actualRevision = try gitRepo.getCurrentRevision().identifier
 
         let component = try await SBOMModel.extractComponent(product: resolvedProduct, graph: graph, store: store)
-        
+
         #expect(component.category == SBOMComponent.Category.library)
         #expect(component.name == "SwiftPMDataModel")
         #expect(component.id == "SwiftPM:SwiftPMDataModel")
@@ -102,7 +101,7 @@ struct SBOMExtractPrimaryComponentTests {
     func extractComponentFromProductFromSwiftlyModulesGraph() async throws {
         let (swiftlyRepo, swiftlyPath) = try SBOMTestRepo.setupSwiftlyTestRepo()
         defer { try? SBOMTestRepo.cleanup(swiftlyPath) }
-        
+
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
@@ -110,7 +109,7 @@ struct SBOMExtractPrimaryComponentTests {
         let actualRevision = try swiftlyRepo.getCurrentRevision().identifier
 
         let component = try await SBOMModel.extractComponent(product: resolvedProduct, graph: graph, store: store)
-        
+
         #expect(component.category == SBOMComponent.Category.application)
         #expect(component.name == "swiftly")
         #expect(component.id == "swiftly:swiftly")
@@ -129,22 +128,22 @@ struct SBOMExtractPrimaryComponentTests {
     func extractPrimaryComponentWithProductFilter() async throws {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
-        
+
         let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        
+
         let productName = "SwiftPMDataModel"
         let component = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, product: productName)
-        
+
         #expect(component.name == productName)
         #expect(component.id == "SwiftPM:\(productName)")
         #expect(component.category == .library)
-        
+
         let packageComponent = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store)
         #expect(packageComponent.name == "SwiftPM")
         #expect(packageComponent.id == "SwiftPM")
         #expect(component.category == .library)
-        
+
         #expect(component.id != packageComponent.id)
     }
 
@@ -152,32 +151,43 @@ struct SBOMExtractPrimaryComponentTests {
     func versionCacheStoresAndReusesVersions() async throws {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
-        
+
         let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
         let cache = SBOMVersionCache()
-        
+
         let component1 = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, cache: cache)
         #expect(component1.version.revision == expectedRevision)
-        
+
         let cachedVersion = await cache.get(rootPackage.identity)
         #expect(cachedVersion != nil, "Cache should contain version for root package")
         #expect(cachedVersion?.revision == expectedRevision, "Cached version should match expected revision")
-        
+
         let gitPath = spmPath.appending(".git")
         try localFileSystem.removeFileTree(gitPath)
         #expect(!localFileSystem.exists(gitPath), "Git directory should be removed")
-        
+
         let component2 = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, cache: cache)
         #expect(component2.version.revision == expectedRevision, "Should return cached version even without Git")
-        #expect(component2.version.revision == component1.version.revision, "Both extractions should return same version")
-        
+        #expect(
+            component2.version.revision == component1.version.revision,
+            "Both extractions should return same version"
+        )
+
         let resolvedProduct = try #require(rootPackage.products.first { $0.name == "SwiftPMDataModel" })
-        let productComponent = try await SBOMModel.extractComponent(product: resolvedProduct, graph: graph, store: store, cache: cache)
-        #expect(productComponent.version.revision == expectedRevision, "Product should use cached version from root package")
-        
+        let productComponent = try await SBOMModel.extractComponent(
+            product: resolvedProduct,
+            graph: graph,
+            store: store,
+            cache: cache
+        )
+        #expect(
+            productComponent.version.revision == expectedRevision,
+            "Product should use cached version from root package"
+        )
+
         let cachedVersionAfter = await cache.get(rootPackage.identity)
         #expect(cachedVersionAfter?.revision == expectedRevision, "Cache should still contain same version")
     }

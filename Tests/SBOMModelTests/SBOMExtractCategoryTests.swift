@@ -10,16 +10,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Testing
-import Foundation
-import Basics
-import PackageModel
-import PackageGraph
-@testable import SBOMModel
 import _InternalTestSupport
+import Basics
+import Foundation
+import PackageGraph
+import PackageModel
+@testable import SBOMModel
+import Testing
 
 private func createProduct(name: String, type: ProductType) throws -> ResolvedProduct {
-    let packageName = PackageIdentity.plain("Package\(name)")    
+    let packageName = PackageIdentity.plain("Package\(name)")
     let module = SBOMTestGraph.createSwiftModule(
         name: "\(name)Module",
         type: type == .executable ? .executable : .library
@@ -40,6 +40,7 @@ private func createProduct(name: String, type: ProductType) throws -> ResolvedPr
         modules: IdentifiableSet([resolvedModule])
     )
 }
+
 private func createPackage(name: String, products: [ResolvedProduct]) throws -> ResolvedPackage {
     let packageName = PackageIdentity.plain("Package\(name)")
     let package = SBOMTestGraph.createPackage(
@@ -47,7 +48,7 @@ private func createPackage(name: String, products: [ResolvedProduct]) throws -> 
         displayName: name,
         path: "/\(name)",
         modules: [],
-        products: products.map { $0.underlying }
+        products: products.map(\.underlying)
     )
     return SBOMTestGraph.createResolvedPackage(
         package: package,
@@ -63,7 +64,7 @@ struct SBOMExtractCategoryTests {
         let category = try await SBOMModel.extractCategory(from: resolvedProduct)
         #expect(category == SBOMComponent.Category.application)
     }
-    
+
     @Test("extractCategoryFromProduct with library product returns library")
     func extractCategoryFromLibraryProduct() async throws {
         let resolvedProduct = try createProduct(name: "MyLibraryProduct", type: .library(.automatic))
@@ -78,7 +79,7 @@ struct SBOMExtractCategoryTests {
         let category = try await SBOMModel.extractCategory(from: resolvedPackage)
         #expect(category == SBOMComponent.Category.application)
     }
-    
+
     @Test("extractCategoryFromPackage with 1 library product returns library")
     func extractCategoryFromPackageWithLibrary() async throws {
         let resolvedProduct = try createProduct(name: "MyLibraryProduct", type: .library(.automatic))
@@ -86,7 +87,7 @@ struct SBOMExtractCategoryTests {
         let category = try await SBOMModel.extractCategory(from: resolvedPackage)
         #expect(category == SBOMComponent.Category.library)
     }
-    
+
     @Test("extractCategoryFromPackage with mixed products returns application")
     func extractCategoryFromPackageWithMixedProducts() async throws {
         let executableProduct = try createProduct(name: "MyExecutableProduct", type: .executable)

@@ -14,26 +14,27 @@ import Foundation
 import struct TSCBasic.StringError
 
 private func generateSPDXID() -> String {
-    return "urn:uuid:\(generateSBOMID())"
+    "urn:uuid:\(generateSBOMID())"
 }
 
 private func convertToSPDXPurpose(from category: SBOMComponent.Category) async -> SPDXPackage.Purpose {
     switch category {
     case .application:
-        return .application
+        .application
     case .framework:
-        return .framework
+        .framework
     case .library:
-        return .library
+        .library
     case .file:
-        return .file
+        .file
     }
 }
 
 package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [Any] {
-    guard let metadata = metadata,
+    guard let metadata,
           let creators = metadata.creators,
-          !creators.isEmpty else {
+          !creators.isEmpty
+    else {
         return []
     }
     var agents: [Any] = []
@@ -44,13 +45,13 @@ package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [Any] {
             type: .CreationInfo,
             specVersion: creator.version,
             createdBy: [creator.id],
-            created: "1970-01-01T00:00:00Z",
+            created: "1970-01-01T00:00:00Z"
         )
         let tool = SPDXAgent(
             id: creator.id,
             type: .Agent,
             name: creator.name,
-            creationInfoID: toolCreationInfoID,
+            creationInfoID: toolCreationInfoID
         )
         agents.append(toolCreationInfo)
         agents.append(tool)
@@ -60,43 +61,44 @@ package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [Any] {
 
 package func convertToSPDXDocument(from document: SBOMDocument) async throws -> [Any] {
     guard let timestamp = document.metadata.timestamp,
-        let creators = document.metadata.creators,
-        !creators.isEmpty else {
-            throw StringError("timestamp or creators are missing from SBOM document metadata, required for SPDX format")
-        }
+          let creators = document.metadata.creators,
+          !creators.isEmpty
+    else {
+        throw StringError("timestamp or creators are missing from SBOM document metadata, required for SPDX format")
+    }
 
     var elements: [Any] = []
 
     let creationInfoID = SPDXConstants.spdxRootCreationInfoID
-    
+
     let creationInfo = SPDXCreationInfo(
         id: creationInfoID,
         type: .CreationInfo,
         specVersion: document.metadata.spec.version,
-        createdBy: creators.map { $0.id },
-        created: timestamp,
+        createdBy: creators.map(\.id),
+        created: timestamp
     )
     elements.append(creationInfo)
 
     let spdxSBOMID = generateSPDXID()
     let profileConformance = ["core", "software"]
-    
+
     let spdxSBOM = SPDXSBOM(
         id: spdxSBOMID,
         type: .SoftwareSBOM,
         creationInfoID: creationInfoID,
         profileConformance: profileConformance,
-        rootElementIDs: [document.primaryComponent.id],        
+        rootElementIDs: [document.primaryComponent.id]
     )
     elements.append(spdxSBOM)
-    
+
     let describes = SPDXRelationship(
         id: "\(spdxSBOMID)-describes-\(document.primaryComponent.id)",
         type: .Relationship,
         category: .describes,
         creationInfoID: creationInfoID,
         parentID: spdxSBOMID,
-        childrenID: [document.primaryComponent.id],  
+        childrenID: [document.primaryComponent.id]
     )
     elements.append(describes)
 
@@ -105,7 +107,7 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
         type: .SpdxDocument,
         creationInfoID: creationInfoID,
         profileConformance: profileConformance,
-        rootElementIDs: [spdxSBOMID],
+        rootElementIDs: [spdxSBOMID]
     )
     elements.append(spdxDocument)
 
@@ -113,15 +115,15 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
 }
 
 package func convertToSPDXPackage(from component: SBOMComponent) async throws -> SPDXPackage {
-    return SPDXPackage(
+    await SPDXPackage(
         id: component.id,
         type: .SoftwarePackage,
-        purpose: await convertToSPDXPurpose(from: component.category),
+        purpose: convertToSPDXPurpose(from: component.category),
         purl: component.purl,
         name: component.name,
         version: component.version.revision,
         creationInfoID: SPDXConstants.spdxRootCreationInfoID,
-        description: component.description,
+        description: component.description
     )
 }
 
@@ -161,12 +163,12 @@ package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?)
         )
         externalIdentifiers.append(relationship)
     }
-    
+
     return externalIdentifiers
 }
 
 package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) async -> [Any] {
-    guard let dependencies = dependencies else {
+    guard let dependencies else {
         return []
     }
 
@@ -179,10 +181,10 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
                 category: .dependsOn,
                 creationInfoID: SPDXConstants.spdxRootCreationInfoID,
                 parentID: dependency.parentID,
-                childrenID: dependency.childrenID,  
+                childrenID: dependency.childrenID
             )
             relationships.append(relationship)
-            
+
             var optionalDependencies: [String] = []
             var testDependencies: [String] = []
             for childID in dependency.childrenID {
@@ -205,7 +207,7 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
                     category: .hasOptionalDependency,
                     creationInfoID: SPDXConstants.spdxRootCreationInfoID,
                     parentID: dependency.parentID,
-                    childrenID: optionalDependencies,
+                    childrenID: optionalDependencies
                 )
                 relationships.append(relationship)
             }
@@ -216,7 +218,7 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
                     category: .hasTest,
                     creationInfoID: SPDXConstants.spdxRootCreationInfoID,
                     parentID: dependency.parentID,
-                    childrenID: testDependencies,
+                    childrenID: testDependencies
                 )
                 relationships.append(relationship)
             }
@@ -248,5 +250,3 @@ package func convertToSPDXGraph(from document: SBOMDocument) async throws -> SPD
         graph: agents + elements + packages + relationships + commits
     )
 }
-
-    

@@ -10,20 +10,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
+import _InternalTestSupport
 import Basics
+import Foundation
 import PackageGraph
 import PackageModel
-import _InternalTestSupport
 @testable import SBOMModel
 
 import struct TSCUtility.Version
 
-struct SBOMTestStore {
-        
+enum SBOMTestStore {
     package static let swiftPMRevision = "e535ac05e3ec765611044bdafa9703db3f67ac07"
     package static let swiftPMURL = "https://github.com/swiftlang/swift-package-manager.git"
-    
+
     package static let swiftlyRevision = "985e34f447d55854f2212f5112ef2d344a7e2072"
     package static let swiftlyURL = "https://github.com/swiftlang/swiftly.git"
 
@@ -35,20 +34,29 @@ struct SBOMTestStore {
         ("swift-tools-support-core", "https://github.com/swiftlang/swift-tools-support-core.git", "main"),
         ("swift-driver", "https://github.com/swiftlang/swift-driver.git", "main"),
         ("swift-crypto", "https://github.com/apple/swift-crypto.git", "3.0.0"),
-        ("swift-certificates", "https://github.com/apple/swift-certificates.git", "1.5.0")
+        ("swift-certificates", "https://github.com/apple/swift-certificates.git", "1.5.0"),
     ]
-    
+
     private static let swiftlyDependencies = [
         ("swift-argument-parser", "https://github.com/apple/swift-argument-parser.git", "1.3.0"),
         ("async-http-client", "https://github.com/swift-server/async-http-client.git", "1.24.0"),
-        ("swift-openapi-async-http-client", "https://github.com/swift-server/swift-openapi-async-http-client.git", "1.1.0"),
+        (
+            "swift-openapi-async-http-client",
+            "https://github.com/swift-server/swift-openapi-async-http-client.git",
+            "1.1.0"
+        ),
         ("swift-nio", "https://github.com/apple/swift-nio.git", "2.80.0"),
         ("swift-tools-support-core", "https://github.com/swiftlang/swift-tools-support-core.git", "0.7.2"),
         ("swift-openapi-runtime", "https://github.com/apple/swift-openapi-runtime.git", "1.8.2"),
-        ("swift-system", "https://github.com/apple/swift-system.git", "1.4.2")
+        ("swift-system", "https://github.com/apple/swift-system.git", "1.4.2"),
     ]
 
-    private static func createResolvedPackagesStore(name: String, url: String, revision: String, dependencies: [(String, String, String)]) throws -> ResolvedPackagesStore {
+    private static func createResolvedPackagesStore(
+        name: String,
+        url: String,
+        revision: String,
+        dependencies: [(String, String, String)]
+    ) throws -> ResolvedPackagesStore {
         let store = try createBaseStore(filename: "\(name)-Package.resolved")
         try addRemoteRepository(
             to: store,
@@ -59,19 +67,29 @@ struct SBOMTestStore {
         try addDependencies(dependencies, to: store)
         return store
     }
-        
+
     package static func createSPMResolvedPackagesStore() throws -> ResolvedPackagesStore {
-        return try createResolvedPackagesStore(name: "SwiftPM", url: swiftPMURL, revision: swiftPMRevision, dependencies: spmDependencies)
+        try self.createResolvedPackagesStore(
+            name: "SwiftPM",
+            url: self.swiftPMURL,
+            revision: self.swiftPMRevision,
+            dependencies: self.spmDependencies
+        )
     }
-    
+
     package static func createSwiftlyResolvedPackagesStore() throws -> ResolvedPackagesStore {
-        return try createResolvedPackagesStore(name: "swiftly", url: swiftlyURL, revision: swiftlyRevision, dependencies: swiftlyDependencies)
+        try self.createResolvedPackagesStore(
+            name: "swiftly",
+            url: self.swiftlyURL,
+            revision: self.swiftlyRevision,
+            dependencies: self.swiftlyDependencies
+        )
     }
 
     private static func createBaseStore(filename: String) throws -> ResolvedPackagesStore {
         let fs = InMemoryFileSystem()
         let packageResolvedFile = AbsolutePath("/tmp/\(filename)")
-        
+
         return try ResolvedPackagesStore(
             packageResolvedFile: packageResolvedFile,
             workingDirectory: .root,
@@ -79,7 +97,7 @@ struct SBOMTestStore {
             mirrors: .init()
         )
     }
-    
+
     private static func addRemoteRepository(
         to store: ResolvedPackagesStore,
         name: String,
@@ -91,13 +109,13 @@ struct SBOMTestStore {
             identity: identity,
             url: SourceControlURL(url)
         )
-        
+
         store.track(
             packageRef: packageRef,
             state: .revision(revision)
         )
     }
-    
+
     private static func addDependencies(
         _ dependencies: [(String, String, String)],
         to store: ResolvedPackagesStore
@@ -108,27 +126,27 @@ struct SBOMTestStore {
                 identity: identity,
                 url: SourceControlURL(url)
             )
-            
-            let mockRevision = generateMockRevision(for: name)
+
+            let mockRevision = self.generateMockRevision(for: name)
             let state = try createResolutionState(version: version, revision: mockRevision)
-            
+
             store.track(packageRef: packageRef, state: state)
         }
     }
-    
+
     private static func createResolutionState(
         version: String,
         revision: String
     ) throws -> ResolvedPackagesStore.ResolutionState {
         // Try to parse as a version first
         if let parsedVersion = try? Version(versionString: version) {
-            return .version(parsedVersion, revision: revision)
+            .version(parsedVersion, revision: revision)
         } else {
             // If it can't be parsed as a version, treat it as a branch
-            return .branch(name: version, revision: revision)
+            .branch(name: version, revision: revision)
         }
     }
-    
+
     package static func generateMockRevision(for packageName: String) -> String {
         let hash = packageName.hash
         return String(format: "%040x", abs(hash)).prefix(40).padding(toLength: 40, withPad: "0", startingAt: 0)
