@@ -41,7 +41,10 @@ add_library(SBOMModel
   SPDX/SPDXType.swift
   Utility/JSONSchema.swift
   Utility/PURL.swift
-  Utility/SBOMID.swift)
+  Utility/SBOMID.swift
+  Utility/SBOMSchema.swift
+  Utility/SPDXValidator.swift
+  Validator/SBOMValidator.swift)
 target_link_libraries(SBOMModel PUBLIC
   TSCBasic
   TSCUtility

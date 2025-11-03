@@ -13,6 +13,11 @@
 import Foundation
 import struct TSCBasic.StringError
 
+private func generateSPDXID(_ id: String) -> String {
+    if id.starts(with: "urn:") { return id }
+    return "urn:spdx:\(id)"
+}
+
 private func convertToSPDXPurpose(from category: SBOMComponent.Category) async -> SPDXPackage.Purpose {
     switch category {
     case .application:
@@ -35,16 +40,17 @@ package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [Any] {
     }
     var agents: [Any] = []
     for creator in creators {
-        let toolCreationInfoID = "\(creator.id):creationInfo"
+        let creatorID = generateSPDXID(creator.id)
+        let toolCreationInfoID = "\(creatorID):creationInfo"
         let toolCreationInfo = SPDXCreationInfo(
             id: toolCreationInfoID,
             type: .CreationInfo,
             specVersion: creator.version,
-            createdBy: [creator.id],
+            createdBy: [creatorID],
             created: "1970-01-01T00:00:00Z"
         )
         let tool = SPDXAgent(
-            id: creator.id,
+            id: creatorID,
             type: .Agent,
             name: creator.name,
             creationInfoID: toolCreationInfoID
@@ -71,7 +77,7 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
         id: creationInfoID,
         type: .CreationInfo,
         specVersion: document.metadata.spec.version,
-        createdBy: creators.map(\.id),
+        createdBy: creators.map { generateSPDXID($0.id) },
         created: timestamp
     )
     elements.append(creationInfo)
@@ -79,27 +85,29 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
     let spdxSBOMID = generateSBOMID()
     let profileConformance = ["core", "software"]
 
+    let primaryComponentID = generateSPDXID(document.primaryComponent.id)
+    
     let spdxSBOM = SPDXSBOM(
         id: spdxSBOMID,
         type: .SoftwareSBOM,
         creationInfoID: creationInfoID,
         profileConformance: profileConformance,
-        rootElementIDs: [document.primaryComponent.id]
+        rootElementIDs: [primaryComponentID]
     )
     elements.append(spdxSBOM)
 
     let describes = SPDXRelationship(
-        id: "\(spdxSBOMID)-describes-\(document.primaryComponent.id)",
+        id: generateSPDXID("\(spdxSBOMID)-describes-\(primaryComponentID)"),
         type: .Relationship,
         category: .describes,
         creationInfoID: creationInfoID,
         parentID: spdxSBOMID,
-        childrenID: [document.primaryComponent.id]
+        childrenID: [primaryComponentID]
     )
     elements.append(describes)
 
     let spdxDocument = SPDXDocument(
-        id: document.id,
+        id: generateSPDXID(document.id),
         type: .SpdxDocument,
         creationInfoID: creationInfoID,
         profileConformance: profileConformance,
@@ -112,7 +120,7 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
 
 package func convertToSPDXPackage(from component: SBOMComponent) async throws -> SPDXPackage {
     await SPDXPackage(
-        id: component.id,
+        id: generateSPDXID(component.id),
         type: .SoftwarePackage,
         purpose: convertToSPDXPurpose(from: component.category),
         purl: component.purl,
@@ -132,29 +140,30 @@ package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?)
     var commitToComponents: [String: (repository: String, componentIDs: [String])] = [:]
     for component in comps {
         if let commits = component.originator.commits {
+            let componentID = generateSPDXID(component.id)
             for commit in commits {
                 if commitToComponents[commit.sha] != nil {
-                    commitToComponents[commit.sha]?.componentIDs.append(component.id)
+                    commitToComponents[commit.sha]?.componentIDs.append(componentID)
                 } else {
-                    commitToComponents[commit.sha] = (repository: commit.repository, componentIDs: [component.id])
+                    commitToComponents[commit.sha] = (repository: commit.repository, componentIDs: [componentID])
                 }
             }
         }
     }
     for (commitSHA, commitInfo) in commitToComponents {
         let externalIdentifier = SPDXExternalIdentifier(
-            identifier: commitSHA,
+            identifier: generateSPDXID(commitSHA),
             identifierLocator: [commitInfo.repository],
             type: .ExternalIdentifier,
             category: .gitoid
         )
         externalIdentifiers.append(externalIdentifier)
         let relationship = SPDXRelationship(
-            id: "\(commitSHA)-generates",
+            id: generateSPDXID("\(commitSHA)-generates"),
             type: .Relationship,
             category: .generates,
             creationInfoID: SPDXConstants.spdxRootCreationInfoID,
-            parentID: commitSHA,
+            parentID: generateSPDXID(commitSHA),
             childrenID: commitInfo.componentIDs
         )
         externalIdentifiers.append(relationship)
@@ -171,13 +180,16 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
     var relationships: [Any] = []
     if let sbomRelationships = dependencies.relationships {
         for dependency in sbomRelationships {
+            let parentID = generateSPDXID(dependency.parentID)
+            let childrenIDs = dependency.childrenID.map { generateSPDXID($0) }
+            
             let relationship = SPDXRelationship(
-                id: "\(dependency.parentID)-dependsOn",
+                id: generateSPDXID("\(dependency.parentID)-dependsOn"),
                 type: .Relationship,
                 category: .dependsOn,
                 creationInfoID: SPDXConstants.spdxRootCreationInfoID,
-                parentID: dependency.parentID,
-                childrenID: dependency.childrenID
+                parentID: parentID,
+                childrenID: childrenIDs
             )
             relationships.append(relationship)
 
@@ -187,33 +199,34 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
                 guard let comp = dependencies.components.first(where: { $0.id == childID }) else {
                     continue
                 }
+                let spdxChildID = generateSPDXID(childID)
                 switch comp.scope {
                 case .optional:
-                    optionalDependencies.append(childID)
+                    optionalDependencies.append(spdxChildID)
                 case .test:
-                    testDependencies.append(childID)
+                    testDependencies.append(spdxChildID)
                 default:
                     break
                 }
             }
             if !optionalDependencies.isEmpty {
                 let relationship = SPDXRelationship(
-                    id: "\(dependency.parentID)-hasOptionalDependency",
+                    id: generateSPDXID("\(dependency.parentID)-hasOptionalDependency"),
                     type: .Relationship,
                     category: .hasOptionalDependency,
                     creationInfoID: SPDXConstants.spdxRootCreationInfoID,
-                    parentID: dependency.parentID,
+                    parentID: parentID,
                     childrenID: optionalDependencies
                 )
                 relationships.append(relationship)
             }
             if !testDependencies.isEmpty {
                 let relationship = SPDXRelationship(
-                    id: "\(dependency.parentID)-hasTest",
+                    id: generateSPDXID("\(dependency.parentID)-hasTest"),
                     type: .Relationship,
                     category: .hasTest,
                     creationInfoID: SPDXConstants.spdxRootCreationInfoID,
-                    parentID: dependency.parentID,
+                    parentID: parentID,
                     childrenID: testDependencies
                 )
                 relationships.append(relationship)

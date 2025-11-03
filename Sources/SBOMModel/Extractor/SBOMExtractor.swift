@@ -32,6 +32,10 @@ package actor SBOMVersionCache {
     }
 }
 
+package func generateSBOMID() -> String {
+    "urn:uuid:\(UUID().uuidString.lowercased())"
+}
+
 package func extractSpec(_ spec: Spec) async throws -> SBOMSpec {
     switch spec {
     // cyclonedx and spdx refer to the most recent versions.

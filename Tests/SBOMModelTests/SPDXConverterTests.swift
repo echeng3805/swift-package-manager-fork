@@ -61,18 +61,18 @@ struct SPDXConverterTests {
 
         let creationInfo = result[0] as? SPDXCreationInfo
         let creationInfoUnwrapped = try #require(creationInfo)
-        #expect(creationInfoUnwrapped.id == "tool-1:creationInfo")
+        #expect(creationInfoUnwrapped.id == "urn:spdx:tool-1:creationInfo")
         #expect(creationInfoUnwrapped.type == .CreationInfo)
         #expect(creationInfoUnwrapped.specVersion == "3.0.1")
-        #expect(creationInfoUnwrapped.createdBy == ["tool-1"])
+        #expect(creationInfoUnwrapped.createdBy == ["urn:spdx:tool-1"])
         #expect(creationInfoUnwrapped.created == "1970-01-01T00:00:00Z")
 
         let agent = result[1] as? SPDXAgent
         let agentUnwrapped = try #require(agent)
-        #expect(agentUnwrapped.id == "tool-1")
+        #expect(agentUnwrapped.id == "urn:spdx:tool-1")
         #expect(agentUnwrapped.type == .Agent)
         #expect(agentUnwrapped.name == "SwiftPM")
-        #expect(agentUnwrapped.creationInfoID == "tool-1:creationInfo")
+        #expect(agentUnwrapped.creationInfoID == "urn:spdx:tool-1:creationInfo")
     }
 
     @Test("convertToSPDXAgent with multiple creators")
@@ -99,22 +99,22 @@ struct SPDXConverterTests {
 
         let creationInfo1 = result[0] as? SPDXCreationInfo
         let creationInfo1Unwrapped = try #require(creationInfo1)
-        #expect(creationInfo1Unwrapped.id == "tool-1:creationInfo")
-        #expect(creationInfo1Unwrapped.createdBy == ["tool-1"])
+        #expect(creationInfo1Unwrapped.id == "urn:spdx:tool-1:creationInfo")
+        #expect(creationInfo1Unwrapped.createdBy == ["urn:spdx:tool-1"])
 
         let agent1 = result[1] as? SPDXAgent
         let agent1Unwrapped = try #require(agent1)
-        #expect(agent1Unwrapped.id == "tool-1")
+        #expect(agent1Unwrapped.id == "urn:spdx:tool-1")
         #expect(agent1Unwrapped.name == "SwiftPM")
 
         let creationInfo2 = result[2] as? SPDXCreationInfo
         let creationInfo2Unwrapped = try #require(creationInfo2)
-        #expect(creationInfo2Unwrapped.id == "tool-2:creationInfo")
-        #expect(creationInfo2Unwrapped.createdBy == ["tool-2"])
+        #expect(creationInfo2Unwrapped.id == "urn:spdx:tool-2:creationInfo")
+        #expect(creationInfo2Unwrapped.createdBy == ["urn:spdx:tool-2"])
 
         let agent2 = result[3] as? SPDXAgent
         let agent2Unwrapped = try #require(agent2)
-        #expect(agent2Unwrapped.id == "tool-2")
+        #expect(agent2Unwrapped.id == "urn:spdx:tool-2")
         #expect(agent2Unwrapped.name == "CustomTool")
     }
 
@@ -242,7 +242,7 @@ struct SPDXConverterTests {
         #expect(creationInfoUnwrapped.id == "_:creationInfo")
         #expect(creationInfoUnwrapped.type == .CreationInfo)
         #expect(creationInfoUnwrapped.specVersion == "3.0.1")
-        #expect(creationInfoUnwrapped.createdBy == ["tool-1"])
+        #expect(creationInfoUnwrapped.createdBy == ["urn:spdx:tool-1"])
         #expect(creationInfoUnwrapped.created == "2025-01-01T00:00:00Z")
 
         let sbom = result[1] as? SPDXSBOM
@@ -250,7 +250,7 @@ struct SPDXConverterTests {
         #expect(sbomUnwrapped.type == .SoftwareSBOM)
         #expect(sbomUnwrapped.creationInfoID == "_:creationInfo")
         #expect(sbomUnwrapped.profileConformance == ["core", "software"])
-        #expect(sbomUnwrapped.rootElementIDs == ["primary-id"])
+        #expect(sbomUnwrapped.rootElementIDs == ["urn:spdx:primary-id"])
 
         let relationship = result[2] as? SPDXRelationship
         let relationshipUnwrapped = try #require(relationship)
@@ -258,11 +258,11 @@ struct SPDXConverterTests {
         #expect(relationshipUnwrapped.category == .describes)
         #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
         #expect(relationshipUnwrapped.parentID == sbomUnwrapped.id)
-        #expect(relationshipUnwrapped.childrenID == ["primary-id"])
+        #expect(relationshipUnwrapped.childrenID == ["urn:spdx:primary-id"])
 
         let spdxDocument = result[3] as? SPDXDocument
         let documentUnwrapped = try #require(spdxDocument)
-        #expect(documentUnwrapped.id == "doc-1")
+        #expect(documentUnwrapped.id == "urn:spdx:doc-1")
         #expect(documentUnwrapped.type == .SpdxDocument)
         #expect(documentUnwrapped.creationInfoID == "_:creationInfo")
         #expect(documentUnwrapped.profileConformance == ["core", "software"])
@@ -292,7 +292,7 @@ struct SPDXConverterTests {
 
             let result = try await convertToSPDXPackage(from: component)
 
-            #expect(result.id == "test-id")
+            #expect(result.id == "urn:spdx:test-id")
             #expect(result.type == .SoftwarePackage)
             #expect(result.purpose == expectedSPDXPurpose)
             #expect(result.purl == "pkg:swift/test@1.0.0")
@@ -307,7 +307,7 @@ struct SPDXConverterTests {
     func convertToSPDXPackageWithNilDescription() async throws {
         let component = SBOMComponent(
             category: .library,
-            id: "test-id",
+            id: "urn:spdx:test-id",
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -318,7 +318,7 @@ struct SPDXConverterTests {
 
         let result = try await convertToSPDXPackage(from: component)
 
-        #expect(result.id == "test-id")
+        #expect(result.id == "urn:spdx:test-id")
         #expect(result.type == .SoftwarePackage)
         #expect(result.purpose == .library)
         #expect(result.description == nil)
@@ -391,19 +391,19 @@ struct SPDXConverterTests {
 
         let externalIdentifier = result[0] as? SPDXExternalIdentifier
         let externalIdentifierUnwrapped = try #require(externalIdentifier)
-        #expect(externalIdentifierUnwrapped.identifier == "abc123")
+        #expect(externalIdentifierUnwrapped.identifier == "urn:spdx:abc123")
         #expect(externalIdentifierUnwrapped.identifierLocator == ["https://github.com/swiftlang/swift-package-manager"])
         #expect(externalIdentifierUnwrapped.type == .ExternalIdentifier)
         #expect(externalIdentifierUnwrapped.category == .gitoid)
 
         let relationship = result[1] as? SPDXRelationship
         let relationshipUnwrapped = try #require(relationship)
-        #expect(relationshipUnwrapped.id == "abc123-generates")
+        #expect(relationshipUnwrapped.id == "urn:spdx:abc123-generates")
         #expect(relationshipUnwrapped.type == .Relationship)
         #expect(relationshipUnwrapped.category == .generates)
         #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
-        #expect(relationshipUnwrapped.parentID == "abc123")
-        #expect(relationshipUnwrapped.childrenID == ["test-id"])
+        #expect(relationshipUnwrapped.parentID == "urn:spdx:abc123")
+        #expect(relationshipUnwrapped.childrenID == ["urn:spdx:test-id"])
     }
 
     @Test("convertToSPDXExternalIdentifiers with multiple commits")
@@ -442,15 +442,15 @@ struct SPDXConverterTests {
         #expect(relationships.count == 2)
 
         let identifiers = externalIdentifiers.map(\.identifier)
-        #expect(identifiers.contains("abc123"))
-        #expect(identifiers.contains("def456"))
+        #expect(identifiers.contains("urn:spdx:abc123"))
+        #expect(identifiers.contains("urn:spdx:def456"))
 
         for relationship in relationships {
             #expect(relationship.type == .Relationship)
             #expect(relationship.category == .generates)
             #expect(relationship.creationInfoID == "_:creationInfo")
-            #expect(relationship.childrenID == ["test-id"])
-            #expect(["abc123", "def456"].contains(relationship.parentID))
+            #expect(relationship.childrenID == ["urn:spdx:test-id"])
+            #expect(["urn:spdx:abc123", "urn:spdx:def456"].contains(relationship.parentID))
         }
     }
 
@@ -487,7 +487,7 @@ struct SPDXConverterTests {
 
         let externalIdentifier = result[0] as? SPDXExternalIdentifier
         let externalIdentifierUnwrapped = try #require(externalIdentifier)
-        #expect(externalIdentifierUnwrapped.identifier == "abc123")
+        #expect(externalIdentifierUnwrapped.identifier == "urn:spdx:abc123")
         #expect(externalIdentifierUnwrapped.identifierLocator == ["https://github.com/swiftlang/swift-package-manager"])
         #expect(externalIdentifierUnwrapped.type == .ExternalIdentifier)
         #expect(externalIdentifierUnwrapped.category == .gitoid)
@@ -497,11 +497,11 @@ struct SPDXConverterTests {
         #expect(relationshipUnwrapped.type == .Relationship)
         #expect(relationshipUnwrapped.category == .generates)
         #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
-        #expect(relationshipUnwrapped.parentID == "abc123")
+        #expect(relationshipUnwrapped.parentID == "urn:spdx:abc123")
 
         #expect(relationshipUnwrapped.childrenID.count == 2)
-        #expect(relationshipUnwrapped.childrenID.contains("test-id-1"))
-        #expect(relationshipUnwrapped.childrenID.contains("test-id-2"))
+        #expect(relationshipUnwrapped.childrenID.contains("urn:spdx:test-id-1"))
+        #expect(relationshipUnwrapped.childrenID.contains("urn:spdx:test-id-2"))
     }
 
     @Test("convertToSPDXRelationships with nil dependencies")
@@ -532,12 +532,12 @@ struct SPDXConverterTests {
 
         let relationship = result[0] as? SPDXRelationship
         let relationshipUnwrapped = try #require(relationship)
-        #expect(relationshipUnwrapped.id == "parent-component-dependsOn")
+        #expect(relationshipUnwrapped.id == "urn:spdx:parent-component-dependsOn")
         #expect(relationshipUnwrapped.type == .Relationship)
         #expect(relationshipUnwrapped.category == .dependsOn)
         #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
-        #expect(relationshipUnwrapped.parentID == "parent-component")
-        #expect(relationshipUnwrapped.childrenID == ["child1", "child2"])
+        #expect(relationshipUnwrapped.parentID == "urn:spdx:parent-component")
+        #expect(relationshipUnwrapped.childrenID == ["urn:spdx:child1", "urn:spdx:child2"])
     }
 
     @Test("convertToSPDXRelationships with multiple dependencies")
@@ -561,16 +561,16 @@ struct SPDXConverterTests {
 
         let relationship1 = result[0] as? SPDXRelationship
         let relationship1Unwrapped = try #require(relationship1)
-        #expect(relationship1Unwrapped.id == "parent1-dependsOn")
-        #expect(relationship1Unwrapped.parentID == "parent1")
-        #expect(relationship1Unwrapped.childrenID == ["child1"])
+        #expect(relationship1Unwrapped.id == "urn:spdx:parent1-dependsOn")
+        #expect(relationship1Unwrapped.parentID == "urn:spdx:parent1")
+        #expect(relationship1Unwrapped.childrenID == ["urn:spdx:child1"])
         #expect(relationship1Unwrapped.category == .dependsOn)
 
         let relationship2 = result[1] as? SPDXRelationship
         let relationship2Unwrapped = try #require(relationship2)
-        #expect(relationship2Unwrapped.id == "parent2-dependsOn")
-        #expect(relationship2Unwrapped.parentID == "parent2")
-        #expect(relationship2Unwrapped.childrenID == ["child2", "child3"])
+        #expect(relationship2Unwrapped.id == "urn:spdx:parent2-dependsOn")
+        #expect(relationship2Unwrapped.parentID == "urn:spdx:parent2")
+        #expect(relationship2Unwrapped.childrenID == ["urn:spdx:child2", "urn:spdx:child3"])
         #expect(relationship2Unwrapped.category == .dependsOn)
     }
 
@@ -624,16 +624,16 @@ struct SPDXConverterTests {
 
         let relationship2 = result[1] as? SPDXRelationship
         let relationship2Unwrapped = try #require(relationship2)
-        #expect(relationship2Unwrapped.id == "parent-id-hasOptionalDependency")
-        #expect(relationship2Unwrapped.parentID == "parent-id")
-        #expect(relationship2Unwrapped.childrenID == ["test-id2"])
+        #expect(relationship2Unwrapped.id == "urn:spdx:parent-id-hasOptionalDependency")
+        #expect(relationship2Unwrapped.parentID == "urn:spdx:parent-id")
+        #expect(relationship2Unwrapped.childrenID == ["urn:spdx:test-id2"])
         #expect(relationship2Unwrapped.category == .hasOptionalDependency)
 
         let relationship1 = result[2] as? SPDXRelationship
         let relationship1Unwrapped = try #require(relationship1)
-        #expect(relationship1Unwrapped.id == "parent-id-hasTest")
-        #expect(relationship1Unwrapped.parentID == "parent-id")
-        #expect(relationship1Unwrapped.childrenID == ["test-id"])
+        #expect(relationship1Unwrapped.id == "urn:spdx:parent-id-hasTest")
+        #expect(relationship1Unwrapped.parentID == "urn:spdx:parent-id")
+        #expect(relationship1Unwrapped.childrenID == ["urn:spdx:test-id"])
         #expect(relationship1Unwrapped.category == .hasTest)
     }
 
@@ -761,7 +761,7 @@ struct SPDXConverterTests {
 
         let packages = result.graph.compactMap { $0.getValue() as SPDXPackage? }
         #expect(packages.count == 1)
-        #expect(packages[0].id == "lib1-id")
+        #expect(packages[0].id == "urn:spdx:lib1-id")
 
         let relationships = result.graph.compactMap { $0.getValue() as SPDXRelationship? }
         #expect(relationships.count == 2) // 1 describes + 1 dependsOn relationship
@@ -824,12 +824,12 @@ struct SPDXConverterTests {
 
         let externalIdentifiers = result.graph.compactMap { $0.getValue() as SPDXExternalIdentifier? }
         #expect(externalIdentifiers.count == 1)
-        #expect(externalIdentifiers[0].identifier == "abc123")
+        #expect(externalIdentifiers[0].identifier == "urn:spdx:abc123")
 
         let relationships = result.graph.compactMap { $0.getValue() as SPDXRelationship? }
         let generatesRelationships = relationships.filter { $0.category == .generates }
         #expect(generatesRelationships.count == 1)
-        #expect(generatesRelationships[0].parentID == "abc123")
-        #expect(generatesRelationships[0].childrenID == ["lib1-id"])
+        #expect(generatesRelationships[0].parentID == "urn:spdx:abc123")
+        #expect(generatesRelationships[0].childrenID == ["urn:spdx:lib1-id"])
     }
 }
