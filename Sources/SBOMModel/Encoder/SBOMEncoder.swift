@@ -42,19 +42,3 @@ package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
     return encoded
 }
 
-package func validateSBOM(from encoded: Foundation.Data, spec: SBOMSpec) async throws {
-    guard let sbomJSONObject = try (JSONSerialization.jsonObject(with: encoded)) as? [String: Any] else {
-        throw StringError("Could not convert generated SBOM file into JSON object for validation")
-    }
-    let schema = try SBOMSchema(from: getSchemaFilename(from: spec.type))
-    try schema.validate(sbomJSONObject)
-}
-
-private func getSchemaFilename(from spec: Spec) -> String {
-    switch spec {
-    case .cyclonedx, .cyclonedx1:
-        CDXConstants.cyclonedx1SchemaFile
-    case .spdx, .spdx3:
-        SPDXConstants.spdx3SchemaFile
-    }
-}

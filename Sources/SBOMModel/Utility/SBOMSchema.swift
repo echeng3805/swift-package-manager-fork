@@ -68,7 +68,10 @@ package struct SBOMSchema {
 
     package func validate(_ jsonObject: Any) throws {
         if self.isJSONLDDocument(jsonObject) {
-            try self.validateJSONLDDocument(jsonObject as! [String: Any])
+            guard let dict = jsonObject as? [String: Any] else {
+                throw StringError("Expected dictionary for JSON-LD document at $")
+            }
+            try self.validateJSONLDDocument(dict)
         } else {
             try self.validateValue(jsonObject, against: self.schema, path: "$")
         }
@@ -277,12 +280,8 @@ package struct SBOMSchema {
     }
 
     private func determineNumberType(_ number: NSNumber) -> (type: String, debugInfo: String) {
-        let objCType = String(cString: number.objCType)
-
         // Check for boolean type
-        if (objCType == "c" || objCType == "B") &&
-            (number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber)
-        {
+        if self.isBoolean(number) {
             return ("boolean", "value: \(number.boolValue)")
         }
 
@@ -293,6 +292,12 @@ package struct SBOMSchema {
 
         // Default to integer
         return ("integer", "value: \(number.intValue)")
+    }
+
+    private func isBoolean(_ number: NSNumber) -> Bool {
+        let objCType = String(cString: number.objCType)
+        return (objCType == "c" || objCType == "B") &&
+            (number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber)
     }
 
     private func validateRequiredProperties(_ object: [String: Any], required: [String], path: String) throws {
@@ -631,11 +636,8 @@ package struct SBOMSchema {
             return "\"\(string)\""
         } else if let number = value as? NSNumber {
             // Handle booleans and numbers
-            let objCType = String(cString: number.objCType)
-            if objCType == "c" || objCType == "B" {
-                if number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber {
-                    return number.boolValue ? "true" : "false"
-                }
+            if self.isBoolean(number) {
+                return number.boolValue ? "true" : "false"
             }
             return "\(number)"
         } else if value is NSNull {
@@ -650,7 +652,7 @@ package struct SBOMSchema {
         let allowedProperties = self.collectAllAllowedProperties(from: schema)
         let extraProperties = Set(object.keys).subtracting(allowedProperties)
 
-        if let isFalse = additionalProps as? Bool, !isFalse {
+        if let allowsAdditional = additionalProps as? Bool, !allowsAdditional {
             guard extraProperties.isEmpty else {
                 let extraList = extraProperties.sorted().joined(separator: ", ")
                 throw StringError("Additional properties not allowed at \(path): \(extraList)")
@@ -707,8 +709,7 @@ package struct SBOMSchema {
 
     private func validateUnevaluatedProperties(_ object: [String: Any], schema: [String: Any], path: String) throws {
         guard let unevaluatedProps = schema[SchemaKeys.unevaluatedProperties] as? Bool,
-              !unevaluatedProps
-        else {
+              !unevaluatedProps else {
             return
         }
 
@@ -850,13 +851,8 @@ package struct SBOMSchema {
         case let str as String:
             description = "\"\(str)\""
         case let num as NSNumber:
-            let objCType = String(cString: num.objCType)
-            if objCType == "c" || objCType == "B" {
-                if num === kCFBooleanTrue as NSNumber || num === kCFBooleanFalse as NSNumber {
-                    description = "\(num.boolValue) (boolean)"
-                } else {
-                    description = "\(num.intValue) (integer)"
-                }
+            if self.isBoolean(num) {
+                description = "\(num.boolValue) (boolean)"
             } else if CFNumberIsFloatType(num) {
                 description = "\(num.doubleValue) (number)"
             } else {
