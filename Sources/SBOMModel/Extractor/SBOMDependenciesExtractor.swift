@@ -157,6 +157,7 @@ private func extractProductDependencies(
     }
 
     func trackDependency(parentID: String, childID: String) {
+        guard parentID != childID else { return }  // Prevent self-referential dependencies
         var dependencies = dependenciesDict[parentID] ?? Set<String>()
         dependencies.insert(childID)
         dependenciesDict[parentID] = dependencies

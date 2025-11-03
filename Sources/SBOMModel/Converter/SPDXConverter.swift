@@ -13,10 +13,6 @@
 import Foundation
 import struct TSCBasic.StringError
 
-private func generateSPDXID() -> String {
-    "urn:uuid:\(generateSBOMID())"
-}
-
 private func convertToSPDXPurpose(from category: SBOMComponent.Category) async -> SPDXPackage.Purpose {
     switch category {
     case .application:
@@ -80,7 +76,7 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
     )
     elements.append(creationInfo)
 
-    let spdxSBOMID = generateSPDXID()
+    let spdxSBOMID = generateSBOMID()
     let profileConformance = ["core", "software"]
 
     let spdxSBOM = SPDXSBOM(

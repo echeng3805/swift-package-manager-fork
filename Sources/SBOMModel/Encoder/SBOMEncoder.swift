@@ -37,7 +37,7 @@ package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
     encoder.dateEncodingStrategy = .iso8601
     let encoded = try encoder.encode(data)
 
-    // try await validateSBOM(from: encoded, spec: sbom.metadata.spec)
+    try await validateSBOM(from: encoded, spec: sbom.metadata.spec)
 
     return encoded
 }
@@ -46,7 +46,7 @@ package func validateSBOM(from encoded: Foundation.Data, spec: SBOMSpec) async t
     guard let sbomJSONObject = try (JSONSerialization.jsonObject(with: encoded)) as? [String: Any] else {
         throw StringError("Could not convert generated SBOM file into JSON object for validation")
     }
-    let schema = try JSONSchema(from: getSchemaFilename(from: spec.type))
+    let schema = try SBOMSchema(from: getSchemaFilename(from: spec.type))
     try schema.validate(sbomJSONObject)
 }
 

@@ -13,7 +13,7 @@
 import Foundation
 import struct TSCBasic.StringError
 
-package struct JSONSchema {
+package struct SBOMSchema {
     // MARK: - Constants
 
     private enum JSONLDKeys {
@@ -44,6 +44,8 @@ package struct JSONSchema {
         static let unevaluatedProperties = "unevaluatedProperties"
         static let minimum = "minimum"
         static let maximum = "maximum"
+        static let minLength = "minLength"
+        static let maxLength = "maxLength"
         static let minItems = "minItems"
         static let maxItems = "maxItems"
         static let uniqueItems = "uniqueItems"
@@ -183,6 +185,22 @@ package struct JSONSchema {
 
     private func validateStringIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
         guard let stringValue = value as? String else { return }
+
+        if let minLength = schema[SchemaKeys.minLength] as? Int {
+            if stringValue.count < minLength {
+                throw StringError(
+                    "String at \(path) is shorter than minimum length. Expected at least \(minLength), got \(stringValue.count)"
+                )
+            }
+        }
+
+        if let maxLength = schema[SchemaKeys.maxLength] as? Int {
+            if stringValue.count > maxLength {
+                throw StringError(
+                    "String at \(path) is longer than maximum length. Expected at most \(maxLength), got \(stringValue.count)"
+                )
+            }
+        }
 
         if let pattern = schema[SchemaKeys.pattern] as? String {
             try self.validatePattern(stringValue, pattern: pattern, path: path)

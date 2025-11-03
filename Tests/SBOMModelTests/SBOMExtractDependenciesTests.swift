@@ -17,6 +17,47 @@ import PackageGraph
 import Testing
 
 struct SBOMExtractDependenciesTests {
+    private func verifyProductDependencies(
+        graph: ModulesGraph,
+        store: ResolvedPackagesStore,
+        product: String
+    ) async throws {
+        let dependencies = try await #require(SBOMModel.extractDependencies(
+            graph: graph,
+            store: store,
+            product: product
+        ).relationships)
+        let packageIDs = graph.packages.map(\.identity.description)
+        
+        #expect(!dependencies.isEmpty, "Product SBOM should have dependencies")
+        
+        let parentIDs = dependencies.map(\.parentID)
+        #expect(parentIDs.count == Set(parentIDs).count, "Parent IDs should be unique")
+        
+        for dependency in dependencies {
+            #expect(!dependency.id.isEmpty, "Dependency ID should not be empty")
+            #expect(!dependency.parentID.isEmpty, "Parent ID should not be empty")
+            #expect(!dependency.childrenID.isEmpty, "Children ID should not be empty")
+            
+            #expect(!dependency.childrenID.contains(dependency.parentID), "parent '\(dependency.parentID)' should not depend on itself")
+            
+            if packageIDs.contains(dependency.parentID) { // package component
+                for child in dependency.childrenID {
+                    if child.contains(":") { // package-to-product dep (own product)
+                        #expect(child.hasPrefix(dependency.parentID), "Package '\(dependency.parentID)' product dependency '\(child)' should be its own product")
+                    } else { // package-to-package dep
+                        #expect(packageIDs.contains(child), "Package '\(dependency.parentID)' package dependency '\(child)' should be a valid package")
+                    }
+                }
+            } else {
+                // Products should only have product-to-product deps, not point back to packages
+                for child in dependency.childrenID {
+                    #expect(child.contains(":"), "Product '\(dependency.parentID)' should only depend on other products, but found package dependency '\(child)'")
+                }
+            }
+        }
+    }
+    
     private func verifyDependencies(graph: ModulesGraph, store: ResolvedPackagesStore) async throws {
         let dependencies = try await #require(SBOMModel.extractDependencies(graph: graph, store: store).relationships)
         let rootPackage = try #require(graph.rootPackages.first)
@@ -33,7 +74,7 @@ struct SBOMExtractDependenciesTests {
             #expect(!dependency.parentID.isEmpty, "Parent ID should not be empty")
             #expect(!dependency.childrenID.isEmpty, "Children ID should not be empty")
 
-            #expect(!dependency.childrenID.contains(dependency.parentID), "parent should not depend on itself")
+            #expect(!dependency.childrenID.contains(dependency.parentID), "parent '\(dependency.parentID)' should not depend on itself")
 
             if dependency.parentID == rootPackageID { // root comp
                 #expect(!dependency.childrenID.contains(rootPackageID))
@@ -76,11 +117,14 @@ struct SBOMExtractDependenciesTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         let productName = "SwiftPMPackageCollections"
+        try await self.verifyProductDependencies(graph: graph, store: store, product: productName)
+        
         let dependencies = try await #require(SBOMModel.extractDependencies(
             graph: graph,
             store: store,
             product: productName
         ).relationships)
+        
         #expect(dependencies.count == 2)
 
         let swiftPMDependency = try #require(dependencies.first(where: { $0.parentID == "SwiftPM" }))
@@ -91,5 +135,14 @@ struct SBOMExtractDependenciesTests {
         let packageCollectionsDependency = try #require(dependencies
             .first(where: { $0.parentID == "SwiftPM:SwiftPMPackageCollections" }))
         #expect(packageCollectionsDependency.childrenID == ["SwiftPM:PackageCollectionsModel"])
+    }
+
+    @Test("extractDependencies with product filter SwiftPMDataModel")
+    func extractDependenciesWithProductFilterSwiftPMDataModel() async throws {
+        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+
+        let productName = "SwiftPMDataModel"
+        try await self.verifyProductDependencies(graph: graph, store: store, product: productName)
     }
 }
