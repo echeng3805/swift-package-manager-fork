@@ -21,7 +21,7 @@ internal struct CDXValidator: SBOMValidatorProtocol {
         try validator.validate(jsonObject)
     }
     
-    internal func validateValue(_ value: Any, against schema: [String: Any], path: String) throws {
-        try validator.validateValue(value, against: schema, path: path)
+    internal func validateValue(_ value: Any, path: String) throws {
+        try validator.validateValue(value, path: path)
     }
 }

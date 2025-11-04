@@ -11,17 +11,15 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import struct TSCBasic.StringError
 
 // MARK: - Base Validator
 
-/// Base validator containing all core JSON Schema validation logic
 internal struct SBOMValidator: SBOMValidatorProtocol {
     // MARK: - Constants
     
     internal enum SchemaKeys {
         static let type = "type"
-        static let required = "required"
+        static let `required` = "required"
         static let properties = "properties"
         static let items = "items"
         static let enumKey = "enum"
@@ -44,7 +42,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         static let uniqueItems = "uniqueItems"
     }
     
-    let schema: [String: Any]
+    internal let schema: [String: Any]
     
     internal init(schema: [String: Any]) {
         self.schema = schema
@@ -53,10 +51,15 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
     // MARK: - SBOMValidatorProtocol Implementation
     
     internal func validate(_ jsonObject: Any) throws {
-        try validateValue(jsonObject, against: schema, path: "$")
+        try validateValue(jsonObject, path: "$")
     }
     
-    internal func validateValue(_ value: Any, against schema: [String: Any], path: String) throws {
+    internal func validateValue(_ value: Any, path: String) throws {
+        try validateValue(value, path: path, schema: self.schema)
+    }
+    
+    // Private helper that accepts a schema parameter for internal recursive calls
+    internal func validateValue(_ value: Any, path: String, schema: [String: Any]) throws {
         // Type validation
         if let expectedType = schema[SchemaKeys.type] as? String {
             try validateType(value, expectedType: expectedType, path: path)
@@ -64,7 +67,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
         // Schema composition keywords
         if let ref = schema[SchemaKeys.ref] as? String {
-            try validateReference(value, ref: ref, path: path)
+            try validateReference(value, ref: ref, path: path, schema: schema)
         }
         if let oneOf = schema[SchemaKeys.oneOf] as? [[String: Any]] {
             try validateOneOf(value, schemas: oneOf, path: path)
@@ -94,106 +97,15 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         try validateNumberIfNeeded(value, schema: schema, path: path)
     }
     
-    // MARK: - Type-Specific Validation
-    
-    private func validateObjectIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
-        guard let objectValue = value as? [String: Any] else { return }
-
-        let allRequired = collectAllRequired(from: schema)
-        if !allRequired.isEmpty {
-            try validateRequiredProperties(objectValue, required: allRequired, path: path)
-        }
-
-        let allProperties = collectAllProperties(from: schema)
-        if !allProperties.isEmpty {
-            try validateObjectProperties(objectValue, properties: allProperties, path: path)
-        }
-
-        try validateAdditionalProperties(objectValue, schema: schema, path: path)
-        try validateUnevaluatedProperties(objectValue, schema: schema, path: path)
-    }
-
-    private func validateArrayIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
-        guard let arrayValue = value as? [Any] else { return }
-
-        if let items = schema[SchemaKeys.items] as? [String: Any] {
-            try validateArrayItems(arrayValue, itemSchema: items, path: path)
-        }
-        try validateArrayConstraints(arrayValue, schema: schema, path: path)
-    }
-
-    private func validateStringIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
-        guard let stringValue = value as? String else { return }
-
-        if let minLength = schema[SchemaKeys.minLength] as? Int {
-            if stringValue.count < minLength {
-                throw StringError(
-                    "String at \(path) is shorter than minimum length. Expected at least \(minLength), got \(stringValue.count)"
-                )
-            }
-        }
-
-        if let maxLength = schema[SchemaKeys.maxLength] as? Int {
-            if stringValue.count > maxLength {
-                throw StringError(
-                    "String at \(path) is longer than maximum length. Expected at most \(maxLength), got \(stringValue.count)"
-                )
-            }
-        }
-
-        if let pattern = schema[SchemaKeys.pattern] as? String {
-            try validatePattern(stringValue, pattern: pattern, path: path)
-        }
-        if let format = schema[SchemaKeys.format] as? String {
-            try validateFormat(stringValue, format: format, path: path)
-        }
-    }
-
-    private func validateNumberIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
-        guard let numberValue = value as? NSNumber else { return }
-        try validateNumericConstraints(numberValue, schema: schema, path: path)
-    }
-    
-    // MARK: - Schema Collection Helpers
-
-    private func collectAllRequired(from schema: [String: Any]) -> [String] {
-        var allRequired: [String] = []
-        if let required = schema[SchemaKeys.required] as? [String] {
-            allRequired.append(contentsOf: required)
-        }
-        if let allOf = schema[SchemaKeys.allOf] as? [[String: Any]] {
-            for subSchema in allOf {
-                collectRequiredProperties(from: subSchema, into: &allRequired)
-            }
-        }
-        return allRequired
-    }
-
-    private func collectAllProperties(from schema: [String: Any]) -> [String: [String: Any]] {
-        var allProperties: [String: [String: Any]] = [:]
-        if let properties = schema[SchemaKeys.properties] as? [String: [String: Any]] {
-            allProperties.merge(properties) { _, new in new }
-        }
-        if let allOf = schema[SchemaKeys.allOf] as? [[String: Any]] {
-            for subSchema in allOf {
-                collectProperties(from: subSchema, into: &allProperties)
-            }
-        }
-        return allProperties
-    }
-    
     // MARK: - Type Validation
 
     private func validateType(_ value: Any, expectedType: String, path: String) throws {
         let (actualType, debugInfo) = determineActualType(value)
-
-        // Allow integers where numbers are expected
         if expectedType == "number" && actualType == "integer" {
             return
         }
-
         guard actualType == expectedType else {
-            throw StringError("Type mismatch at \(path): expected \(expectedType), got \(actualType) (\(debugInfo))")
+            throw SBOMValidationError.typeMismatch(path: path, expected: expectedType, actual: actualType, debugInfo: debugInfo)
         }
     }
 
@@ -216,150 +128,44 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
     }
 
     private func determineNumberType(_ number: NSNumber) -> (type: String, debugInfo: String) {
-        // Check for boolean type
         if isBoolean(number) {
             return ("boolean", "value: \(number.boolValue)")
         }
-
-        // Check for floating point
         if CFNumberIsFloatType(number) {
             return ("number", "value: \(number.doubleValue)")
         }
-
-        // Default to integer
         return ("integer", "value: \(number.intValue)")
     }
 
     private func isBoolean(_ number: NSNumber) -> Bool {
-        let objCType = String(cString: number.objCType)
-        return (objCType == "c" || objCType == "B") &&
-            (number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber)
-    }
-
-    private func validateRequiredProperties(_ object: [String: Any], required: [String], path: String) throws {
-        for property in required {
-            guard object[property] != nil else {
-                throw StringError("Missing required property '\(property)' at \(path)")
-            }
-        }
-    }
-
-    private func validateObjectProperties(
-        _ object: [String: Any],
-        properties: [String: [String: Any]],
-        path: String
-    ) throws {
-        for (key, value) in object {
-            guard let propertySchema = properties[key] else {
-                continue
-            }
-            try validateValue(value, against: propertySchema, path: "\(path).\(key)")
-        }
-    }
-
-    private func validateArrayItems(_ array: [Any], itemSchema: [String: Any], path: String) throws {
-        for (index, item) in array.enumerated() {
-            try validateValue(item, against: itemSchema, path: "\(path)[\(index)]")
-        }
-    }
-
-    private func validateEnum(_ value: Any, allowedValues: [Any], path: String) throws {
-        let isValid = allowedValues.contains { allowedValue in
-            areEqual(value, allowedValue)
-        }
-
-        if !isValid {
-            let valueStr = describeValue(value)
-            let allowedStr = allowedValues.map { describeValue($0) }.joined(separator: ", ")
-            throw StringError(
-                "Value at \(path) is not one of the allowed enum values. Got: \(valueStr), allowed: [\(allowedStr)]"
-            )
-        }
-    }
-
-    private func validatePattern(_ value: String, pattern: String, path: String) throws {
-        guard let regex = try? NSRegularExpression(pattern: pattern) else {
-            throw StringError("Invalid regex pattern: \(pattern)")
-        }
-
-        let range = NSRange(location: 0, length: value.utf16.count)
-
-        guard let match = regex.firstMatch(in: value, options: [], range: range) else {
-            throw StringError("String at \(path) does not match pattern: \(pattern). Value: \"\(value)\"")
-        }
-
-        // Verify the match covers the entire string (JSON Schema pattern must match the whole string)
-        if match.range.location != 0 || match.range.length != value.utf16.count {
-            throw StringError("String at \(path) does not match pattern: \(pattern). Value: \"\(value)\"")
-        }
-    }
-
-    private func validateFormat(_ value: String, format: String, path: String) throws {
-        switch format {
-        case "date-time":
-            if ISO8601DateFormatter().date(from: value) == nil {
-                throw StringError("Invalid date-time format at \(path)")
-            }
-        case "date":
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            if formatter.date(from: value) == nil {
-                throw StringError("Invalid date format at \(path)")
-            }
-        case "email", "idn-email":
-            let emailRegex = #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"#
-            if !NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: value) {
-                throw StringError("Invalid email format at \(path)")
-            }
-        case "uri", "iri-reference":
-            if URL(string: value) == nil {
-                throw StringError("Invalid URI format at \(path)")
-            }
-        default:
-            // Unknown format - skip validation but log in debug builds
-            break
-        }
-    }
-
-    private func validateNumericConstraints(_ value: NSNumber, schema: [String: Any], path: String) throws {
-        if let minimum = schema[SchemaKeys.minimum] as? NSNumber, value.compare(minimum) == .orderedAscending {
-            throw StringError("Value at \(path) is below minimum: \(minimum). Got: \(value)")
-        }
-
-        if let maximum = schema[SchemaKeys.maximum] as? NSNumber, value.compare(maximum) == .orderedDescending {
-            throw StringError("Value at \(path) is above maximum: \(maximum). Got: \(value)")
-        }
-    }
-
-    private func validateReference(_ value: Any, ref: String, path: String) throws {
-        if ref.hasPrefix("#/") {
-            let pointer = String(ref.dropFirst(2))
-            let components = pointer.components(separatedBy: "/")
-
-            if let referencedSchema = resolveReference(components: components, in: schema) {
-                try validateValue(value, against: referencedSchema, path: path)
-            } else {
-                throw StringError("Could not resolve reference '\(ref)' at \(path)")
-            }
-        }
-    }
-
-    private func validateOneOf(_ value: Any, schemas: [[String: Any]], path: String) throws {
-        try validateOneOf(value, schemas: schemas, path: path, preValidation: nil)
+        return number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber
     }
     
-    /// Validate oneOf with optional pre-validation hook for subclass customization
-    internal func validateOneOf(_ value: Any, schemas: [[String: Any]], path: String, preValidation: ((Any, [String: Any], Int, String) throws -> Void)?) throws {
+    // MARK: - Schema Composition Validation
+
+    private func validateReference(_ value: Any, ref: String, path: String, schema: [String: Any]) throws {
+        guard ref.hasPrefix("#/") else { return }
+        
+        let pointer = String(ref.dropFirst(2))
+        let components = pointer.components(separatedBy: "/")
+
+        // References starting with #/ are always resolved from the root schema (self.schema)
+        // not from the current schema being validated
+        guard let referencedSchema = resolveReference(components: components, in: self.schema) else {
+            throw SBOMValidationError.invalidValue(path: path, message: "Could not resolve reference '\(ref)'")
+        }
+        
+        try validateValue(value, path: path, schema: referencedSchema)
+    }
+
+    internal func validateOneOf(_ value: Any, schemas: [[String: Any]], path: String) throws {
         var validCount = 0
         var validationErrors: [String] = []
         var matchingSchemas: [Int] = []
 
         for (index, schema) in schemas.enumerated() {
             do {
-                // Allow custom pre-validation logic (e.g., SPDX-specific checks)
-                try preValidation?(value, schema, index, path)
-                
-                try validateValue(value, against: schema, path: path)
+                try validateValue(value, path: path, schema: schema)
                 validCount += 1
                 matchingSchemas.append(index)
             } catch {
@@ -371,13 +177,15 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
             let valueDesc = describeValue(value, maxLength: 200)
             if validCount == 0 {
                 let allErrors = validationErrors.joined(separator: "\n  ")
-                throw StringError(
-                    "Value at \(path) does not match any oneOf schemas.\nValue: \(valueDesc)\nErrors:\n  \(allErrors)"
+                throw SBOMValidationError.schemaComposition(
+                    path: path,
+                    message: "Value does not match any oneOf schemas.\nValue: \(valueDesc)\nErrors:\n  \(allErrors)"
                 )
             } else {
                 let matchingIndices = matchingSchemas.map(String.init).joined(separator: ", ")
-                throw StringError(
-                    "Value at \(path) matches multiple oneOf schemas (expected exactly one). Matched \(validCount) schemas at indices: \(matchingIndices)\nValue: \(valueDesc)"
+                throw SBOMValidationError.schemaComposition(
+                    path: path,
+                    message: "Value matches multiple oneOf schemas (expected exactly one). Matched \(validCount) schemas at indices: \(matchingIndices)\nValue: \(valueDesc)"
                 )
             }
         }
@@ -385,21 +193,15 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
     private func validateAnyOf(_ value: Any, schemas: [[String: Any]], path: String) throws {
         var schemaNames: [String] = []
-        var detailedErrors: [String: String] = [:]
 
         for (index, schema) in schemas.enumerated() {
             do {
-                try validateValue(value, against: schema, path: path)
+                try validateValue(value, path: path, schema: schema)
                 return // Successfully validated against one schema, we're done
             } catch {
                 // Extract just the schema name/type for concise error reporting
                 let schemaName = extractSchemaName(from: schema, index: index)
                 schemaNames.append(schemaName)
-
-                // For specific schemas, capture the detailed error
-                if schemaName == "CreationInfo" || schemaName == "ExternalIdentifier" || schemaName == "Relationship" {
-                    detailedErrors[schemaName] = error.localizedDescription
-                }
             }
         }
 
@@ -415,7 +217,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
             summary = "Tried schemas: \(schemaNames.joined(separator: ", "))"
         }
 
-        throw StringError("Value at \(path) does not match any anyOf schemas.\nValue: \(valueDesc)\n\(summary)")
+        throw SBOMValidationError.schemaComposition(path: path, message: "Value does not match any anyOf schemas.\nValue: \(valueDesc)\n\(summary)")
     }
 
     private func validateAllOf(_ value: Any, schemas: [[String: Any]], path: String) throws {
@@ -423,7 +225,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
         for (index, schema) in schemas.enumerated() {
             do {
-                try validateValue(value, against: schema, path: path)
+                try validateValue(value, path: path, schema: schema)
             } catch {
                 errors.append("Schema \(index): \(error.localizedDescription)")
             }
@@ -432,38 +234,166 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         if !errors.isEmpty {
             let valueDesc = describeValue(value, maxLength: 200)
             let allErrors = errors.joined(separator: "\n  ")
-            throw StringError(
-                "Value at \(path) does not match all allOf schemas.\nValue: \(valueDesc)\nErrors:\n  \(allErrors)"
+            throw SBOMValidationError.schemaComposition(
+                path: path,
+                message: "Value does not match all allOf schemas.\nValue: \(valueDesc)\nErrors:\n  \(allErrors)"
             )
         }
     }
+
+    private func validateNot(_ value: Any, schema: [String: Any], path: String) throws {
+        do {
+            try validateValue(value, path: path, schema: schema)
+            let valueDesc = describeValue(value, maxLength: 200)
+            throw SBOMValidationError.notSchemaViolation(path: path, valueDescription: valueDesc)
+        } catch let error as SBOMValidationError { // rethrow notSchemaViolation errors (from nested "not" schemas)
+            if case .notSchemaViolation = error {
+                throw error
+            }
+            return
+        } catch { // rethrow unexpected errors (parsing errors, system errors, programming bugs)
+            throw error
+        }
+    }
+    
+    // MARK: - Value Validation
 
     private func validateConst(_ value: Any, expectedValue: Any, path: String) throws {
         if !areEqual(value, expectedValue) {
             let valueDesc = describeValue(value)
             let expectedDesc = describeValue(expectedValue)
-            throw StringError("Value at \(path) does not match const. Expected: \(expectedDesc), got: \(valueDesc)")
+            throw SBOMValidationError.invalidValue(path: path, message: "Value does not match const. Expected: \(expectedDesc), got: \(valueDesc)")
+        }
+    }
+
+    private func validateEnum(_ value: Any, allowedValues: [Any], path: String) throws {
+        let isValid = allowedValues.contains { allowedValue in
+            areEqual(value, allowedValue)
+        }
+
+        if !isValid {
+            let valueStr = describeValue(value)
+            let allowedStr = allowedValues.map { describeValue($0) }.joined(separator: ", ")
+            throw SBOMValidationError.invalidValue(
+                path: path,
+                message: "Value is not one of the allowed enum values. Got: \(valueStr), allowed: [\(allowedStr)]"
+            )
+        }
+    }
+    
+    // MARK: - Type-Specific Validation - Object
+
+    private func validateObjectIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
+        guard let objectValue = value as? [String: Any] else { return }
+
+        let allRequired = collectAllRequired(from: schema)
+        if !allRequired.isEmpty {
+            try validateRequiredProperties(objectValue, required: allRequired, path: path)
+        }
+
+        let allProperties = collectAllProperties(from: schema)
+        if !allProperties.isEmpty {
+            try validateObjectProperties(objectValue, properties: allProperties, path: path)
+        }
+
+        try validateAdditionalProperties(objectValue, schema: schema, path: path)
+        try validateUnevaluatedProperties(objectValue, schema: schema, path: path)
+    }
+
+    private func validateRequiredProperties(_ object: [String: Any], required: [String], path: String) throws {
+        for property in required {
+            guard object[property] != nil else {
+                throw SBOMValidationError.missingRequired(path: path, property: property)
+            }
+        }
+    }
+
+    private func validateObjectProperties(
+        _ object: [String: Any],
+        properties: [String: [String: Any]],
+        path: String
+    ) throws {
+        for (key, value) in object {
+            guard let propertySchema = properties[key] else {
+                continue
+            }
+            try validateValue(value, path: "\(path).\(key)", schema: propertySchema)
+        }
+    }
+
+    private func validateAdditionalProperties(_ object: [String: Any], schema: [String: Any], path: String) throws {
+        guard let additionalProps = schema[SchemaKeys.additionalProperties] else { return }
+
+        let allowedProperties = collectAllAllowedProperties(from: schema)
+        let extraProperties = Set(object.keys).subtracting(allowedProperties)
+
+        if let allowsAdditional = additionalProps as? Bool, !allowsAdditional {
+            guard extraProperties.isEmpty else {
+                let extraList = extraProperties.sorted().joined(separator: ", ")
+                throw SBOMValidationError.constraintViolation(path: path, message: "Additional properties not allowed: \(extraList)")
+            }
+            return
+        }
+        
+        guard let additionalPropsSchema = additionalProps as? [String: Any] else { return }
+        
+        for key in extraProperties {
+            guard let value = object[key] else { continue }
+            try validateValue(value, path: "\(path).\(key)", schema: additionalPropsSchema)
+        }
+    }
+
+    private func validateUnevaluatedProperties(_ object: [String: Any], schema: [String: Any], path: String) throws {
+        guard let unevaluatedProps = schema[SchemaKeys.unevaluatedProperties] as? Bool,
+              !unevaluatedProps else {
+            return
+        }
+
+        let evaluatedProperties = collectAllEvaluatedProperties(from: schema)
+        let unevaluated = Set(object.keys).subtracting(evaluatedProperties)
+
+        guard unevaluated.isEmpty else {
+            let unevaluatedList = unevaluated.sorted().joined(separator: ", ")
+            throw SBOMValidationError.constraintViolation(path: path, message: "Unevaluated properties found: \(unevaluatedList)")
+        }
+    }
+    
+    // MARK: - Type-Specific Validation - Array
+
+    private func validateArrayIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
+        guard let arrayValue = value as? [Any] else { return }
+
+        if let items = schema[SchemaKeys.items] as? [String: Any] {
+            try validateArrayItems(arrayValue, itemSchema: items, path: path)
+        }
+        try validateArrayConstraints(arrayValue, schema: schema, path: path)
+    }
+
+    private func validateArrayItems(_ array: [Any], itemSchema: [String: Any], path: String) throws {
+        for (index, item) in array.enumerated() {
+            try validateValue(item, path: "\(path)[\(index)]", schema: itemSchema)
         }
     }
 
     private func validateArrayConstraints(_ array: [Any], schema: [String: Any], path: String) throws {
         if let minItems = schema["minItems"] as? Int {
-            if array.count < minItems {
-                throw StringError(
-                    "Array at \(path) has fewer items than minimum. Expected at least \(minItems), got \(array.count)"
+            guard array.count >= minItems else {
+                throw SBOMValidationError.constraintViolation(
+                    path: path,
+                    message: "Array has fewer items than minimum. Expected at least \(minItems), got \(array.count)"
                 )
             }
         }
 
         if let maxItems = schema["maxItems"] as? Int {
-            if array.count > maxItems {
-                throw StringError(
-                    "Array at \(path) has more items than maximum. Expected at most \(maxItems), got \(array.count)"
+            guard array.count <= maxItems else {
+                throw SBOMValidationError.constraintViolation(
+                    path: path,
+                    message: "Array has more items than maximum. Expected at most \(maxItems), got \(array.count)"
                 )
             }
         }
 
-        // Validate uniqueItems constraint
         if let uniqueItems = schema["uniqueItems"] as? Bool, uniqueItems {
             try validateUniqueItems(array, path: path)
         }
@@ -480,8 +410,9 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
             if seen.contains(itemKey) {
                 let itemDesc = describeValue(item, maxLength: 100)
-                throw StringError(
-                    "Array at \(path) contains duplicate items. Duplicate found at index \(index): \(itemDesc)"
+                throw SBOMValidationError.constraintViolation(
+                    path: path,
+                    message: "Array contains duplicate items. Duplicate found at index \(index): \(itemDesc)"
                 )
             }
             seen.insert(itemKey)
@@ -501,7 +432,6 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         } else if let string = value as? String {
             return "\"\(string)\""
         } else if let number = value as? NSNumber {
-            // Handle booleans and numbers
             if isBoolean(number) {
                 return number.boolValue ? "true" : "false"
             }
@@ -511,25 +441,121 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         }
         return "\(value)"
     }
+    
+    // MARK: - Type-Specific Validation - String
 
-    private func validateAdditionalProperties(_ object: [String: Any], schema: [String: Any], path: String) throws {
-        guard let additionalProps = schema[SchemaKeys.additionalProperties] else { return }
+    private func validateStringIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
+        guard let stringValue = value as? String else { return }
 
-        let allowedProperties = collectAllAllowedProperties(from: schema)
-        let extraProperties = Set(object.keys).subtracting(allowedProperties)
-
-        if let allowsAdditional = additionalProps as? Bool, !allowsAdditional {
-            guard extraProperties.isEmpty else {
-                let extraList = extraProperties.sorted().joined(separator: ", ")
-                throw StringError("Additional properties not allowed at \(path): \(extraList)")
-            }
-        } else if let additionalPropsSchema = additionalProps as? [String: Any] {
-            for key in extraProperties {
-                if let value = object[key] {
-                    try validateValue(value, against: additionalPropsSchema, path: "\(path).\(key)")
-                }
-            }
+        try validateStringLength(stringValue, schema: schema, path: path)
+        
+        if let pattern = schema[SchemaKeys.pattern] as? String {
+            try validatePattern(stringValue, pattern: pattern, path: path)
         }
+        if let format = schema[SchemaKeys.format] as? String {
+            try validateFormat(stringValue, format: format, path: path)
+        }
+    }
+    
+    private func validateStringLength(_ value: String, schema: [String: Any], path: String) throws {
+        let minLength = schema[SchemaKeys.minLength] as? Int
+        let maxLength = schema[SchemaKeys.maxLength] as? Int
+        let length = value.count
+        
+        // Check minimum length
+        if let min = minLength, length < min {
+            throw SBOMValidationError.constraintViolation(
+                path: path,
+                message: "String is shorter than minimum length. Expected at least \(min), got \(length)"
+            )
+        }
+        
+        // Check maximum length
+        if let max = maxLength, length > max {
+            throw SBOMValidationError.constraintViolation(
+                path: path,
+                message: "String is longer than maximum length. Expected at most \(max), got \(length)"
+            )
+        }
+    }
+
+    private func validatePattern(_ value: String, pattern: String, path: String) throws {
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            throw SBOMValidationError.invalidValue(path: path, message: "Invalid regex pattern: \(pattern)")
+        }
+
+        let range = NSRange(location: 0, length: value.utf16.count)
+
+        guard let match = regex.firstMatch(in: value, options: [], range: range) else {
+            throw SBOMValidationError.constraintViolation(path: path, message: "String does not match pattern: \(pattern). Value: \"\(value)\"")
+        }
+
+        // Verify the match covers the entire string (JSON Schema pattern must match the whole string)
+        guard match.range.location == 0 && match.range.length == value.utf16.count else {
+            throw SBOMValidationError.constraintViolation(path: path, message: "String does not match pattern: \(pattern). Value: \"\(value)\"")
+        }
+    }
+
+    private func validateFormat(_ value: String, format: String, path: String) throws {
+        switch format {
+        case "date-time":
+            if ISO8601DateFormatter().date(from: value) == nil {
+                throw SBOMValidationError.invalidValue(path: path, message: "Invalid date-time format")
+            }
+        case "date":
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            if formatter.date(from: value) == nil {
+                throw SBOMValidationError.invalidValue(path: path, message: "Invalid date format")
+            }
+        case "email", "idn-email":
+            let emailRegex = #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"#
+            if !NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: value) {
+                throw SBOMValidationError.invalidValue(path: path, message: "Invalid email format")
+            }
+        case "uri", "iri-reference":
+            if URL(string: value) == nil {
+                throw SBOMValidationError.invalidValue(path: path, message: "Invalid URI format")
+            }
+        default:
+            // Unknown format - skip validation but log in debug builds
+            break
+        }
+    }
+    
+    // MARK: - Type-Specific Validation - Number
+
+    private func validateNumberIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
+        guard let numberValue = value as? NSNumber else { return }
+        try validateNumericConstraints(numberValue, schema: schema, path: path)
+    }
+
+    private func validateNumericConstraints(_ value: NSNumber, schema: [String: Any], path: String) throws {
+        if let minimum = schema[SchemaKeys.minimum] as? NSNumber, value.compare(minimum) == .orderedAscending {
+            throw SBOMValidationError.constraintViolation(path: path, message: "Value is below minimum: \(minimum). Got: \(value)")
+        }
+
+        if let maximum = schema[SchemaKeys.maximum] as? NSNumber, value.compare(maximum) == .orderedDescending {
+            throw SBOMValidationError.constraintViolation(path: path, message: "Value is above maximum: \(maximum). Got: \(value)")
+        }
+    }
+    
+    // MARK: - Schema Resolution and Collection Helpers
+
+    private func collectAllRequired(from schema: [String: Any]) -> [String] {
+        var allRequired: [String] = []
+        collectFromSchema(schema, key: SchemaKeys.required) { (required: [String]) in
+            allRequired.append(contentsOf: required)
+        }
+        return allRequired
+    }
+
+    private func collectAllProperties(from schema: [String: Any]) -> [String: [String: Any]] {
+        var allProperties: [String: [String: Any]] = [:]
+        collectFromSchema(schema, key: SchemaKeys.properties) { (properties: [String: [String: Any]]) in
+            allProperties.merge(properties) { _, new in new }
+        }
+        return allProperties
     }
 
     private func collectAllAllowedProperties(from schema: [String: Any]) -> Set<String> {
@@ -542,50 +568,12 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         for compositionKey in [SchemaKeys.allOf, SchemaKeys.anyOf, SchemaKeys.oneOf] {
             if let schemas = schema[compositionKey] as? [[String: Any]] {
                 for subSchema in schemas {
-                    collectAllowedProperties(from: subSchema, into: &allowedProperties)
+                    allowedProperties.formUnion(collectAllAllowedProperties(from: subSchema))
                 }
             }
         }
 
         return allowedProperties
-    }
-
-    private func collectAllowedProperties(from schema: [String: Any], into allowedProperties: inout Set<String>) {
-        collectFromSchema(schema, key: SchemaKeys.properties) { (properties: [String: Any]) in
-            allowedProperties.formUnion(properties.keys)
-        }
-    }
-
-    private func validateNot(_ value: Any, schema: [String: Any], path: String) throws {
-        do {
-            try validateValue(value, against: schema, path: path)
-            // If validation succeeds, it means the value matches the schema, which violates "not"
-            let valueDesc = describeValue(value, maxLength: 200)
-            throw StringError("Value at \(path) matches 'not' schema (should not match).\nValue: \(valueDesc)")
-        } catch {
-            // If validation fails, it's what we want for "not" - the value doesn't match
-            // Only rethrow if it's our own "not" error
-            if error.localizedDescription.contains("matches 'not' schema") {
-                throw error
-            }
-            // Otherwise, validation failed as expected for "not", so we're good
-            return
-        }
-    }
-
-    private func validateUnevaluatedProperties(_ object: [String: Any], schema: [String: Any], path: String) throws {
-        guard let unevaluatedProps = schema[SchemaKeys.unevaluatedProperties] as? Bool,
-              !unevaluatedProps else {
-            return
-        }
-
-        let evaluatedProperties = collectAllEvaluatedProperties(from: schema)
-        let unevaluated = Set(object.keys).subtracting(evaluatedProperties)
-
-        guard unevaluated.isEmpty else {
-            let unevaluatedList = unevaluated.sorted().joined(separator: ", ")
-            throw StringError("Unevaluated properties found at \(path): \(unevaluatedList)")
-        }
     }
 
     private func collectAllEvaluatedProperties(from schema: [String: Any]) -> Set<String> {
@@ -602,7 +590,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         for compositionKey in [SchemaKeys.allOf, SchemaKeys.anyOf, SchemaKeys.oneOf] {
             if let schemas = schema[compositionKey] as? [[String: Any]] {
                 for subSchema in schemas {
-                    collectEvaluatedProperties(from: subSchema, into: &evaluatedProperties)
+                    evaluatedProperties.formUnion(collectEvaluatedProperties(from: subSchema))
                 }
             }
         }
@@ -610,22 +598,12 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         return evaluatedProperties
     }
 
-    private func collectRequiredProperties(from schema: [String: Any], into allRequired: inout [String]) {
-        collectFromSchema(schema, key: SchemaKeys.required) { (required: [String]) in
-            allRequired.append(contentsOf: required)
+    private func collectEvaluatedProperties(from schema: [String: Any]) -> Set<String> {
+        var properties = Set<String>()
+        collectFromSchema(schema, key: SchemaKeys.properties) { (schemaProperties: [String: Any]) in
+            properties.formUnion(schemaProperties.keys)
         }
-    }
-
-    private func collectProperties(from schema: [String: Any], into allProperties: inout [String: [String: Any]]) {
-        collectFromSchema(schema, key: SchemaKeys.properties) { (properties: [String: [String: Any]]) in
-            allProperties.merge(properties) { _, new in new }
-        }
-    }
-
-    private func collectEvaluatedProperties(from schema: [String: Any], into evaluatedProperties: inout Set<String>) {
-        collectFromSchema(schema, key: SchemaKeys.properties) { (properties: [String: Any]) in
-            evaluatedProperties.formUnion(properties.keys)
-        }
+        return properties
     }
 
     /// Generic helper to collect data from schema with $ref and allOf resolution
@@ -635,7 +613,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
             collector(value)
         }
 
-        // Resolve and collect from $ref
+        // Resolve and collect from $ref - always resolve from root schema
         if let ref = schema[SchemaKeys.ref] as? String, ref.hasPrefix("#/") {
             let pointer = String(ref.dropFirst(2))
             let components = pointer.components(separatedBy: "/")
@@ -654,18 +632,19 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
     private func resolveReference(components: [String], in schema: [String: Any]) -> [String: Any]? {
         var current: Any = schema
-
         for component in components {
-            guard let dict = current as? [String: Any],
-                  let next = dict[component]
-            else {
+            guard let dict = current as? [String: Any] else {
+                return nil
+            }
+            guard let next = dict[component] else {
                 return nil
             }
             current = next
         }
-
         return current as? [String: Any]
     }
+    
+    // MARK: - Utility Functions
 
     private func areEqual(_ lhs: Any, _ rhs: Any) -> Bool {
         if let lhsString = lhs as? String, let rhsString = rhs as? String {
@@ -684,7 +663,6 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
     private func extractSchemaName(from schema: [String: Any], index: Int) -> String {
         // Check for $ref first
         if let ref = schema["$ref"] as? String {
-            // Extract the last component of the reference path
             let components = ref.components(separatedBy: "/")
             if let last = components.last {
                 return last
@@ -700,12 +678,10 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         if let properties = schema["properties"] as? [String: Any],
            let typeSchema = properties["type"] as? [String: Any],
            let oneOf = typeSchema["oneOf"] as? [[String: Any]],
-           let firstConst = oneOf.first?["const"] as? String
-        {
+           let firstConst = oneOf.first?["const"] as? String {
             return firstConst
         }
 
-        // Fallback to index
         return "#\(index)"
     }
 

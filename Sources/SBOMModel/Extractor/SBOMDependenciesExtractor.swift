@@ -26,8 +26,10 @@ package func extractDependencies(
     cache: SBOMVersionCache? = nil
 ) async throws -> SBOMDependencies {
     if let name = product {
+        // slower but can filter out dependencies based on product
         return try await extractProductDependencies(graph: graph, store: store, product: name, cache: cache)
     }
+    // faster but gets all dependencies for the root package
     return try await extractRootPackageDependencies(graph: graph, store: store, cache: cache)
 }
 
@@ -234,9 +236,9 @@ private func extractProductDependencies(
                     trackDependency(parentID: rootPackageID, childID: productPackageComponent.id)
                 }
                 // add rootPackage -> dependentProductPackage dependency if it's not the root package
-                if dependentProductPackageComponent.id != rootPackageID {
-                    trackDependency(parentID: rootPackageID, childID: dependentProductPackageComponent.id)
-                }
+                // if dependentProductPackageComponent.id != rootPackageID {
+                //     trackDependency(parentID: rootPackageID, childID: dependentProductPackageComponent.id)
+                // }
             }
         }
         return dependentProduct // needs to be processed
@@ -264,7 +266,7 @@ private func extractProductDependencies(
         return Array(productsToProcess)
     }
 
-    // add rootPackage -> targetProduct dependency
+    // first, add rootPackage -> targetProduct dependency
     try await addComponent(extractComponent(product: targetProduct, graph: graph, store: store, cache: cache))
     try await addComponent(extractComponent(package: rootPackage, graph: graph, store: store, cache: cache))
     trackDependency(parentID: rootPackageID, childID: targetID)

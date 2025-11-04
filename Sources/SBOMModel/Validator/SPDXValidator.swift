@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import struct TSCBasic.StringError
 
 internal struct SPDXValidator: SBOMValidatorProtocol {
     
@@ -23,110 +22,96 @@ internal struct SPDXValidator: SBOMValidatorProtocol {
     }
     
     private let validator: SBOMValidator
+    private let graphElementSchema: [String: Any]
     
     internal init(schema: [String: Any]) {
         self.validator = SBOMValidator(schema: schema)
+        self.graphElementSchema = SPDXValidator.extractGraphElementSchema(from: schema)
     }
         
     internal func validate(_ jsonObject: Any) throws {
         guard let rootDict = jsonObject as? [String: Any] else {
-            throw StringError("Expected dictionary for SPDX JSON-LD document at $")
+            throw SBOMValidationError.typeMismatch(path: "$", expected: "dictionary", actual: "other", debugInfo: "Expected dictionary for SPDX JSON-LD document")
+        }
+        guard let contextString = rootDict[SPDXKeys.context] as? String,
+            !contextString.isEmpty else {
+            throw SBOMValidationError.invalidValue(path: "$", message: "@context must be a non-empty string")
+        }
+        guard let graph = rootDict[SPDXKeys.graph] as? [Any],
+            !graph.isEmpty else {
+            throw SBOMValidationError.invalidValue(path: "$", message: "@graph must be a non-empty array")
         }
 
-        try validateContext(rootDict[SPDXKeys.context])
-
-        guard let graph = rootDict[SPDXKeys.graph] as? [Any] else {
-            throw StringError("@graph at $ must be an array")
-        }
-        guard !graph.isEmpty else {
-            throw StringError("@graph at $ is empty")
-        }
-
-        let graphElementSchema = extractGraphElementSchema()
         for (index, element) in graph.enumerated() {
-            try validateValue(element, against: graphElementSchema, path: "$[@graph][\(index)]")
+            try validateValue(element, path: "$[@graph][\(index)]")
         }
     }
     
-    internal func validateValue(_ value: Any, against schema: [String: Any], path: String) throws {
-        if let objectValue = value as? [String: Any] {
-            try validateObjectWithSPDXRules(objectValue, against: schema, path: path)
-        } else {
-            try validator.validateValue(value, against: schema, path: path)
+    internal func validateValue(_ value: Any, path: String) throws {
+        if let dictObject = value as? [String: Any] {
+            try validateObjectWithSPDXRules(dictObject, path: path)
         }
+        try validator.validateValue(value, path: path, schema: graphElementSchema)
     }
+    
+    // private func validateGraphElement(_ value: Any, path: String) throws {
+    //     guard let dictObject = value as? [String: Any] else {
+    //         throw SBOMValidationError.typeMismatch(path: path, expected: "dictionary", actual: "other", debugInfo: "Graph elements must be dictionaries")
+    //     }
+    //     try validator.validateValue(value, path: path, schema: graphElementSchema)
+    // }
         
-    private func validateObjectWithSPDXRules(_ object: [String: Any], against schema: [String: Any], path: String) throws {
+    private func validateObjectWithSPDXRules(_ object: [String: Any], path: String) throws {
+        let schema = validator.schema
+        
         if let required = schema["required"] as? [String] {
             for property in required {
+                if property == SPDXKeys.context {
+                    continue
+                }
                 // allow @id as substitute for spdxId
                 if property == SPDXKeys.spdxId && object[SPDXKeys.id] != nil {
                     continue
                 }
                 guard object[property] != nil else {
-                    throw StringError("Missing required property '\(property)' at \(path)")
+                    throw SBOMValidationError.missingRequired(path: path, property: property)
                 }
             }
         }
         
-        // Handle properties with SPDX-specific resolution
         if let properties = schema["properties"] as? [String: [String: Any]] {
             for (key, value) in object {
                 let propertySchema: [String: Any]?
                 
-                // SPDX JSON-LD: @id can use spdxId schema
+                // @id can use spdxId schema
                 if key == SPDXKeys.id, let spdxIdSchema = properties[SPDXKeys.spdxId] {
                     propertySchema = spdxIdSchema
                 }
-                // SPDX JSON-LD: Skip spdxId if @id is present
+                // skip spdxId if @id is present
                 else if key == SPDXKeys.spdxId && object[SPDXKeys.id] != nil {
                     continue
                 }
                 else {
                     propertySchema = properties[key]
                 }
-                
-                if let schema = propertySchema {
-                    try validateValue(value, against: schema, path: "\(path).\(key)")
+                if let propSchema = propertySchema {
+                    try validator.validateValue(value, path: "\(path).\(key)", schema: propSchema)
                 }
             }
         }
-        
-        // Handle oneOf with SPDX-specific logic
+
         if let oneOf = schema["oneOf"] as? [[String: Any]] {
-            // Use base validator's validateOneOf with SPDX-specific pre-validation
-            try validator.validateOneOf(object, schemas: oneOf, path: path) { value, schema, index, path in
-                // SPDX-specific: Prevent AnyClass from matching @graph objects
-                if path == "$", let valueDict = value as? [String: Any] {
-                    if index == 1 && valueDict[SPDXKeys.graph] != nil {
-                        throw StringError("AnyClass schema should not match objects with @graph property")
-                    }
-                }
-            }
-            return
-        }
-        
-        try validator.validateValue(object, against: schema, path: path)
-    }
-    
-    // MARK: - Private Validation Methods
-    
-    private func validateContext(_ context: Any?) throws {
-        guard let contextString = context as? String else {
-            throw StringError("@context at $ must be a string")
-        }
-        guard !contextString.isEmpty else {
-            throw StringError("@context at $ is empty")
+            try validator.validateOneOf(object, schemas: oneOf, path: path)
         }
     }
     
-    private func extractGraphElementSchema() -> [String: Any] {
+    private static func extractGraphElementSchema(from schema: [String: Any]) -> [String: Any] {
         // Graph elements use AnyClass schema (oneOf[1]) rather than root schema
-        if let oneOf = validator.schema[SBOMValidator.SchemaKeys.oneOf] as? [[String: Any]], oneOf.count > 1 {
+        if let oneOf = schema[SBOMValidator.SchemaKeys.oneOf] as? [[String: Any]], oneOf.count > 1 {
             return oneOf[1]
-        } else if let anyOf = validator.schema[SBOMValidator.SchemaKeys.anyOf] as? [[String: Any]], !anyOf.isEmpty {
+        } else if let anyOf = schema[SBOMValidator.SchemaKeys.anyOf] as? [[String: Any]], !anyOf.isEmpty {
             return anyOf[0]
         }
-        return validator.schema
+        return schema
     }
 }

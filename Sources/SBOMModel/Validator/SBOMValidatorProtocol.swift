@@ -10,7 +10,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
+
 internal protocol SBOMValidatorProtocol {
     func validate(_ jsonObject: Any) throws
-    func validateValue(_ value: Any, against schema: [String: Any], path: String) throws
+    func validateValue(_ value: Any, path: String) throws
 }
