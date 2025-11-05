@@ -34,27 +34,22 @@ struct SBOMExtractTests {
         #expect(fullSbom.primaryComponent.id == "SwiftPM")
         #expect(fullSbom.primaryComponent.category == .library)
 
-        #expect(sbom.dependencies.components.count == 3)
-        #expect(fullSbom.dependencies.components.count == 42)
+        #expect(sbom.dependencies.components.count == 9)
+        #expect(fullSbom.dependencies.components.count == 22)
 
-        #expect(sbom.dependencies.relationships?.count == 2)
-        #expect(fullSbom.dependencies.relationships?.count == 10)
+        #expect(sbom.dependencies.relationships?.count == 5)
+        #expect(fullSbom.dependencies.relationships?.count == 13)
 
         let componentIDs = Set(sbom.dependencies.components.map(\.id))
 
         #expect(componentIDs.contains("SwiftPM:SwiftPMPackageCollections"), "should contain target product")
         #expect(componentIDs.contains("SwiftPM"), "should contain root package")
-        #expect(componentIDs.contains("SwiftPM:PackageCollectionsModel"), "should contain dependency product")
 
         let swiftPMDependency = try #require(sbom.dependencies.relationships?
             .first(where: { $0.parentID == "SwiftPM" }))
         #expect(Set(swiftPMDependency.childrenID) == Set([
-            "SwiftPM:PackageCollectionsModel",
-            "SwiftPM:SwiftPMPackageCollections",
+            "swift-tools-support-core", "swift-system", "swift-collections", "SwiftPM:SwiftPMPackageCollections"
         ]))
-        let packageCollectionsDependency = try #require(sbom.dependencies.relationships?
-            .first(where: { $0.parentID == "SwiftPM:SwiftPMPackageCollections" }))
-        #expect(packageCollectionsDependency.childrenID == ["SwiftPM:PackageCollectionsModel"])
     }
 
     @Test("extractSBOM with product filter for Swiftly")
@@ -74,10 +69,10 @@ struct SBOMExtractTests {
         #expect(fullSbom.primaryComponent.id == "swiftly")
         #expect(fullSbom.primaryComponent.category == .application)
 
-        #expect(sbom.dependencies.components.count == 8)
+        #expect(sbom.dependencies.components.count == 16)
         #expect(fullSbom.dependencies.components.count == 17)
 
-        #expect(sbom.dependencies.relationships?.count == 5)
+        #expect(sbom.dependencies.relationships?.count == 9)
         #expect(fullSbom.dependencies.relationships?.count == 10)
 
         let componentIDs = Set(sbom.dependencies.components.map(\.id))
@@ -95,13 +90,21 @@ struct SBOMExtractTests {
             "swift-tools-support-core",
             "swift-argument-parser",
             "swift-system",
+            "async-http-client",
+            "swift-openapi-async-http-client",
+            "swift-nio",
+            "swift-openapi-runtime",
         ]))
         let swiftlyProductDependency = try #require(sbom.dependencies.relationships?
             .first(where: { $0.parentID == "swiftly:swiftly" }))
         #expect(Set(swiftlyProductDependency.childrenID) == Set([
-            "swift-system:SystemPackage",
+            "async-http-client:AsyncHTTPClient",
+            "swift-openapi-async-http-client:OpenAPIAsyncHTTPClient",
+            "swift-openapi-runtime:OpenAPIRuntime",
             "swift-tools-support-core:SwiftToolsSupport-auto",
             "swift-argument-parser:ArgumentParser",
+            "swift-nio:NIOFoundationCompat",
+            "swift-system:SystemPackage",
         ]))
         let swiftSystemDependency = try #require(sbom.dependencies.relationships?
             .first(where: { $0.parentID == "swift-system" }))

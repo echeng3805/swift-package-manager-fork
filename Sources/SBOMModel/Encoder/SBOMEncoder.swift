@@ -37,7 +37,7 @@ package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
     encoder.dateEncodingStrategy = .iso8601
     let encoded = try encoder.encode(data)
 
-    // try await validateSBOM(from: encoded, spec: sbom.metadata.spec)
+    try await validateSBOM(from: encoded, spec: sbom.metadata.spec)
 
     return encoded
 }

@@ -118,23 +118,6 @@ struct SBOMExtractDependenciesTests {
 
         let productName = "SwiftPMPackageCollections"
         try await self.verifyProductDependencies(graph: graph, store: store, product: productName)
-        
-        let dependencies = try await #require(SBOMModel.extractDependencies(
-            graph: graph,
-            store: store,
-            product: productName
-        ).relationships)
-        
-        #expect(dependencies.count == 2)
-
-        let swiftPMDependency = try #require(dependencies.first(where: { $0.parentID == "SwiftPM" }))
-        #expect(Set(swiftPMDependency.childrenID) == Set([
-            "SwiftPM:PackageCollectionsModel",
-            "SwiftPM:SwiftPMPackageCollections",
-        ]))
-        let packageCollectionsDependency = try #require(dependencies
-            .first(where: { $0.parentID == "SwiftPM:SwiftPMPackageCollections" }))
-        #expect(packageCollectionsDependency.childrenID == ["SwiftPM:PackageCollectionsModel"])
     }
 
     @Test("extractDependencies with product filter SwiftPMDataModel")
@@ -144,5 +127,38 @@ struct SBOMExtractDependenciesTests {
 
         let productName = "SwiftPMDataModel"
         try await self.verifyProductDependencies(graph: graph, store: store, product: productName)
+    }
+
+    @Test("extractDependencies with simple test graph")
+    func extractDependenciesFromSimpleGraph() async throws {
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        try await self.verifyDependencies(graph: graph, store: store)
+        let dependencies = try await #require(SBOMModel.extractDependencies(graph: graph, store: store).relationships)
+        
+        // Expected structure:
+        // - MyApp package depends on Utils package and App product
+        // - Utils package depends on Utils product
+        // - App product depends on Utils product
+        
+        #expect(dependencies.count == 3, "Simple graph should have exactly 3 dependency relationships")
+        
+        // Find each dependency relationship
+        let myAppPackageDep = try #require(dependencies.first { $0.parentID == "MyApp" })
+        let utilsPackageDep = try #require(dependencies.first { $0.parentID == "Utils" })
+        let appProductDep = try #require(dependencies.first { $0.parentID == "MyApp:App" })
+        
+        // Verify MyApp package dependencies
+        #expect(myAppPackageDep.childrenID.count == 2, "MyApp package should have 2 dependencies")
+        #expect(myAppPackageDep.childrenID.contains("Utils"), "MyApp should depend on Utils package")
+        #expect(myAppPackageDep.childrenID.contains("MyApp:App"), "MyApp should depend on its own App product")
+        
+        // Verify Utils package dependencies
+        #expect(utilsPackageDep.childrenID.count == 1, "Utils package should have 1 dependency")
+        #expect(utilsPackageDep.childrenID.contains("Utils:Utils"), "Utils should depend on its own Utils product")
+        
+        // Verify App product dependencies
+        #expect(appProductDep.childrenID.count == 1, "App product should have 1 dependency")
+        #expect(appProductDep.childrenID.contains("Utils:Utils"), "App product should depend on Utils product")
     }
 }

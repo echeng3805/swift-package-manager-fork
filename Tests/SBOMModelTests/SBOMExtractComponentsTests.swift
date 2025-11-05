@@ -29,11 +29,9 @@ struct SBOMExtractComponentsTests {
     }
 
     private static let spmExpectations = TestExpectations(
-        totalComponentCount: 42,
+        totalComponentCount: 22,
         expectedPackageIds: Set([
-            "SwiftPM", "swift-system", "swift-collections", "swift-argument-parser",
-            "swift-llbuild", "swift-tools-support-core", "swift-driver",
-            "swift-crypto", "swift-certificates",
+            "swift-system", "swift-driver", "swift-tools-support-core", "SwiftPM", "swift-collections", "swift-llbuild"
         ]),
         rootPackagePrefix: "SwiftPM:",
         expectedRootProductCount: 10,
@@ -42,15 +40,18 @@ struct SBOMExtractComponentsTests {
             "PackagePlugin", "XCBuildSupport", "SwiftPMDataModel-auto", "SwiftPMPackageCollections",
             "AppleProductTypes", "SwiftPM", "SwiftPMDataModel",
         ]),
-        expectedDependencyProductCount: 32
+        expectedDependencyProductCount: 12
     )
 
     private static let swiftlyExpectations = TestExpectations(
         totalComponentCount: 17,
         expectedPackageIds: Set([
-            "swiftly", "swift-argument-parser", "async-http-client",
-            "swift-openapi-async-http-client", "swift-nio", "swift-tools-support-core",
-            "swift-openapi-runtime", "swift-system",
+            "swift-openapi-runtime",
+            "swift-openapi-async-http-client",
+            "swift-system", "swiftly",
+            "swift-argument-parser", "swift-tools-support-core",
+            "async-http-client", "swift-nio"
+            
         ]),
         rootPackagePrefix: "swiftly:",
         expectedRootProductCount: 2,
@@ -64,11 +65,6 @@ struct SBOMExtractComponentsTests {
         expectations: TestExpectations
     ) {
         #expect(components.count == expectations.totalComponentCount)
-
-        let graphPackages = Set(graph.packages.map(\.identity.description))
-        let packageComponents = components.filter { !$0.id.contains(":") }
-        let packageComponentIds = Set(packageComponents.map(\.id))
-        #expect(packageComponentIds == graphPackages, "All packages from graph should be converted to components")
 
         let componentPackageIds = Set(components.compactMap { component in
             component.id.components(separatedBy: ":").first
@@ -168,27 +164,25 @@ struct SBOMExtractComponentsTests {
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
 
         // Find a version-based dependency (swift-argument-parser uses version "1.5.1")
-        let argParserComponent = components.first { component in
-            component.id == "swift-argument-parser" || component.name == "swift-argument-parser"
-        }
+        let swiftSystemComponent = components.first { component in component.id == "swift-system" }
 
-        let versionComponent = try #require(argParserComponent, "swift-argument-parser component should be found")
+        let versionComponent = try #require(swiftSystemComponent, "component should be found")
 
         let commits = try #require(
             versionComponent.originator.commits,
-            "swift-argument-parser component should have commit information"
+            "component should have commit information"
         )
-        #expect(!commits.isEmpty, "swift-argument-parser should have at least one commit")
+        #expect(!commits.isEmpty, "component should have at least one commit")
 
         let commit = commits[0]
         #expect(!commit.sha.isEmpty, "Commit SHA should not be empty")
         #expect(
-            commit.repository == "https://github.com/apple/swift-argument-parser.git",
+            commit.repository == "https://github.com/apple/swift-system.git",
             "Repository URL should match"
         )
 
         #expect(
-            versionComponent.version.revision == "1.5.1",
+            versionComponent.version.revision == "1.3.2",
             "Component version should be the version tag for version-based dependency"
         )
         #expect(
@@ -212,8 +206,10 @@ struct SBOMExtractComponentsTests {
         #expect(components.count < allComponents.count)
 
         let expectedComponentIDs: Set<String> = [
-            "SwiftPM:SwiftPMDataModel",
-            "SwiftPM",
+            "swift-system:SystemPackage", "swift-system",
+            "swift-collections:DequeModule", "SwiftPM:SwiftPMDataModel",
+            "swift-collections:OrderedCollections", "swift-tools-support-core",
+            "swift-collections", "swift-tools-support-core:SwiftToolsSupport-auto", "SwiftPM"
         ]
         #expect(componentIDs == expectedComponentIDs)
 

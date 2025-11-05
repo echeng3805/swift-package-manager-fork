@@ -86,6 +86,17 @@ enum SBOMTestStore {
         )
     }
 
+    package static func createSimpleResolvedPackagesStore() throws -> ResolvedPackagesStore {
+        try self.createResolvedPackagesStore(
+            name: "MyApp",
+            url: "https://github.com/example/myapp.git",
+            revision: "abc123def456abc123def456abc123def456abc1",
+            dependencies: [
+                ("Utils", "https://github.com/example/utils.git", "1.0.0")
+            ]
+        )
+    }
+
     private static func createBaseStore(filename: String) throws -> ResolvedPackagesStore {
         let fs = InMemoryFileSystem()
         let packageResolvedFile = AbsolutePath("/tmp/\(filename)")
