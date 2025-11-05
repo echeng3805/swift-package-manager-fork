@@ -60,8 +60,7 @@ struct CDXConverterTests {
                 authors: [SBOMPerson(
                     id: "author1",
                     name: "John Doe",
-                    email: "john@example.com",
-                    timestamp: "2025-01-01T00:00:00Z"
+                    email: "john@example.com"
                 )],
                 message: "Add new feature"
             ),
@@ -78,7 +77,6 @@ struct CDXConverterTests {
         #expect(cdxCommit.message == "Add new feature")
 
         let cdxAuthor = try #require(cdxCommit.author)
-        #expect(cdxAuthor.timestamp == "2025-01-01T00:00:00Z")
         #expect(cdxAuthor.name == "John Doe")
         #expect(cdxAuthor.email == "john@example.com")
     }
@@ -88,14 +86,12 @@ struct CDXConverterTests {
         let author1 = SBOMPerson(
             id: "author1",
             name: "John Doe",
-            email: "john@example.com",
-            timestamp: "2025-01-01T00:00:00Z"
+            email: "john@example.com"
         )
         let author2 = SBOMPerson(
             id: "author2",
             name: "Jane Smith",
-            email: "jane@example.com",
-            timestamp: "2025-01-02T00:00:00Z"
+            email: "jane@example.com"
         )
 
         let commit1 = SBOMCommit(
@@ -140,14 +136,12 @@ struct CDXConverterTests {
         let author1 = SBOMPerson(
             id: "author1",
             name: "John Doe",
-            email: "john@example.com",
-            timestamp: "2025-01-01T00:00:00Z"
+            email: "john@example.com"
         )
         let author2 = SBOMPerson(
             id: "author2",
             name: "Jane Smith",
-            email: "jane@example.com",
-            timestamp: "2025-01-02T00:00:00Z"
+            email: "jane@example.com"
         )
 
         let commit = SBOMCommit(
@@ -241,8 +235,7 @@ struct CDXConverterTests {
                     SBOMPerson(
                         id: "author1",
                         name: "John Doe",
-                        email: "john@example.com",
-                        timestamp: "2025-01-01T00:00:00Z"
+                        email: "john@example.com"
                     ),
                 ],
                 message: "Initial commit"
@@ -278,7 +271,6 @@ struct CDXConverterTests {
         #expect(cdxCommit.message == "Initial commit")
 
         let cdxAuthor = try #require(cdxCommit.author)
-        #expect(cdxAuthor.timestamp == "2025-01-01T00:00:00Z")
         #expect(cdxAuthor.name == "John Doe")
         #expect(cdxAuthor.email == "john@example.com")
     }

@@ -14,17 +14,14 @@ package struct SBOMPerson: Codable, Equatable {
     package let id: String
     package let name: String
     package let email: String?
-    package let timestamp: String?
 
     package init(
         id: String,
         name: String,
-        email: String?,
-        timestamp: String?
+        email: String?
     ) {
         self.id = id
         self.name = name
         self.email = email
-        self.timestamp = timestamp
     }
 }

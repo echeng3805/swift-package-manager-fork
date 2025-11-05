@@ -51,7 +51,6 @@ package func convertToCDXPedigree(from originator: SBOMOriginator) async throws 
     let cdxCommits = sbomCommits.map { sbomCommit in
         let cdxAuthor: CDXAction? = sbomCommit.authors?.first.map { sbomPerson in
             CDXAction(
-                timestamp: sbomPerson.timestamp,
                 name: sbomPerson.name,
                 email: sbomPerson.email
             )
