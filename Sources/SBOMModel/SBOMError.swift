@@ -12,6 +12,25 @@
 
 import Foundation
 
+// MARK: - General SBOM Errors
+
+/// General errors that can occur across SBOM operations
+package enum SBOMError: Error, LocalizedError, CustomStringConvertible {
+    /// Expected a specific SBOM spec type but got another
+    case unexpectedSpecType(expected: String, actual: Spec)
+    
+    package var errorDescription: String? {
+        switch self {
+        case .unexpectedSpecType(let expected, let actual):
+            return "Expected \(expected) spec but got \(actual)"
+        }
+    }
+    
+    package var description: String {
+        errorDescription ?? "Unknown SBOM error"
+    }
+}
+
 // MARK: - Schema Errors
 
 /// Errors that can occur during SBOM schema operations
@@ -37,18 +56,16 @@ package enum SBOMSchemaError: Error, LocalizedError, CustomStringConvertible {
 
 /// Errors that can occur during SBOM format conversion
 package enum SBOMConverterError: Error, LocalizedError, CustomStringConvertible {
-    /// Expected a specific SBOM spec type but got another
-    case unexpectedSpecType(expected: String, actual: Spec)
     /// Missing required metadata for conversion
     case missingRequiredMetadata(message: String)
+    
     package var errorDescription: String? {
         switch self {
-        case .unexpectedSpecType(let expected, let actual):
-            return "Expected \(expected) spec but got \(actual)"
         case .missingRequiredMetadata(let message):
             return "Missing required metadata: \(message)"
         }
     }
+    
     package var description: String {
         errorDescription ?? "Unknown SBOM converter error"
     }

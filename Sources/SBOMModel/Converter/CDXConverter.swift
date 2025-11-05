@@ -37,12 +37,10 @@ private func convertToCDXCategory(from category: SBOMComponent.Category) async -
 }
 
 package func convertToCDXSchema(from spec: SBOMSpec) async throws -> String {
-    switch spec.type {
-    case .cyclonedx, .cyclonedx1:
-        return CDXConstants.cyclonedx1Schema
-    case .spdx, .spdx3:
-        throw SBOMConverterError.unexpectedSpecType(expected: "cyclonedx", actual: spec.type)
+    guard spec.type.supportsCycloneDX else {
+        throw SBOMError.unexpectedSpecType(expected: "cyclonedx", actual: spec.type)
     }
+    return CDXConstants.cyclonedx1Schema
 }
 
 package func convertToCDXPedigree(from originator: SBOMOriginator) async throws -> CDXPedigree {
@@ -121,8 +119,8 @@ package func convertToCDXMetadata(from document: SBOMDocument) async throws -> C
 }
 
 package func convertToCDXDocument(from document: SBOMDocument) async throws -> CDXDocument {
-    guard document.metadata.spec.type == .cyclonedx || document.metadata.spec.type == .cyclonedx1 else {
-        throw SBOMConverterError.unexpectedSpecType(expected: "cyclonedx", actual: document.metadata.spec.type)
+    guard document.metadata.spec.type.supportsCycloneDX else {
+        throw SBOMError.unexpectedSpecType(expected: "cyclonedx", actual: document.metadata.spec.type)
     }
 
     var components: [CDXComponent] = []

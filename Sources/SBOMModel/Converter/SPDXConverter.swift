@@ -239,8 +239,8 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
 }
 
 package func convertToSPDXGraph(from document: SBOMDocument) async throws -> SPDXGraph {
-    guard document.metadata.spec.type == .spdx || document.metadata.spec.type == .spdx3 else {
-        throw SBOMConverterError.unexpectedSpecType(expected: "spdx", actual: document.metadata.spec.type)
+    guard document.metadata.spec.type.supportsSPDX else {
+        throw SBOMError.unexpectedSpecType(expected: "spdx", actual: document.metadata.spec.type)
     }
 
     let agents = await convertToSPDXAgent(from: document.metadata)

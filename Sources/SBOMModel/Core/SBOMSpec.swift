@@ -32,6 +32,24 @@ package enum Spec: String, Codable, Equatable, CaseIterable, ExpressibleByArgume
     package static func < (lhs: Spec, rhs: Spec) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
+
+    package var supportsCycloneDX: Bool {
+        switch self {
+        case .cyclonedx, .cyclonedx1:
+            true
+        case .spdx, .spdx3:
+            false
+        }
+    }
+
+    package var supportsSPDX: Bool {
+        switch self {
+        case .spdx, .spdx3:
+            true
+        case .cyclonedx, .cyclonedx1:
+            false
+        }
+    }
 }
 
 package struct SBOMSpec: Codable, Equatable {

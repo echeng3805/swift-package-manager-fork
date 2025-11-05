@@ -24,11 +24,13 @@ package func encodeSBOM(from sbom: SBOMDocument, outputPath: AbsolutePath?) asyn
 }
 
 package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
-    let data: any Encodable = switch sbom.metadata.spec.type {
-    case .cyclonedx, .cyclonedx1:
-        try await convertToCDXDocument(from: sbom)
-    case .spdx, .spdx3:
-        try await convertToSPDXGraph(from: sbom)
+    let data: any Encodable
+    if sbom.metadata.spec.type.supportsCycloneDX {
+        data = try await convertToCDXDocument(from: sbom)
+    } else if sbom.metadata.spec.type.supportsSPDX {
+        data = try await convertToSPDXGraph(from: sbom)
+    } else {
+        throw SBOMError.unexpectedSpecType(expected: "cyclonedx or spdx", actual: sbom.metadata.spec.type)
     }
 
     let encoder = JSONEncoder()
@@ -45,15 +47,16 @@ package func validateSBOM(from encoded: Foundation.Data, spec: SBOMSpec) async t
     guard let sbomJSONObject = try (JSONSerialization.jsonObject(with: encoded)) as? [String: Any] else {
         throw SBOMEncoderError.jsonConversionFailed(message: "Could not convert generated SBOM file into JSON object for validation")
     }
-    let schema = try SBOMSchema(from: getSchemaFilename(from: spec.type))
+    let schema = try SBOMSchema(from: try getSchemaFilename(from: spec.type))
     try schema.validate(json: sbomJSONObject, spec: spec)
 }
 
-private func getSchemaFilename(from spec: Spec) -> String {
-    switch spec {
-    case .cyclonedx, .cyclonedx1:
-        CDXConstants.cyclonedx1SchemaFile
-    case .spdx, .spdx3:
-        SPDXConstants.spdx3SchemaFile
+private func getSchemaFilename(from spec: Spec) throws -> String {
+    if spec.supportsCycloneDX {
+        return CDXConstants.cyclonedx1SchemaFile
+    } else if spec.supportsSPDX {
+        return SPDXConstants.spdx3SchemaFile
+    } else {
+        throw SBOMError.unexpectedSpecType(expected: "cyclonedx or spdx", actual: spec)
     }
 }
