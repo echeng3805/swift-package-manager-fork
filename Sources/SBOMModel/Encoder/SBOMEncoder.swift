@@ -12,7 +12,6 @@
 
 import Basics
 import Foundation
-import struct TSCBasic.StringError
 import TSCUtility
 
 package func encodeSBOM(from sbom: SBOMDocument, outputPath: AbsolutePath?) async throws {
@@ -44,7 +43,7 @@ package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
 
 package func validateSBOM(from encoded: Foundation.Data, spec: SBOMSpec) async throws {
     guard let sbomJSONObject = try (JSONSerialization.jsonObject(with: encoded)) as? [String: Any] else {
-        throw StringError("Could not convert generated SBOM file into JSON object for validation")
+        throw SBOMEncoderError.jsonConversionFailed(message: "Could not convert generated SBOM file into JSON object for validation")
     }
     let schema = try SBOMSchema(from: getSchemaFilename(from: spec.type))
     try schema.validate(json: sbomJSONObject, spec: spec)

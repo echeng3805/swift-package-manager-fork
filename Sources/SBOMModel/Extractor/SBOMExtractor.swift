@@ -17,7 +17,6 @@ import PackageGraph
 import PackageModel
 import SourceControl
 import var TSCBasic.stderrStream
-import struct TSCBasic.StringError
 import TSCUtility
 
 /// Cache for storing root package version from Git (to minimize calls to Git)
@@ -271,12 +270,12 @@ package func extractPrimaryComponent(
     cache: SBOMVersionCache? = nil
 ) async throws -> SBOMComponent {
     guard let rootPackage = graph.rootPackages.first else {
-        throw StringError("No root package found in package graph, cannot determine primary component for SBOM")
+        throw SBOMExtractorError.noRootPackage(context: "determine primary component for SBOM")
     }
     // product of root package
     if let productName = product {
         guard let resolvedProduct = rootPackage.products.first(where: { $0.name == productName }) else {
-            throw StringError("Product '\(productName)' not found in root package '\(rootPackage.identity)'")
+            throw SBOMExtractorError.productNotFound(productName: productName, packageIdentity: rootPackage.identity.description)
         }
         return try await extractComponent(product: resolvedProduct, graph: graph, store: store, cache: cache)
     }

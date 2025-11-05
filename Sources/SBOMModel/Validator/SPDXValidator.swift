@@ -31,15 +31,15 @@ internal struct SPDXValidator: SBOMValidatorProtocol {
         
     internal func validate(_ jsonObject: Any) throws {
         guard let rootDict = jsonObject as? [String: Any] else {
-            throw SBOMValidationError.typeMismatch(path: "$", expected: "dictionary", actual: "other", debugInfo: "Expected dictionary for SPDX JSON-LD document")
+            throw SBOMValidatorError.typeMismatch(path: "$", expected: "dictionary", actual: "other", debugInfo: "Expected dictionary for SPDX JSON-LD document")
         }
         guard let contextString = rootDict[SPDXKeys.context] as? String,
             !contextString.isEmpty else {
-            throw SBOMValidationError.invalidValue(path: "$", message: "@context must be a non-empty string")
+            throw SBOMValidatorError.invalidValue(path: "$", message: "@context must be a non-empty string")
         }
         guard let graph = rootDict[SPDXKeys.graph] as? [Any],
             !graph.isEmpty else {
-            throw SBOMValidationError.invalidValue(path: "$", message: "@graph must be a non-empty array")
+            throw SBOMValidatorError.invalidValue(path: "$", message: "@graph must be a non-empty array")
         }
 
         for (index, element) in graph.enumerated() {
@@ -74,7 +74,7 @@ internal struct SPDXValidator: SBOMValidatorProtocol {
                     continue
                 }
                 guard object[property] != nil else {
-                    throw SBOMValidationError.missingRequired(path: path, property: property)
+                    throw SBOMValidatorError.missingRequired(path: path, property: property)
                 }
             }
         }

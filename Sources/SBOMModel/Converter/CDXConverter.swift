@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import struct TSCBasic.StringError
 
 private func convertToCDXScope(from scope: SBOMComponent.Scope) async -> CDXComponent.Scope {
     switch scope {
@@ -42,7 +41,7 @@ package func convertToCDXSchema(from spec: SBOMSpec) async throws -> String {
     case .cyclonedx, .cyclonedx1:
         return CDXConstants.cyclonedx1Schema
     case .spdx, .spdx3:
-        throw StringError("expected cyclonedx spec")
+        throw SBOMConverterError.unexpectedSpecType(expected: "cyclonedx", actual: spec.type)
     }
 }
 
@@ -123,7 +122,7 @@ package func convertToCDXMetadata(from document: SBOMDocument) async throws -> C
 
 package func convertToCDXDocument(from document: SBOMDocument) async throws -> CDXDocument {
     guard document.metadata.spec.type == .cyclonedx || document.metadata.spec.type == .cyclonedx1 else {
-        throw StringError("internal SBOMDocument spec type is not cyclonedx, cannot convert to cyclonedx")
+        throw SBOMConverterError.unexpectedSpecType(expected: "cyclonedx", actual: document.metadata.spec.type)
     }
 
     var components: [CDXComponent] = []

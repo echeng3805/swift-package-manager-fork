@@ -14,7 +14,6 @@ import _InternalTestSupport
 import Foundation
 @testable import SBOMModel
 import Testing
-import struct TSCBasic.StringError
 
 struct SBOMExtractTests {
     @Test("extractSBOM with product filter for SwiftPM")
@@ -122,8 +121,7 @@ struct SBOMExtractTests {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
-        // Try to extract SBOM for a non-existent product
-        await #expect(throws: StringError.self) {
+        await #expect(throws: SBOMExtractorError.self) {
             _ = try await SBOMModel.extractSBOM(
                 spec: .cyclonedx,
                 graph: graph,

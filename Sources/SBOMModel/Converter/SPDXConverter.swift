@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import struct TSCBasic.StringError
 
 private func generateSPDXID(_ id: String) -> String {
     if id.starts(with: "urn:") { return id }
@@ -66,7 +65,9 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
           let creators = document.metadata.creators,
           !creators.isEmpty
     else {
-        throw StringError("timestamp or creators are missing from SBOM document metadata, required for SPDX format")
+        throw SBOMConverterError.missingRequiredMetadata(
+            message: "timestamp or creators are missing from SBOM document metadata, required for SPDX format"
+        )
     }
 
     var elements: [Any] = []
@@ -239,7 +240,7 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
 
 package func convertToSPDXGraph(from document: SBOMDocument) async throws -> SPDXGraph {
     guard document.metadata.spec.type == .spdx || document.metadata.spec.type == .spdx3 else {
-        throw StringError("internal SBOMDocument spec type is not spdx, cannot convert to spdx")
+        throw SBOMConverterError.unexpectedSpecType(expected: "spdx", actual: document.metadata.spec.type)
     }
 
     let agents = await convertToSPDXAgent(from: document.metadata)

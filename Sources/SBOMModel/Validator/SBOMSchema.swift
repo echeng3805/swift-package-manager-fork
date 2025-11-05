@@ -11,20 +11,20 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import struct TSCBasic.StringError
 
 package struct SBOMSchema {
     private let schema: [String: Any]
 
     package init(from schemaFilename: String) throws {
         guard let schemaURL = Bundle.module.url(forResource: schemaFilename, withExtension: "json") else {
-            throw StringError(
-                "SBOM schema file '\(schemaFilename).json' not found in bundle: \(Bundle.module.bundlePath)"
+            throw SBOMSchemaError.schemaFileNotFound(
+                filename: schemaFilename,
+                bundlePath: Bundle.module.bundlePath
             )
         }
         let schemaData = try Data(contentsOf: schemaURL)
         guard let jsonObject = try JSONSerialization.jsonObject(with: schemaData) as? [String: Any] else {
-            throw StringError("Invalid JSON schema format")
+            throw SBOMSchemaError.invalidSchemaFormat(message: "Could not parse schema as JSON dictionary")
         }
         self.schema = jsonObject
     }

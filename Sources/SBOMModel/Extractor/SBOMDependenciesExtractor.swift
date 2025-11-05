@@ -16,7 +16,6 @@ import PackageCollections
 import PackageGraph
 import PackageModel
 import SourceControl
-import struct TSCBasic.StringError
 import TSCUtility
 
 package func extractDependencies(
@@ -27,13 +26,13 @@ package func extractDependencies(
 ) async throws -> SBOMDependencies {
 
     guard let rootPackage = graph.rootPackages.first else {
-        throw StringError("No root package found in package graph, cannot extract dependencies")
+        throw SBOMExtractorError.noRootPackage(context: "extract dependencies")
     }
     
     let targetProducts: [ResolvedProduct]
     if let name = product {
         guard let targetProduct = rootPackage.products.first(where: { $0.name == name }) else {
-            throw StringError("Product '\(name)' not found in root package '\(rootPackage.identity)'")
+            throw SBOMExtractorError.productNotFound(productName: name, packageIdentity: rootPackage.identity.description)
         }
         targetProducts = [targetProduct]
     } else {
@@ -55,7 +54,7 @@ private func extractDependenciesForProducts(
     cache: SBOMVersionCache? = nil
 ) async throws -> SBOMDependencies {
     guard let rootPackage = graph.rootPackages.first else {
-        throw StringError("No root package found in package graph, cannot extract dependencies")
+        throw SBOMExtractorError.noRootPackage(context: "extract dependencies")
     }
     let rootPackageID = await extractComponentID(from: rootPackage)
 

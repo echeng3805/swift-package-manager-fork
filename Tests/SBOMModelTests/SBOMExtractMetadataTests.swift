@@ -13,7 +13,6 @@
 import Foundation
 @testable import SBOMModel
 import Testing
-import struct TSCBasic.StringError
 
 struct SBOMExtractMetadataTests {
     struct ExtractMetadataTestCase {

@@ -121,7 +121,7 @@ struct SBOMExtractComponentsTests {
             binaryArtifacts: [:]
         )
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        await #expect(throws: StringError.self) {
+        await #expect(throws: SBOMExtractorError.self) {
             _ = try await SBOMModel.extractDependencies(graph: emptyGraph, store: store).components
         }
     }

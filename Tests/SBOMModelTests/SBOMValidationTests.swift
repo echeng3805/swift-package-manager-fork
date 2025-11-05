@@ -172,9 +172,10 @@ struct SBOMValidationTests {
     @Test("validate SBOM from files", arguments: try getValidateFileSBOMTestCases())
     func validateSBOMFromFile(testCase: ValidateFileSBOMTestCase) async throws {
         let testBundle = Bundle.module
-        guard let fileURL = testBundle.url(forResource: testCase.inputFilePath, withExtension: "json") else {
-            throw StringError("Could not find \(testCase.inputFilePath).json test file")
-        }
+        let fileURL = try #require(
+            testBundle.url(forResource: testCase.inputFilePath, withExtension: "json"),
+            "Could not find \(testCase.inputFilePath).json test file"
+        )
         let encodedData = try Data(contentsOf: fileURL)
 
         if testCase.wantError {

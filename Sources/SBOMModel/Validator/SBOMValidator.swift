@@ -105,7 +105,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
             return
         }
         guard actualType == expectedType else {
-            throw SBOMValidationError.typeMismatch(path: path, expected: expectedType, actual: actualType, debugInfo: debugInfo)
+            throw SBOMValidatorError.typeMismatch(path: path, expected: expectedType, actual: actualType, debugInfo: debugInfo)
         }
     }
 
@@ -152,7 +152,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         // References starting with #/ are always resolved from the root schema (self.schema)
         // not from the current schema being validated
         guard let referencedSchema = resolveReference(components: components, in: self.schema) else {
-            throw SBOMValidationError.invalidValue(path: path, message: "Could not resolve reference '\(ref)'")
+            throw SBOMValidatorError.invalidValue(path: path, message: "Could not resolve reference '\(ref)'")
         }
         
         try validateValue(value, path: path, schema: referencedSchema)
@@ -177,13 +177,13 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
             let valueDesc = describeValue(value, maxLength: 200)
             if validCount == 0 {
                 let allErrors = validationErrors.joined(separator: "\n  ")
-                throw SBOMValidationError.schemaComposition(
+                throw SBOMValidatorError.schemaComposition(
                     path: path,
                     message: "Value does not match any oneOf schemas.\nValue: \(valueDesc)\nErrors:\n  \(allErrors)"
                 )
             } else {
                 let matchingIndices = matchingSchemas.map(String.init).joined(separator: ", ")
-                throw SBOMValidationError.schemaComposition(
+                throw SBOMValidatorError.schemaComposition(
                     path: path,
                     message: "Value matches multiple oneOf schemas (expected exactly one). Matched \(validCount) schemas at indices: \(matchingIndices)\nValue: \(valueDesc)"
                 )
@@ -217,7 +217,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
             summary = "Tried schemas: \(schemaNames.joined(separator: ", "))"
         }
 
-        throw SBOMValidationError.schemaComposition(path: path, message: "Value does not match any anyOf schemas.\nValue: \(valueDesc)\n\(summary)")
+        throw SBOMValidatorError.schemaComposition(path: path, message: "Value does not match any anyOf schemas.\nValue: \(valueDesc)\n\(summary)")
     }
 
     private func validateAllOf(_ value: Any, schemas: [[String: Any]], path: String) throws {
@@ -234,7 +234,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         if !errors.isEmpty {
             let valueDesc = describeValue(value, maxLength: 200)
             let allErrors = errors.joined(separator: "\n  ")
-            throw SBOMValidationError.schemaComposition(
+            throw SBOMValidatorError.schemaComposition(
                 path: path,
                 message: "Value does not match all allOf schemas.\nValue: \(valueDesc)\nErrors:\n  \(allErrors)"
             )
@@ -245,8 +245,8 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         do {
             try validateValue(value, path: path, schema: schema)
             let valueDesc = describeValue(value, maxLength: 200)
-            throw SBOMValidationError.notSchemaViolation(path: path, valueDescription: valueDesc)
-        } catch let error as SBOMValidationError { // rethrow notSchemaViolation errors (from nested "not" schemas)
+            throw SBOMValidatorError.notSchemaViolation(path: path, valueDescription: valueDesc)
+        } catch let error as SBOMValidatorError { // rethrow notSchemaViolation errors (from nested "not" schemas)
             if case .notSchemaViolation = error {
                 throw error
             }
@@ -262,7 +262,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         if !areEqual(value, expectedValue) {
             let valueDesc = describeValue(value)
             let expectedDesc = describeValue(expectedValue)
-            throw SBOMValidationError.invalidValue(path: path, message: "Value does not match const. Expected: \(expectedDesc), got: \(valueDesc)")
+            throw SBOMValidatorError.invalidValue(path: path, message: "Value does not match const. Expected: \(expectedDesc), got: \(valueDesc)")
         }
     }
 
@@ -274,7 +274,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         if !isValid {
             let valueStr = describeValue(value)
             let allowedStr = allowedValues.map { describeValue($0) }.joined(separator: ", ")
-            throw SBOMValidationError.invalidValue(
+            throw SBOMValidatorError.invalidValue(
                 path: path,
                 message: "Value is not one of the allowed enum values. Got: \(valueStr), allowed: [\(allowedStr)]"
             )
@@ -303,7 +303,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
     private func validateRequiredProperties(_ object: [String: Any], required: [String], path: String) throws {
         for property in required {
             guard object[property] != nil else {
-                throw SBOMValidationError.missingRequired(path: path, property: property)
+                throw SBOMValidatorError.missingRequired(path: path, property: property)
             }
         }
     }
@@ -330,7 +330,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         if let allowsAdditional = additionalProps as? Bool, !allowsAdditional {
             guard extraProperties.isEmpty else {
                 let extraList = extraProperties.sorted().joined(separator: ", ")
-                throw SBOMValidationError.constraintViolation(path: path, message: "Additional properties not allowed: \(extraList)")
+                throw SBOMValidatorError.constraintViolation(path: path, message: "Additional properties not allowed: \(extraList)")
             }
             return
         }
@@ -354,7 +354,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
         guard unevaluated.isEmpty else {
             let unevaluatedList = unevaluated.sorted().joined(separator: ", ")
-            throw SBOMValidationError.constraintViolation(path: path, message: "Unevaluated properties found: \(unevaluatedList)")
+            throw SBOMValidatorError.constraintViolation(path: path, message: "Unevaluated properties found: \(unevaluatedList)")
         }
     }
     
@@ -378,7 +378,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
     private func validateArrayConstraints(_ array: [Any], schema: [String: Any], path: String) throws {
         if let minItems = schema["minItems"] as? Int {
             guard array.count >= minItems else {
-                throw SBOMValidationError.constraintViolation(
+                throw SBOMValidatorError.constraintViolation(
                     path: path,
                     message: "Array has fewer items than minimum. Expected at least \(minItems), got \(array.count)"
                 )
@@ -387,7 +387,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
         if let maxItems = schema["maxItems"] as? Int {
             guard array.count <= maxItems else {
-                throw SBOMValidationError.constraintViolation(
+                throw SBOMValidatorError.constraintViolation(
                     path: path,
                     message: "Array has more items than maximum. Expected at most \(maxItems), got \(array.count)"
                 )
@@ -410,7 +410,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
             if seen.contains(itemKey) {
                 let itemDesc = describeValue(item, maxLength: 100)
-                throw SBOMValidationError.constraintViolation(
+                throw SBOMValidatorError.constraintViolation(
                     path: path,
                     message: "Array contains duplicate items. Duplicate found at index \(index): \(itemDesc)"
                 )
@@ -464,7 +464,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         
         // Check minimum length
         if let min = minLength, length < min {
-            throw SBOMValidationError.constraintViolation(
+            throw SBOMValidatorError.constraintViolation(
                 path: path,
                 message: "String is shorter than minimum length. Expected at least \(min), got \(length)"
             )
@@ -472,7 +472,7 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         
         // Check maximum length
         if let max = maxLength, length > max {
-            throw SBOMValidationError.constraintViolation(
+            throw SBOMValidatorError.constraintViolation(
                 path: path,
                 message: "String is longer than maximum length. Expected at most \(max), got \(length)"
             )
@@ -481,18 +481,18 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
     private func validatePattern(_ value: String, pattern: String, path: String) throws {
         guard let regex = try? NSRegularExpression(pattern: pattern) else {
-            throw SBOMValidationError.invalidValue(path: path, message: "Invalid regex pattern: \(pattern)")
+            throw SBOMValidatorError.invalidValue(path: path, message: "Invalid regex pattern: \(pattern)")
         }
 
         let range = NSRange(location: 0, length: value.utf16.count)
 
         guard let match = regex.firstMatch(in: value, options: [], range: range) else {
-            throw SBOMValidationError.constraintViolation(path: path, message: "String does not match pattern: \(pattern). Value: \"\(value)\"")
+            throw SBOMValidatorError.constraintViolation(path: path, message: "String does not match pattern: \(pattern). Value: \"\(value)\"")
         }
 
         // Verify the match covers the entire string (JSON Schema pattern must match the whole string)
         guard match.range.location == 0 && match.range.length == value.utf16.count else {
-            throw SBOMValidationError.constraintViolation(path: path, message: "String does not match pattern: \(pattern). Value: \"\(value)\"")
+            throw SBOMValidatorError.constraintViolation(path: path, message: "String does not match pattern: \(pattern). Value: \"\(value)\"")
         }
     }
 
@@ -500,22 +500,22 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         switch format {
         case "date-time":
             if ISO8601DateFormatter().date(from: value) == nil {
-                throw SBOMValidationError.invalidValue(path: path, message: "Invalid date-time format")
+                throw SBOMValidatorError.invalidValue(path: path, message: "Invalid date-time format")
             }
         case "date":
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             if formatter.date(from: value) == nil {
-                throw SBOMValidationError.invalidValue(path: path, message: "Invalid date format")
+                throw SBOMValidatorError.invalidValue(path: path, message: "Invalid date format")
             }
         case "email", "idn-email":
             let emailRegex = #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"#
             if !NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: value) {
-                throw SBOMValidationError.invalidValue(path: path, message: "Invalid email format")
+                throw SBOMValidatorError.invalidValue(path: path, message: "Invalid email format")
             }
         case "uri", "iri-reference":
             if URL(string: value) == nil {
-                throw SBOMValidationError.invalidValue(path: path, message: "Invalid URI format")
+                throw SBOMValidatorError.invalidValue(path: path, message: "Invalid URI format")
             }
         default:
             // Unknown format - skip validation but log in debug builds
@@ -532,11 +532,11 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
     private func validateNumericConstraints(_ value: NSNumber, schema: [String: Any], path: String) throws {
         if let minimum = schema[SchemaKeys.minimum] as? NSNumber, value.compare(minimum) == .orderedAscending {
-            throw SBOMValidationError.constraintViolation(path: path, message: "Value is below minimum: \(minimum). Got: \(value)")
+            throw SBOMValidatorError.constraintViolation(path: path, message: "Value is below minimum: \(minimum). Got: \(value)")
         }
 
         if let maximum = schema[SchemaKeys.maximum] as? NSNumber, value.compare(maximum) == .orderedDescending {
-            throw SBOMValidationError.constraintViolation(path: path, message: "Value is above maximum: \(maximum). Got: \(value)")
+            throw SBOMValidatorError.constraintViolation(path: path, message: "Value is above maximum: \(maximum). Got: \(value)")
         }
     }
     
