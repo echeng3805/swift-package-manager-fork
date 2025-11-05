@@ -53,13 +53,6 @@ internal struct SPDXValidator: SBOMValidatorProtocol {
         }
         try validator.validateValue(value, path: path, schema: graphElementSchema)
     }
-    
-    // private func validateGraphElement(_ value: Any, path: String) throws {
-    //     guard let dictObject = value as? [String: Any] else {
-    //         throw SBOMValidationError.typeMismatch(path: path, expected: "dictionary", actual: "other", debugInfo: "Graph elements must be dictionaries")
-    //     }
-    //     try validator.validateValue(value, path: path, schema: graphElementSchema)
-    // }
         
     private func validateObjectWithSPDXRules(_ object: [String: Any], path: String) throws {
         let schema = validator.schema
