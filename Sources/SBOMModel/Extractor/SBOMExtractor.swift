@@ -16,7 +16,6 @@ import PackageCollections
 import PackageGraph
 import PackageModel
 import SourceControl
-import var TSCBasic.stderrStream
 import TSCUtility
 
 /// Cache for storing root package version from Git (to minimize calls to Git)
@@ -141,9 +140,7 @@ private func extractComponentVersionFromGit(packagePath: AbsolutePath) async thr
             )
         )
     } catch {
-        TSCBasic.stderrStream
-            .write("warning: Failed to extract version from Git repository at \(packagePath): \(error)\n")
-        TSCBasic.stderrStream.flush()
+        fputs("warning: Failed to extract version from Git repository at \(packagePath): \(error)\n", stderr)
         return nil
     }
 }
