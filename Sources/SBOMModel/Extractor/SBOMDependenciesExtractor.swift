@@ -91,20 +91,6 @@ private func extractDependenciesForProducts(
         from product: ResolvedProduct,
         dependentModule: ResolvedModule
     ) async throws -> [ResolvedProduct] {
-        // let containerProducts = graph.allProducts.filter { $0.modules.contains(id: dependentModule.id) }
-        
-        // // If the module is in a product, process those products
-        // if !containerProducts.isEmpty {
-        //     var results: [ResolvedProduct] = []
-        //     for containerProduct in containerProducts {
-        //         if let processed = try await processProductDependency(from: product, dependentProduct: containerProduct) {
-        //             results.append(processed)
-        //         }
-        //     }
-        //     return results
-        // }
-        
-        // // If the module is not in any product (internal module), process its dependencies directly
         var results: [ResolvedProduct] = []
         for dependency in dependentModule.dependencies {
             switch dependency {
