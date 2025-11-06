@@ -21,11 +21,12 @@ package enum Spec: String, Codable, Equatable, CaseIterable, ExpressibleByArgume
     // case spdx4, for future major versions of SPDX
 
     package var defaultValueDescription: String {
+        let (_, version) = self.latestSpec
         switch self {
-        case .cyclonedx: "Most recent major version of CycloneDX supported by SPM (currently: \(CycloneDXConstants.cyclonedx1SpecVersion))"
-        case .spdx: "Most recent major version of SPDX supported by SPM (currently: \(SPDXConstants.spdx3SpecVersion))"
-        case .cyclonedx1: "Most recent minor version of CycloneDX v1 supported by SPM  (currently: \(CycloneDXConstants.cyclonedx1SpecVersion))"
-        case .spdx3: "Most recent minor version of SPDX v3 supported by SPM (currently: \(SPDXConstants.spdx3SpecVersion))"
+        case .cyclonedx: return "Most recent major version of CycloneDX supported by SwiftPM (currently: \(version))"
+        case .spdx: return "Most recent major version of SPDX supported by SwiftPM (currently: \(version))"
+        case .cyclonedx1: return "Most recent minor version of CycloneDX v1 supported by SSwiftPMPM  (currently: \(version))"
+        case .spdx3: return "Most recent minor version of SPDX v3 supported by SwiftPM (currently: \(version))"
         }
     }
 
