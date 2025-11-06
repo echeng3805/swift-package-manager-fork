@@ -17,6 +17,39 @@ import Foundation
 internal struct SBOMValidator: SBOMValidatorProtocol {
     // MARK: - Constants
     
+    internal enum StringFormat: String {
+        case dateTime = "date-time"
+        case date = "date"
+        case email = "email"
+        case idnEmail = "idn-email"
+        case uri = "uri"
+        case iriReference = "iri-reference"
+        
+        func validate(_ value: String, path: String) throws {
+            switch self {
+            case .dateTime:
+                if ISO8601DateFormatter().date(from: value) == nil {
+                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid date-time format")
+                }
+            case .date:
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                if formatter.date(from: value) == nil {
+                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid date format")
+                }
+            case .email, .idnEmail:
+                let emailRegex = #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"#
+                if !NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: value) {
+                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid email format")
+                }
+            case .uri, .iriReference:
+                if URL(string: value) == nil {
+                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid URI format")
+                }
+            }
+        }
+    }
+    
     internal enum SchemaKeys {
         static let type = "type"
         static let `required` = "required"
@@ -497,30 +530,11 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
     }
 
     private func validateFormat(_ value: String, format: String, path: String) throws {
-        switch format {
-        case "date-time":
-            if ISO8601DateFormatter().date(from: value) == nil {
-                throw SBOMValidatorError.invalidValue(path: path, message: "Invalid date-time format")
-            }
-        case "date":
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            if formatter.date(from: value) == nil {
-                throw SBOMValidatorError.invalidValue(path: path, message: "Invalid date format")
-            }
-        case "email", "idn-email":
-            let emailRegex = #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"#
-            if !NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: value) {
-                throw SBOMValidatorError.invalidValue(path: path, message: "Invalid email format")
-            }
-        case "uri", "iri-reference":
-            if URL(string: value) == nil {
-                throw SBOMValidatorError.invalidValue(path: path, message: "Invalid URI format")
-            }
-        default:
-            // Unknown format - skip validation but log in debug builds
-            break
+        guard let stringFormat = StringFormat(rawValue: format) else {
+            // Unknown format - skip validation (JSON Schema allows unknown formats)
+            return
         }
+        try stringFormat.validate(value, path: path)
     }
     
     // MARK: - Type-Specific Validation - Number
@@ -531,12 +545,20 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
     }
 
     private func validateNumericConstraints(_ value: NSNumber, schema: [String: Any], path: String) throws {
-        if let minimum = schema[SchemaKeys.minimum] as? NSNumber, value.compare(minimum) == .orderedAscending {
-            throw SBOMValidatorError.constraintViolation(path: path, message: "Value is below minimum: \(minimum). Got: \(value)")
+        let doubleValue = value.doubleValue
+        
+        if let minimum = schema[SchemaKeys.minimum] as? NSNumber {
+            let minValue = minimum.doubleValue
+            if doubleValue < minValue {
+                throw SBOMValidatorError.constraintViolation(path: path, message: "Value is below minimum: \(minimum). Got: \(value)")
+            }
         }
 
-        if let maximum = schema[SchemaKeys.maximum] as? NSNumber, value.compare(maximum) == .orderedDescending {
-            throw SBOMValidatorError.constraintViolation(path: path, message: "Value is above maximum: \(maximum). Got: \(value)")
+        if let maximum = schema[SchemaKeys.maximum] as? NSNumber {
+            let maxValue = maximum.doubleValue
+            if doubleValue > maxValue {
+                throw SBOMValidatorError.constraintViolation(path: path, message: "Value is above maximum: \(maximum). Got: \(value)")
+            }
         }
     }
     
