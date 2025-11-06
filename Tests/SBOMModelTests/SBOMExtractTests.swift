@@ -130,4 +130,81 @@ struct SBOMExtractTests {
             )
         }
     }
+
+    @Test("generateSBOMID generates valid URN UUID format")
+    func generateSBOMIDGeneratesValidURNUUIDFormat() async throws {
+        let id1 = SBOMModel.generateSBOMID()
+        let id2 = SBOMModel.generateSBOMID()
+
+        #expect(id1.hasPrefix("urn:uuid:"))
+        #expect(id2.hasPrefix("urn:uuid:"))
+
+        let uuid1String = String(id1.dropFirst("urn:uuid:".count))
+        let uuid2String = String(id2.dropFirst("urn:uuid:".count))
+
+        #expect(UUID(uuidString: uuid1String) != nil, "Should be a valid UUID")
+        #expect(UUID(uuidString: uuid2String) != nil, "Should be a valid UUID")
+
+        #expect(uuid1String == uuid1String.lowercased(), "UUID should be lowercase")
+        #expect(uuid2String == uuid2String.lowercased(), "UUID should be lowercase")
+
+        #expect(id1 != id2, "Each call should generate a unique ID")
+    }
+
+    @Test("extractComponentID from package returns package identity")
+    func extractComponentIDFromPackageReturnsPackageIdentity() async throws {
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let rootPackage = try #require(graph.rootPackages.first)
+
+        let componentID = await SBOMModel.extractComponentID(from: rootPackage)
+
+        #expect(componentID == "MyApp")
+        #expect(componentID == rootPackage.identity.description)
+    }
+
+    @Test("extractComponentID from product returns package:product format")
+    func extractComponentIDFromProductReturnsPackageProductFormat() async throws {
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let rootPackage = try #require(graph.rootPackages.first)
+        let product = try #require(rootPackage.products.first)
+
+        let componentID = await SBOMModel.extractComponentID(from: product)
+
+        #expect(componentID == "MyApp:App")
+        #expect(componentID.hasPrefix("\(product.packageIdentity):"))
+        #expect(componentID.hasSuffix(":\(product.name)"))
+    }
+
+    @Test("extractComponentID from multiple products maintains correct format")
+    func extractComponentIDFromMultipleProductsMaintainsCorrectFormat() async throws {
+        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let rootPackage = try #require(graph.rootPackages.first)
+
+        // Test multiple products
+        for product in rootPackage.products {
+            let componentID = await SBOMModel.extractComponentID(from: product)
+            let expectedID = "\(product.packageIdentity):\(product.name)"
+
+            #expect(componentID == expectedID)
+            #expect(componentID.contains(":"), "Product ID should contain colon separator")
+
+            let parts = componentID.split(separator: ":")
+            #expect(parts.count == 2, "Product ID should have exactly two parts")
+            #expect(String(parts[0]) == product.packageIdentity.description)
+            #expect(String(parts[1]) == product.name)
+        }
+    }
+
+    @Test("extractComponentID from dependency packages returns correct identity")
+    func extractComponentIDFromDependencyPackagesReturnsCorrectIdentity() async throws {
+        let graph = try SBOMTestGraph.createSPMModulesGraph()
+
+        // Test dependency packages
+        for package in graph.packages where package.identity.description != "SwiftPM" {
+            let componentID = await SBOMModel.extractComponentID(from: package)
+
+            #expect(componentID == package.identity.description)
+            #expect(!componentID.contains(":"), "Package ID should not contain colon")
+        }
+    }
 }

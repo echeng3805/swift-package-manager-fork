@@ -13,6 +13,7 @@
 import _InternalTestSupport
 import Basics
 import Foundation
+import PackageModel
 @testable import SBOMModel
 import SourceControl
 import Testing
@@ -190,5 +191,302 @@ struct SBOMExtractPrimaryComponentTests {
 
         let cachedVersionAfter = await cache.get(rootPackage.identity)
         #expect(cachedVersionAfter?.revision == expectedRevision, "Cache should still contain same version")
+    }
+
+    @Test("extractComponent from package includes all products as nested components")
+    func extractComponentFromPackageIncludesAllProducts() async throws {
+        let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+
+        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        #expect(component.components != nil, "Package component should have nested product components")
+        let nestedComponents = try #require(component.components)
+        #expect(nestedComponents.count == rootPackage.products.count, "Should have one component per product")
+
+        for product in rootPackage.products {
+            let productComponent = nestedComponents.first { $0.name == product.name }
+            #expect(productComponent != nil, "Should have component for product \(product.name)")
+            #expect(productComponent?.id == "SwiftPM:\(product.name)")
+        }
+    }
+
+    @Test("extractComponent from package with executable product has application category")
+    func extractComponentFromPackageWithExecutableHasApplicationCategory() async throws {
+        let (_, swiftlyPath) = try SBOMTestRepo.setupSwiftlyTestRepo()
+        defer { try? SBOMTestRepo.cleanup(swiftlyPath) }
+
+        let graph = try SBOMTestGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+
+        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        #expect(component.category == .application, "Package with executable should be application category")
+        #expect(component.name == "swiftly")
+        #expect(component.id == "swiftly")
+    }
+
+    @Test("extractComponent from dependency package uses store version")
+    func extractComponentFromDependencyPackageUsesStoreVersion() async throws {
+        let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        
+        let dependencyPackage = try #require(graph.packages.first { $0.identity.description == "swift-system" })
+
+        let component = try await SBOMModel.extractComponent(package: dependencyPackage, graph: graph, store: store)
+
+        #expect(component.name == "swift-system")
+        #expect(component.id == "swift-system")
+        #expect(component.category == .library)
+        #expect(component.version.revision == "1.3.2")
+        let expectedSHA = SBOMTestStore.generateMockRevision(for: "swift-system")
+        #expect(component.version.commit?.sha == expectedSHA)
+        #expect(component.version.commit?.repository == "https://github.com/apple/swift-system.git")
+    }
+
+    @Test("extractComponent from product without graph uses store version")
+    func extractComponentFromProductWithoutGraphUsesStoreVersion() async throws {
+        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        
+        let dependencyPackage = try #require(graph.packages.first { $0.identity.description == "swift-collections" })
+        let product = try #require(dependencyPackage.products.first { $0.name == "OrderedCollections" })
+
+        let component = try await SBOMModel.extractComponent(product: product, graph: nil, store: store)
+
+        #expect(component.name == "OrderedCollections")
+        #expect(component.id == "swift-collections:OrderedCollections")
+        #expect(component.category == .library)
+        #expect(component.version.revision == "1.1.4")
+        #expect(component.description == nil, "Products should not have description")
+    }
+
+    @Test("extractComponent from package sets correct PURL")
+    func extractComponentFromPackageSetsCorrectPURL() async throws {
+        let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+
+        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        #expect(component.purl.hasPrefix("pkg:swift/github.com/swiftlang/SwiftPM@"))
+        #expect(component.purl.contains("github.com/swiftlang/SwiftPM"))
+    }
+
+    @Test("extractComponent from product sets correct PURL with subpath")
+    func extractComponentFromProductSetsCorrectPURLWithSubpath() async throws {
+        let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+        let product = try #require(rootPackage.products.first { $0.name == "SwiftPMPackageCollections" })
+
+        let component = try await SBOMModel.extractComponent(product: product, graph: graph, store: store)
+
+        #expect(component.purl.contains("pkg:swift/github.com/swiftlang/SwiftPM:SwiftPMPackageCollections@"))
+        #expect(component.purl.contains(":SwiftPMPackageCollections@"))
+    }
+
+    @Test("extractComponent from package includes originator with commit info")
+    func extractComponentFromPackageIncludesOriginatorWithCommitInfo() async throws {
+        let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+        let expectedRevision = try spmRepo.getCurrentRevision().identifier
+
+        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        #expect(component.originator.commits != nil)
+        let commits = try #require(component.originator.commits)
+        #expect(commits.count == 1)
+        #expect(commits.first?.sha == expectedRevision)
+        #expect(commits.first?.repository == SBOMTestStore.swiftPMURL)
+    }
+
+    @Test("extractComponent from product includes originator with commit info")
+    func extractComponentFromProductIncludesOriginatorWithCommitInfo() async throws {
+        let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+        let product = try #require(rootPackage.products.first)
+        let expectedRevision = try spmRepo.getCurrentRevision().identifier
+
+        let component = try await SBOMModel.extractComponent(product: product, graph: graph, store: store)
+
+        #expect(component.originator.commits != nil)
+        let commits = try #require(component.originator.commits)
+        #expect(commits.count == 1)
+        #expect(commits.first?.sha == expectedRevision)
+        #expect(commits.first?.repository == SBOMTestStore.swiftPMURL)
+    }
+
+    @Test("extractComponent from package preserves package description")
+    func extractComponentFromPackagePreservesDescription() async throws {
+        let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+
+        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        #expect(component.description == rootPackage.description)
+    }
+
+    @Test("extractComponent from product has nil description")
+    func extractComponentFromProductHasNilDescription() async throws {
+        let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+        let product = try #require(rootPackage.products.first)
+
+        let component = try await SBOMModel.extractComponent(product: product, graph: graph, store: store)
+
+        #expect(component.description == nil, "Products should not have description")
+    }
+
+    @Test("extractComponent from package extracts all products with correct properties")
+    func extractComponentFromPackageExtractsAllProductsWithCorrectProperties() async throws {
+        let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+        let expectedRevision = try spmRepo.getCurrentRevision().identifier
+
+        let packageComponent = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        let productComponents = try #require(packageComponent.components)
+        #expect(productComponents.count == rootPackage.products.count)
+
+        for (index, product) in rootPackage.products.enumerated() {
+            let productComponent = try #require(productComponents.first { $0.name == product.name })
+            #expect(productComponent.id == "SwiftPM:\(product.name)")
+            let expectedCategory: SBOMComponent.Category = product.type == .executable ? .application : .library
+            #expect(productComponent.category == expectedCategory)
+            #expect(productComponent.version.revision == expectedRevision)
+            #expect(productComponent.version.commit?.sha == expectedRevision)
+            #expect(productComponent.scope == .runtime)
+            #expect(productComponent.description == nil)
+            #expect(productComponent.purl.contains(":\(product.name)@"))
+        }
+    }
+
+    @Test("extractComponent from package with multiple product types extracts all correctly")
+    func extractComponentFromPackageWithMultipleProductTypesExtractsAllCorrectly() async throws {
+        let (_, swiftlyPath) = try SBOMTestRepo.setupSwiftlyTestRepo()
+        defer { try? SBOMTestRepo.cleanup(swiftlyPath) }
+
+        let graph = try SBOMTestGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+
+        let packageComponent = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        let productComponents = try #require(packageComponent.components)
+        #expect(productComponents.count == rootPackage.products.count)
+
+        let executableProduct = try #require(rootPackage.products.first { $0.type == .executable })
+        let executableComponent = try #require(productComponents.first { $0.name == executableProduct.name })
+        #expect(executableComponent.category == .application)
+        #expect(executableComponent.id == "swiftly:swiftly")
+    }
+
+    @Test("extractComponent from dependency package extracts products with store versions")
+    func extractComponentFromDependencyPackageExtractsProductsWithStoreVersions() async throws {
+        let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        
+        let dependencyPackage = try #require(graph.packages.first { $0.identity.description == "swift-collections" })
+
+        let packageComponent = try await SBOMModel.extractComponent(package: dependencyPackage, graph: graph, store: store)
+
+        let productComponents = try #require(packageComponent.components)
+        #expect(productComponents.count == dependencyPackage.products.count)
+
+        let expectedVersion = "1.1.4"
+        let expectedSHA = SBOMTestStore.generateMockRevision(for: "swift-collections")
+        for productComponent in productComponents {
+            #expect(productComponent.version.revision == expectedVersion)
+            #expect(productComponent.version.commit?.sha == expectedSHA)
+        }
+
+        let orderedCollections = try #require(productComponents.first { $0.name == "OrderedCollections" })
+        #expect(orderedCollections.id == "swift-collections:OrderedCollections")
+        #expect(orderedCollections.category == .library)
+    }
+
+    @Test("extractComponent from package with no products has empty components array")
+    func extractComponentFromPackageWithNoProductsHasEmptyComponentsArray() async throws {
+        // Create a simple package with no products for testing
+        let packageIdentity = PackageIdentity.plain("TestPackage")
+        let module = SBOMTestGraph.createSwiftModule(name: "TestModule")
+        let package = SBOMTestGraph.createPackage(
+            identity: packageIdentity,
+            displayName: "TestPackage",
+            path: "/TestPackage",
+            modules: [module],
+            products: []
+        )
+        let resolvedModule = SBOMTestGraph.createResolvedModule(
+            packageIdentity: packageIdentity,
+            module: module
+        )
+        let resolvedPackage = SBOMTestGraph.createResolvedPackage(
+            package: package,
+            modules: IdentifiableSet([resolvedModule]),
+            products: []
+        )
+
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let component = try await SBOMModel.extractComponent(package: resolvedPackage, graph: nil, store: store)
+
+        #expect(component.components != nil)
+        #expect(component.components?.isEmpty == true, "Package with no products should have empty components array")
+    }
+
+    @Test("extractComponent from package preserves product order")
+    func extractComponentFromPackagePreservesProductOrder() async throws {
+        let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+
+        let packageComponent = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        let productComponents = try #require(packageComponent.components)
+        let productNames = productComponents.map(\.name)
+        let expectedProductNames = rootPackage.products.map(\.name)
+
+        #expect(productNames == expectedProductNames, "Product components should maintain the same order as package products")
     }
 }

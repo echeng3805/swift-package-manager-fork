@@ -841,7 +841,7 @@ extension SBOMTestGraph {
             ]
         )
 
-        let swiftToolchainSQLitePackage = self.createPackage(
+        _ = self.createPackage(
             identity: swiftToolchainSQLiteIdentity,
             displayName: "swift-toolchain-sqlite",
             path: "/swift-toolchain-sqlite",
@@ -889,7 +889,7 @@ extension SBOMTestGraph {
             products: [cryptoProduct, cryptoExtrasProduct]
         )
 
-        let swiftSyntaxPackage = self.createPackage(
+        _ = self.createPackage(
             identity: swiftSyntaxIdentity,
             displayName: "swift-syntax",
             path: "/swift-syntax",
@@ -943,7 +943,7 @@ extension SBOMTestGraph {
             products: [x509Product]
         )
 
-        let swiftASN1Package = self.createPackage(
+        _ = self.createPackage(
             identity: swiftASN1Identity,
             displayName: "swift-asn1",
             path: "/swift-asn1",
@@ -951,7 +951,7 @@ extension SBOMTestGraph {
             products: [swiftASN1Product]
         )
 
-        let swiftDoccPluginPackage = self.createPackage(
+        _ = self.createPackage(
             identity: swiftDoccPluginIdentity,
             displayName: "swift-docc-plugin",
             path: "/swift-docc-plugin",
@@ -959,7 +959,7 @@ extension SBOMTestGraph {
             products: [swiftDoccProduct, swiftDoccPreviewProduct]
         )
 
-        let swiftDoccSymbolKitPackage = self.createPackage(
+        _ = self.createPackage(
             identity: swiftDoccSymbolKitIdentity,
             displayName: "swift-docc-symbolkit",
             path: "/swift-docc-symbolkit",
@@ -967,7 +967,7 @@ extension SBOMTestGraph {
             products: [swiftDoccSymbolKitProduct]
         )
 
-        let swiftJsonSchemaPackage = self.createPackage(
+        _ = self.createPackage(
             identity: swiftJsonSchemaIdentity,
             displayName: "swift-json-schema",
             path: "/swift-json-schema",
@@ -980,7 +980,7 @@ extension SBOMTestGraph {
             ]
         )
 
-        let swiftBuildPackage = self.createPackage(
+        _ = self.createPackage(
             identity: swiftBuildIdentity,
             displayName: "swift-build",
             path: "/swift-build",

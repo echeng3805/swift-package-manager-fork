@@ -111,4 +111,49 @@ enum SBOMTestGraph {
             platformVersionProvider: PlatformVersionProvider(implementation: .minimumDeploymentTargetDefault)
         )
     }
+
+    static func createProduct(name: String, type: ProductType, moduleType: Module.Kind = .library) throws -> ResolvedProduct {
+        let packageName = PackageIdentity.plain("Package\(name)")
+        let module = createSwiftModule(
+            name: "\(name)Module",
+            type: moduleType
+        )
+        let product = try Product(
+            package: packageName,
+            name: name,
+            type: type,
+            modules: [module]
+        )
+        let resolvedModule = createResolvedModule(
+            packageIdentity: packageName,
+            module: module
+        )
+        return createResolvedProduct(
+            packageIdentity: packageName,
+            product: product,
+            modules: IdentifiableSet([resolvedModule])
+        )
+    }
+
+    static func createPackage(name: String, products: [ResolvedProduct], modules: [Module] = []) throws -> ResolvedPackage {
+        let packageName = PackageIdentity.plain("Package\(name)")
+        let package = createPackage(
+            identity: packageName,
+            displayName: name,
+            path: "/\(name)",
+            modules: modules,
+            products: products.map(\.underlying)
+        )
+        let resolvedModules = modules.map { module in
+            createResolvedModule(
+                packageIdentity: packageName,
+                module: module
+            )
+        }
+        return createResolvedPackage(
+            package: package,
+            modules: IdentifiableSet(resolvedModules),
+            products: products
+        )
+    }
 }
