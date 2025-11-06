@@ -112,37 +112,35 @@ package func extractScope(from package: ResolvedPackage) async throws -> SBOMCom
 }
 
 /// Extracts version information from Git for the root package
-private func extractComponentVersionFromGit(packagePath: AbsolutePath) async throws -> SBOMComponent.Version? {
-    guard localFileSystem.exists(packagePath.appending(".git")) else {
-        return nil
+private func extractComponentVersionFromGit(packagePath: AbsolutePath) async throws -> SBOMComponent.Version {
+    let gitRepo = GitRepository(path: packagePath, isWorkingRepo: true)
+    
+    guard let currentRevision = try? gitRepo.getCurrentRevision() else {
+        return SBOMComponent.Version(revision: "unknown")
     }
-    do {
-        let gitRepo = GitRepository(path: packagePath, isWorkingRepo: true)
-        let remotes = try gitRepo.remotes()
-        let repositoryURL = remotes.first(where: { $0.name == "origin" })?.url ?? remotes.first?.url ?? packagePath
-            .pathString
-        let currentRevision = try gitRepo.getCurrentRevision()
-        if let currentTag = gitRepo.getCurrentTag() {
-            return SBOMComponent.Version(
-                revision: gitRepo.hasUncommittedChanges() ? "\(currentTag)-modified" : currentTag,
-                commit: SBOMCommit(
-                    sha: currentRevision.identifier,
-                    repository: repositoryURL
-                )
-            )
-        }
+    
+    let remotes = (try? gitRepo.remotes()) ?? []
+    let repositoryURL = remotes.first(where: { $0.name == "origin" })?.url ?? remotes.first?.url ?? packagePath
+        .pathString
+    
+    if let currentTag = gitRepo.getCurrentTag() {
         return SBOMComponent.Version(
-            revision: gitRepo.hasUncommittedChanges() ? "\(currentRevision.identifier)-modified" : currentRevision
-                .identifier,
+            revision: gitRepo.hasUncommittedChanges() ? "\(currentTag)-modified" : currentTag,
             commit: SBOMCommit(
                 sha: currentRevision.identifier,
                 repository: repositoryURL
             )
         )
-    } catch {
-        fputs("warning: Failed to extract version from Git repository at \(packagePath): \(error)\n", stderr)
-        return nil
     }
+    
+    return SBOMComponent.Version(
+        revision: gitRepo.hasUncommittedChanges() ? "\(currentRevision.identifier)-modified" : currentRevision
+            .identifier,
+        commit: SBOMCommit(
+            sha: currentRevision.identifier,
+            repository: repositoryURL
+        )
+    )
 }
 
 private func extractComponentVersion(
@@ -157,8 +155,7 @@ private func extractComponentVersion(
 
     // root package (try to get version from git)
     if let graph, let rootPackage = graph.rootPackages.first(where: { $0.identity == packageIdentity }) {
-        let version = try await extractComponentVersionFromGit(packagePath: rootPackage.path) ?? SBOMComponent
-            .Version(revision: "unknown")
+        let version = try await extractComponentVersionFromGit(packagePath: rootPackage.path)
         if let cache {
             await cache.set(packageIdentity, version: version)
         }
