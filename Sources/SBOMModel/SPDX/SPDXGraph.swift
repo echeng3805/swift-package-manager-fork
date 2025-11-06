@@ -43,15 +43,10 @@ package struct SPDXGraph: Encodable {
 
     package init(
         context: String,
-        graph: [Any]
+        graph: [any SPDXObject]
     ) {
         self.context = context
-        self.graph = graph.compactMap { element in
-            if let encodableElement = element as? any Encodable {
-                return SPDXGraphElement(encodableElement)
-            }
-            return nil
-        }
+        self.graph = graph.map { SPDXGraphElement($0) }
     }
 
     private enum CodingKeys: String, CodingKey {

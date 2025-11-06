@@ -30,14 +30,14 @@ private func convertToSPDXPurpose(from category: SBOMComponent.Category) async -
     }
 }
 
-package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [Any] {
+package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [any SPDXObject] {
     guard let metadata,
           let creators = metadata.creators,
           !creators.isEmpty
     else {
         return []
     }
-    var agents: [Any] = []
+    var agents: [any SPDXObject] = []
     for creator in creators {
         let creatorID = generateSPDXID(creator.id)
         let toolCreationInfoID = "\(creatorID):creationInfo"
@@ -60,7 +60,7 @@ package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [Any] {
     return agents
 }
 
-package func convertToSPDXDocument(from document: SBOMDocument) async throws -> [Any] {
+package func convertToSPDXDocument(from document: SBOMDocument) async throws -> [any SPDXObject] {
     guard let timestamp = document.metadata.timestamp,
           let creators = document.metadata.creators,
           !creators.isEmpty
@@ -70,7 +70,7 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
         )
     }
 
-    var elements: [Any] = []
+    var elements: [any SPDXObject] = []
 
     let creationInfoID = SPDXConstants.spdxRootCreationInfoID
 
@@ -132,12 +132,12 @@ package func convertToSPDXPackage(from component: SBOMComponent) async throws ->
     )
 }
 
-package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?) async -> [Any] {
+package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?) async -> [any SPDXObject] {
     guard let comps = components, !comps.isEmpty else {
         return []
     }
 
-    var externalIdentifiers: [Any] = []
+    var externalIdentifiers: [any SPDXObject] = []
     var commitToComponents: [String: (repository: String, componentIDs: [String])] = [:]
     for component in comps {
         if let commits = component.originator.commits {
@@ -173,12 +173,12 @@ package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?)
     return externalIdentifiers
 }
 
-package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) async -> [Any] {
+package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) async -> [any SPDXObject] {
     guard let dependencies else {
         return []
     }
 
-    var relationships: [Any] = []
+    var relationships: [any SPDXObject] = []
     if let sbomRelationships = dependencies.relationships {
         for dependency in sbomRelationships {
             let parentID = generateSPDXID(dependency.parentID)
@@ -246,7 +246,7 @@ package func convertToSPDXGraph(from document: SBOMDocument) async throws -> SPD
     let agents = await convertToSPDXAgent(from: document.metadata)
     let elements = try await convertToSPDXDocument(from: document)
 
-    var packages: [Any] = []
+    var packages: [any SPDXObject] = []
     for comp in document.dependencies.components {
         let p = try await convertToSPDXPackage(from: comp)
         packages.append(p)
