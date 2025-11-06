@@ -35,22 +35,11 @@ package func generateSBOMID() -> String {
 }
 
 package func extractSpec(_ spec: Spec) async throws -> SBOMSpec {
-    // cyclonedx and spdx refer to the most recent versions.
-    // when there are new major versions available, cyclonedx and spdx should be moved to the same
-    // cases as cyclonedx2 and spdx4.
-    if spec.supportsCycloneDX {
-        return SBOMSpec(
-            type: .cyclonedx1,
-            version: CDXConstants.cyclonedx1SpecVersion
-        )
-    } else if spec.supportsSPDX {
-        return SBOMSpec(
-            type: .spdx3,
-            version: SPDXConstants.spdx3SpecVersion
-        )
-    } else {
-        throw SBOMError.unexpectedSpecType(expected: "cyclonedx or spdx", actual: spec)
-    }
+    let concreteSpec = spec.latestSpec
+    return SBOMSpec(
+        type: concreteSpec.type,
+        version: concreteSpec.version
+    )
 }
 
 package func extractMetadata(_ spec: Spec) async throws -> SBOMMetadata {

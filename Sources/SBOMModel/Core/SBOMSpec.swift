@@ -50,6 +50,26 @@ package enum Spec: String, Codable, Equatable, CaseIterable, ExpressibleByArgume
             false
         }
     }
+
+    /// Returns the concrete spec type and version for generic spec cases.
+    /// For versioned cases (e.g., .cyclonedx1, .spdx3), returns self.
+    /// For generic cases (e.g., .cyclonedx, .spdx), returns the latest supported version.
+    package var latestSpec: (type: Spec, version: String) {
+        switch self {
+        case .cyclonedx:
+            return (.cyclonedx1, CDXConstants.cyclonedx1SpecVersion)
+        case .spdx:
+            return (.spdx3, SPDXConstants.spdx3SpecVersion)
+        case .cyclonedx1:
+            return (.cyclonedx1, CDXConstants.cyclonedx1SpecVersion)
+        case .spdx3:
+            return (.spdx3, SPDXConstants.spdx3SpecVersion)
+        // When adding new major versions (e.g., .cyclonedx2, .spdx4):
+        // 1. Add the new case to the enum
+        // 2. Update the .cyclonedx or .spdx case above to return the new version
+        // 3. Add a case for the new version that returns itself
+        }
+    }
 }
 
 package struct SBOMSpec: Codable, Equatable {
