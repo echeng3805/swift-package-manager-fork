@@ -147,6 +147,35 @@ struct PURLTests {
             expectedString: "pkg:swift/MyPackage#Meow/MeowMeow/MeowMeowMeow/Meow/Meow.swift",
             description: "PURL with complex subpath"
         ),
+        // Test "unknown" version handling - should be omitted from string
+        PURLStringTestCase(
+            purl: PURL(
+                scheme: "pkg",
+                type: "swift",
+                namespace: nil,
+                name: "MyPackage",
+                version: "unknown",
+                qualifiers: nil,
+                subpath: nil
+            ),
+            expectedString: "pkg:swift/MyPackage",
+            description: "PURL with 'unknown' version (should be omitted)"
+        ),
+        
+        // Test qualifier ordering - qualifiers should be sorted alphabetically
+        PURLStringTestCase(
+            purl: PURL(
+                scheme: "pkg",
+                type: "swift",
+                namespace: nil,
+                name: "MyPackage",
+                version: nil,
+                qualifiers: ["zebra": "last", "alpha": "first", "middle": "mid"],
+                subpath: nil
+            ),
+            expectedString: "pkg:swift/MyPackage?alpha=first&middle=mid&zebra=last",
+            description: "PURL with qualifiers in alphabetical order"
+        ),
     ]
 
     @Test("PURL string representation", arguments: stringRepresentationTestCases)
@@ -156,6 +185,186 @@ struct PURLTests {
             actualString == testCase.expectedString,
             "Expected '\(testCase.expectedString)' but got '\(actualString)' for case \(testCase.description)"
         )
+    }
+    
+    // MARK: - CustomStringConvertible Protocol Conformance Tests
+    
+    @Test("PURL conforms to CustomStringConvertible")
+    func purlConformsToCustomStringConvertible() {
+        let purl = PURL(
+            scheme: "pkg",
+            type: "swift",
+            name: "TestPackage"
+        )
+        
+        // Verify that PURL can be used as CustomStringConvertible
+        let _: CustomStringConvertible = purl
+        
+        // Verify description property is accessible
+        let description = purl.description
+        #expect(!description.isEmpty)
+    }
+    
+    @Test("PURL description is consistent")
+    func purlDescriptionIsConsistent() {
+        let purl = PURL(
+            scheme: "pkg",
+            type: "swift",
+            namespace: "github.com/apple",
+            name: "swift-package-manager",
+            version: "1.0.0",
+            qualifiers: ["os": "macos"],
+            subpath: "Sources"
+        )
+        
+        // Multiple calls to description should return the same value
+        let description1 = purl.description
+        let description2 = purl.description
+        #expect(description1 == description2)
+    }
+    
+    @Test("PURL description can be used in string interpolation")
+    func purlDescriptionInStringInterpolation() {
+        let purl = PURL(
+            scheme: "pkg",
+            type: "swift",
+            name: "MyPackage",
+            version: "1.0.0"
+        )
+        
+        let interpolated = "Package URL: \(purl)"
+        #expect(interpolated == "Package URL: pkg:swift/MyPackage@1.0.0")
+    }
+    
+    @Test("PURL description handles special characters in components")
+    func purlDescriptionWithSpecialCharacters() {
+        // Test with hyphens, underscores, and colons (common in package names)
+        let purl = PURL(
+            scheme: "pkg",
+            type: "swift",
+            namespace: "github.com/my-org",
+            name: "my_package:product-name",
+            version: "1.0.0-beta.1"
+        )
+        
+        let description = purl.description
+        #expect(description.contains("my-org"))
+        #expect(description.contains("my_package:product-name"))
+        #expect(description.contains("1.0.0-beta.1"))
+    }
+    
+    @Test("PURL description with all nil optional components")
+    func purlDescriptionWithAllNilOptionals() {
+        let purl = PURL(
+            scheme: "pkg",
+            type: "swift",
+            namespace: nil,
+            name: "MinimalPackage",
+            version: nil,
+            qualifiers: nil,
+            subpath: nil
+        )
+        
+        #expect(purl.description == "pkg:swift/MinimalPackage")
+    }
+    
+    @Test("PURL description format follows PURL specification")
+    func purlDescriptionFollowsPURLSpec() {
+        let purl = PURL(
+            scheme: "pkg",
+            type: "swift",
+            namespace: "github.com/apple",
+            name: "swift-package-manager",
+            version: "5.9.0",
+            qualifiers: ["arch": "arm64"],
+            subpath: "Sources/PackageModel"
+        )
+        
+        let description = purl.description
+        
+        // Verify PURL format: scheme:type/namespace/name@version?qualifiers#subpath
+        #expect(description.hasPrefix("pkg:"))
+        #expect(description.contains("swift/"))
+        #expect(description.contains("github.com/apple/"))
+        #expect(description.contains("swift-package-manager"))
+        #expect(description.contains("@5.9.0"))
+        #expect(description.contains("?arch=arm64"))
+        #expect(description.contains("#Sources/PackageModel"))
+    }
+    
+    @Test("PURL description with multiple qualifiers maintains alphabetical order")
+    func purlDescriptionQualifierOrdering() {
+        let purl = PURL(
+            scheme: "pkg",
+            type: "swift",
+            name: "Package",
+            qualifiers: [
+                "zoo": "value1",
+                "apple": "value2",
+                "middle": "value3",
+                "beta": "value4"
+            ]
+        )
+        
+        let description = purl.description
+        
+        // Verify qualifiers appear in alphabetical order
+        let qualifierPart = description.split(separator: "?").last?.split(separator: "#").first
+        #expect(qualifierPart == "apple=value2&beta=value4&middle=value3&zoo=value1")
+    }
+    
+    @Test("PURL description equality matches struct equality")
+    func purlDescriptionEqualityMatchesStructEquality() {
+        let purl1 = PURL(
+            scheme: "pkg",
+            type: "swift",
+            name: "Package",
+            version: "1.0.0"
+        )
+        
+        let purl2 = PURL(
+            scheme: "pkg",
+            type: "swift",
+            name: "Package",
+            version: "1.0.0"
+        )
+        
+        let purl3 = PURL(
+            scheme: "pkg",
+            type: "swift",
+            name: "Package",
+            version: "2.0.0"
+        )
+        
+        // Equal PURLs should have equal descriptions
+        #expect(purl1 == purl2)
+        #expect(purl1.description == purl2.description)
+        
+        // Different PURLs should have different descriptions
+        #expect(purl1 != purl3)
+        #expect(purl1.description != purl3.description)
+    }
+    
+    @Test("PURL description with empty qualifiers dictionary is same as nil qualifiers")
+    func purlDescriptionEmptyQualifiersEqualsNil() {
+        let purlWithNil = PURL(
+            scheme: "pkg",
+            type: "swift",
+            name: "Package",
+            qualifiers: nil
+        )
+        
+        let purlWithEmpty = PURL(
+            scheme: "pkg",
+            type: "swift",
+            name: "Package",
+            qualifiers: [:]
+        )
+        
+        // Both should produce the same description (no qualifiers section)
+        #expect(purlWithNil.description == purlWithEmpty.description)
+        #expect(!purlWithNil.description.contains("?"))
+        #expect(!purlWithEmpty.description.contains("?"))
     }
 
     struct PURLNamespaceTestCase {
