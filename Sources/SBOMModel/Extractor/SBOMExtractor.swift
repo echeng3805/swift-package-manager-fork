@@ -85,7 +85,7 @@ package func extractCategory(from product: ResolvedProduct) async throws -> SBOM
     switch product.type {
     case .executable:
         .application
-    default:
+    case .library, .snippet, .plugin, .test, .macro:
         .library
     }
 }
