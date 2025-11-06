@@ -38,8 +38,8 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
                     throw SBOMValidatorError.invalidValue(path: path, message: "Invalid date format")
                 }
             case .email, .idnEmail:
-                let emailRegex = #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"#
-                if !NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: value) {
+                let emailRegex = #/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/#
+                if value.wholeMatch(of: emailRegex) == nil {
                     throw SBOMValidatorError.invalidValue(path: path, message: "Invalid email format")
                 }
             case .uri, .iriReference:
