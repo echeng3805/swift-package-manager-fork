@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CDXConstants: Codable, Equatable {
+package struct CycloneDXConstants: Codable, Equatable {
     package static let cyclonedx1Schema = "http://cyclonedx.org/schema/bom-1.7.schema.json"
     package static let cyclonedx1SchemaFile = "cyclonedx-1.7.schema"
     package static let cyclonedx1SpecVersion = "1.7"

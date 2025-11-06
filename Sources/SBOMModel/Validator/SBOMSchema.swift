@@ -38,7 +38,7 @@ package struct SBOMSchema {
         if spec.type.supportsSPDX {
             return SPDXValidator(schema: schema)
         } else if spec.type.supportsCycloneDX {
-            return CDXValidator(schema: schema)
+            return CycloneDXValidator(schema: schema)
         } else {
             throw SBOMError.unexpectedSpecType(expected: "cyclonedx or spdx", actual: spec.type)
         }

@@ -10,15 +10,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CDXDocument: Codable, Equatable {
+package struct CycloneDXDocument: Codable, Equatable {
     package let schema: String
     package let bomFormat: String
     package let specVersion: String
     package let serialNumber: String
     package let version: Int
-    package let metadata: CDXMetadata
-    package let components: [CDXComponent]?
-    package let dependencies: [CDXDependency]?
+    package let metadata: CycloneDXMetadata
+    package let components: [CycloneDXComponent]?
+    package let dependencies: [CycloneDXDependency]?
 
     package init(
         schema: String,
@@ -26,9 +26,9 @@ package struct CDXDocument: Codable, Equatable {
         specVersion: String,
         serialNumber: String,
         version: Int,
-        metadata: CDXMetadata,
-        components: [CDXComponent]? = nil,
-        dependencies: [CDXDependency]? = nil
+        metadata: CycloneDXMetadata,
+        components: [CycloneDXComponent]? = nil,
+        dependencies: [CycloneDXDependency]? = nil
     ) {
         self.schema = schema
         self.bomFormat = bomFormat

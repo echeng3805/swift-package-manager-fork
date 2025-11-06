@@ -18,14 +18,14 @@ add_library(SBOMModel
   Core/SBOMRelationship.swift
   Core/SBOMSpec.swift
   Core/SBOMTool.swift
-  Converter/CDXConverter.swift
+  Converter/CycloneDXConverter.swift
   Converter/SPDXConverter.swift
-  CycloneDX/CDXComponent.swift
-  CycloneDX/CDXConstants.swift
-  CycloneDX/CDXDependency.swift
-  CycloneDX/CDXDocument.swift
-  CycloneDX/CDXMetadata.swift
-  CycloneDX/CDXPedigree.swift
+  CycloneDX/CycloneDXComponent.swift
+  CycloneDX/CycloneDXConstants.swift
+  CycloneDX/CycloneDXDependency.swift
+  CycloneDX/CycloneDXDocument.swift
+  CycloneDX/CycloneDXMetadata.swift
+  CycloneDX/CycloneDXPedigree.swift
   Encoder/SBOMEncoder.swift
   Extractor/SBOMDependenciesExtractor.swift
   Extractor/SBOMExtractor.swift

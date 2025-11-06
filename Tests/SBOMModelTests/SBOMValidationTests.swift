@@ -92,27 +92,27 @@ struct SBOMValidationTests {
             // valid CycloneDX SBOMs
             ValidateFileSBOMTestCase(
                 inputFilePath: "testfiles/valid-cyclonedx-1.7-empty-comps",
-                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CDXConstants.cyclonedx1SpecVersion),
+                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CycloneDXConstants.cyclonedx1SpecVersion),
                 wantError: false
             ),
             ValidateFileSBOMTestCase(
                 inputFilePath: "testfiles/valid-cyclonedx-1.7-minimal",
-                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CDXConstants.cyclonedx1SpecVersion),
+                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CycloneDXConstants.cyclonedx1SpecVersion),
                 wantError: false
             ),
             ValidateFileSBOMTestCase(
                 inputFilePath: "testfiles/valid-cyclonedx-1.7-unicode",
-                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CDXConstants.cyclonedx1SpecVersion),
+                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CycloneDXConstants.cyclonedx1SpecVersion),
                 wantError: false
             ),
             ValidateFileSBOMTestCase(
                 inputFilePath: "testfiles/valid-cyclonedx-1.7-spm",
-                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CDXConstants.cyclonedx1SpecVersion),
+                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CycloneDXConstants.cyclonedx1SpecVersion),
                 wantError: false
             ),
             ValidateFileSBOMTestCase(
                 inputFilePath: "testfiles/valid-cyclonedx-1.7-versions",
-                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CDXConstants.cyclonedx1SpecVersion),
+                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CycloneDXConstants.cyclonedx1SpecVersion),
                 wantError: false
             ),
 
@@ -126,12 +126,12 @@ struct SBOMValidationTests {
             // invalid CycloneDX SBOMs
             ValidateFileSBOMTestCase(
                 inputFilePath: "testfiles/invalid-cyclonedx-1-missing-fields",
-                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CDXConstants.cyclonedx1SpecVersion),
+                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CycloneDXConstants.cyclonedx1SpecVersion),
                 wantError: true
             ),
             ValidateFileSBOMTestCase(
                 inputFilePath: "testfiles/invalid-cyclonedx-1-small",
-                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CDXConstants.cyclonedx1SpecVersion),
+                inputSBOMSpec: SBOMSpec(type: .cyclonedx1, version: CycloneDXConstants.cyclonedx1SpecVersion),
                 wantError: true
             ),
             ValidateFileSBOMTestCase(

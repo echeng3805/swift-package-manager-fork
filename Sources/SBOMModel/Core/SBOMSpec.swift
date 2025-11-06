@@ -22,9 +22,9 @@ package enum Spec: String, Codable, Equatable, CaseIterable, ExpressibleByArgume
 
     package var defaultValueDescription: String {
         switch self {
-        case .cyclonedx: "Most recent major version of CycloneDX supported by SPM (currently: \(CDXConstants.cyclonedx1SpecVersion))"
+        case .cyclonedx: "Most recent major version of CycloneDX supported by SPM (currently: \(CycloneDXConstants.cyclonedx1SpecVersion))"
         case .spdx: "Most recent major version of SPDX supported by SPM (currently: \(SPDXConstants.spdx3SpecVersion))"
-        case .cyclonedx1: "Most recent minor version of CycloneDX v1 supported by SPM  (currently: \(CDXConstants.cyclonedx1SpecVersion))"
+        case .cyclonedx1: "Most recent minor version of CycloneDX v1 supported by SPM  (currently: \(CycloneDXConstants.cyclonedx1SpecVersion))"
         case .spdx3: "Most recent minor version of SPDX v3 supported by SPM (currently: \(SPDXConstants.spdx3SpecVersion))"
         }
     }
@@ -57,11 +57,11 @@ package enum Spec: String, Codable, Equatable, CaseIterable, ExpressibleByArgume
     package var latestSpec: (type: Spec, version: String) {
         switch self {
         case .cyclonedx:
-            return (.cyclonedx1, CDXConstants.cyclonedx1SpecVersion)
+            return (.cyclonedx1, CycloneDXConstants.cyclonedx1SpecVersion)
         case .spdx:
             return (.spdx3, SPDXConstants.spdx3SpecVersion)
         case .cyclonedx1:
-            return (.cyclonedx1, CDXConstants.cyclonedx1SpecVersion)
+            return (.cyclonedx1, CycloneDXConstants.cyclonedx1SpecVersion)
         case .spdx3:
             return (.spdx3, SPDXConstants.spdx3SpecVersion)
         // When adding new major versions (e.g., .cyclonedx2, .spdx4):

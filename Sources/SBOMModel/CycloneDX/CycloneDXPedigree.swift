@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CDXAction: Codable, Equatable {
+package struct CycloneDXAction: Codable, Equatable {
     package let name: String?
     package let email: String?
 
@@ -23,16 +23,16 @@ package struct CDXAction: Codable, Equatable {
     }
 }
 
-package struct CDXCommit: Codable, Equatable {
+package struct CycloneDXCommit: Codable, Equatable {
     package let uid: String?
     package let url: String?
-    package let author: CDXAction?
+    package let author: CycloneDXAction?
     package let message: String?
 
     package init(
         uid: String? = nil,
         url: String? = nil,
-        author: CDXAction? = nil,
+        author: CycloneDXAction? = nil,
         message: String? = nil
     ) {
         self.uid = uid
@@ -42,10 +42,10 @@ package struct CDXCommit: Codable, Equatable {
     }
 }
 
-package struct CDXPedigree: Codable, Equatable {
-    package let commits: [CDXCommit]?
+package struct CycloneDXPedigree: Codable, Equatable {
+    package let commits: [CycloneDXCommit]?
 
-    package init(commits: [CDXCommit]? = nil) {
+    package init(commits: [CycloneDXCommit]? = nil) {
         self.commits = commits
     }
 }

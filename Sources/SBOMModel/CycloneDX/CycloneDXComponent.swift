@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CDXComponent: Codable, Equatable {
+package struct CycloneDXComponent: Codable, Equatable {
     package enum Category: String, Codable, Equatable {
         case application
         case framework
@@ -30,8 +30,8 @@ package struct CDXComponent: Codable, Equatable {
     package let version: String
     package let scope: Scope
     package let purl: String
-    package let components: [CDXComponent]?
-    package let pedigree: CDXPedigree?
+    package let components: [CycloneDXComponent]?
+    package let pedigree: CycloneDXPedigree?
 
     package init(
         type: Category,
@@ -40,8 +40,8 @@ package struct CDXComponent: Codable, Equatable {
         version: String,
         scope: Scope,
         purl: String,
-        components: [CDXComponent]? = nil,
-        pedigree: CDXPedigree? = nil
+        components: [CycloneDXComponent]? = nil,
+        pedigree: CycloneDXPedigree? = nil
     ) {
         self.type = type
         self.bomRef = bomRef

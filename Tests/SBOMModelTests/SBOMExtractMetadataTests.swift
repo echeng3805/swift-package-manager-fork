@@ -25,12 +25,12 @@ struct SBOMExtractMetadataTests {
         ExtractMetadataTestCase(
             input: .cyclonedx,
             expectedSpecType: .cyclonedx1,
-            expectedSpecVersion: CDXConstants.cyclonedx1SpecVersion
+            expectedSpecVersion: CycloneDXConstants.cyclonedx1SpecVersion
         ),
         ExtractMetadataTestCase(
             input: .cyclonedx1,
             expectedSpecType: .cyclonedx1,
-            expectedSpecVersion: CDXConstants.cyclonedx1SpecVersion
+            expectedSpecVersion: CycloneDXConstants.cyclonedx1SpecVersion
         ),
         ExtractMetadataTestCase(
             input: .spdx,

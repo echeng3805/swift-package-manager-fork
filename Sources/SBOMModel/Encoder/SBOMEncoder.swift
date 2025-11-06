@@ -26,7 +26,7 @@ package func encodeSBOM(from sbom: SBOMDocument, outputPath: AbsolutePath?) asyn
 package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
     let data: any Encodable
     if sbom.metadata.spec.type.supportsCycloneDX {
-        data = try await convertToCDXDocument(from: sbom)
+        data = try await convertToCycloneDXDocument(from: sbom)
     } else if sbom.metadata.spec.type.supportsSPDX {
         data = try await convertToSPDXGraph(from: sbom)
     } else {
@@ -53,7 +53,7 @@ package func validateSBOM(from encoded: Foundation.Data, spec: SBOMSpec) async t
 
 private func getSchemaFilename(from spec: Spec) throws -> String {
     if spec.supportsCycloneDX {
-        return CDXConstants.cyclonedx1SchemaFile
+        return CycloneDXConstants.cyclonedx1SchemaFile
     } else if spec.supportsSPDX {
         return SPDXConstants.spdx3SchemaFile
     } else {

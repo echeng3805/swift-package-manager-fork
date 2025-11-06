@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-internal struct CDXValidator: SBOMValidatorProtocol {
+internal struct CycloneDXValidator: SBOMValidatorProtocol {
     private let validator: SBOMValidator
     
     internal init(schema: [String: Any]) {

@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CDXDependency: Codable, Equatable {
+package struct CycloneDXDependency: Codable, Equatable {
     package let ref: String
     package let dependsOn: [String]
 

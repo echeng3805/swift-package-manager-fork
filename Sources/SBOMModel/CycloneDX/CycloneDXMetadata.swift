@@ -10,23 +10,23 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CDXTools: Codable, Equatable {
-    package let components: [CDXComponent]
+package struct CycloneDXTools: Codable, Equatable {
+    package let components: [CycloneDXComponent]
 
-    package init(components: [CDXComponent]) {
+    package init(components: [CycloneDXComponent]) {
         self.components = components
     }
 }
 
-package struct CDXMetadata: Codable, Equatable {
+package struct CycloneDXMetadata: Codable, Equatable {
     package let timestamp: String?
-    package let component: CDXComponent
-    package let tools: CDXTools?
+    package let component: CycloneDXComponent
+    package let tools: CycloneDXTools?
 
     package init(
         timestamp: String?,
-        component: CDXComponent,
-        tools: CDXTools?
+        component: CycloneDXComponent,
+        tools: CycloneDXTools?
     ) {
         self.timestamp = timestamp
         self.component = component

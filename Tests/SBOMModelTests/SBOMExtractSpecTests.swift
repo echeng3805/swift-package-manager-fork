@@ -25,12 +25,12 @@ struct SBOMExtractSpecTests {
         ExtractSpecTestCase(
             input: .cyclonedx,
             expectedType: .cyclonedx1,
-            expectedVersion: CDXConstants.cyclonedx1SpecVersion
+            expectedVersion: CycloneDXConstants.cyclonedx1SpecVersion
         ),
         ExtractSpecTestCase(
             input: .cyclonedx1,
             expectedType: .cyclonedx1,
-            expectedVersion: CDXConstants.cyclonedx1SpecVersion
+            expectedVersion: CycloneDXConstants.cyclonedx1SpecVersion
         ),
         ExtractSpecTestCase(
             input: .spdx,

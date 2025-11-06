@@ -14,23 +14,23 @@ import Foundation
 @testable import SBOMModel
 import Testing
 
-struct CDXConverterTests {
-    @Test("convertToCDXPedigree with nil commits")
-    func convertToCDXPedigreeWithNilCommits() async throws {
+struct CycloneDXConverterTests {
+    @Test("convertToCycloneDXPedigree with nil commits")
+    func convertToCycloneDXPedigreeWithNilCommits() async throws {
         let originator = SBOMOriginator(commits: nil)
-        let result = try await convertToCDXPedigree(from: originator)
+        let result = try await convertToCycloneDXPedigree(from: originator)
         #expect(result.commits == nil)
     }
 
-    @Test("convertToCDXPedigree with empty commits")
-    func convertToCDXPedigreeWithEmptyCommits() async throws {
+    @Test("convertToCycloneDXPedigree with empty commits")
+    func convertToCycloneDXPedigreeWithEmptyCommits() async throws {
         let originator = SBOMOriginator(commits: [])
-        let result = try await convertToCDXPedigree(from: originator)
+        let result = try await convertToCycloneDXPedigree(from: originator)
         #expect(result.commits?.isEmpty == true)
     }
 
-    @Test("convertToCDXPedigree with single commit without authors")
-    func convertToCDXPedigreeWithSingleCommitNoAuthors() async throws {
+    @Test("convertToCycloneDXPedigree with single commit without authors")
+    func convertToCycloneDXPedigreeWithSingleCommitNoAuthors() async throws {
         let originator = SBOMOriginator(commits: [SBOMCommit(
             sha: "abc123",
             repository: "https://github.com/swiftlang/swift-package-manager",
@@ -38,7 +38,7 @@ struct CDXConverterTests {
             authors: nil,
             message: "Initial commit"
         )])
-        let result = try await convertToCDXPedigree(from: originator)
+        let result = try await convertToCycloneDXPedigree(from: originator)
 
         let cdxCommits = try #require(result.commits)
         #expect(cdxCommits.count == 1)
@@ -50,8 +50,8 @@ struct CDXConverterTests {
         #expect(cdxCommit.message == "Initial commit")
     }
 
-    @Test("convertToCDXPedigree with single commit with authors")
-    func convertToCDXPedigreeWithSingleCommitWithAuthors() async throws {
+    @Test("convertToCycloneDXPedigree with single commit with authors")
+    func convertToCycloneDXPedigreeWithSingleCommitWithAuthors() async throws {
         let originator = SBOMOriginator(commits: [
             SBOMCommit(
                 sha: "def456",
@@ -66,7 +66,7 @@ struct CDXConverterTests {
             ),
         ])
 
-        let result = try await convertToCDXPedigree(from: originator)
+        let result = try await convertToCycloneDXPedigree(from: originator)
 
         let cdxCommits = try #require(result.commits)
         #expect(cdxCommits.count == 1)
@@ -81,8 +81,8 @@ struct CDXConverterTests {
         #expect(cdxAuthor.email == "john@example.com")
     }
 
-    @Test("convertToCDXPedigree with multiple commits")
-    func convertToCDXPedigreeWithMultipleCommits() async throws {
+    @Test("convertToCycloneDXPedigree with multiple commits")
+    func convertToCycloneDXPedigreeWithMultipleCommits() async throws {
         let author1 = SBOMPerson(
             id: "author1",
             name: "John Doe",
@@ -111,7 +111,7 @@ struct CDXConverterTests {
 
         let originator = SBOMOriginator(commits: [commit1, commit2])
 
-        let result = try await convertToCDXPedigree(from: originator)
+        let result = try await convertToCycloneDXPedigree(from: originator)
 
         let cdxCommits = try #require(result.commits)
         #expect(cdxCommits.count == 2)
@@ -131,8 +131,8 @@ struct CDXConverterTests {
         #expect(cdxAuthor2.name == "Jane Smith")
     }
 
-    @Test("convertToCDXPedigree uses first author only")
-    func convertToCDXPedigreeUsesFirstAuthorOnly() async throws {
+    @Test("convertToCycloneDXPedigree uses first author only")
+    func convertToCycloneDXPedigreeUsesFirstAuthorOnly() async throws {
         let author1 = SBOMPerson(
             id: "author1",
             name: "John Doe",
@@ -152,7 +152,7 @@ struct CDXConverterTests {
             message: "Commit with multiple authors"
         )
         let originator = SBOMOriginator(commits: [commit])
-        let result = try await convertToCDXPedigree(from: originator)
+        let result = try await convertToCycloneDXPedigree(from: originator)
 
         let cdxCommits = try #require(result.commits)
         #expect(cdxCommits.count == 1)
@@ -162,9 +162,9 @@ struct CDXConverterTests {
         #expect(cdxAuthor.email == "john@example.com")
     }
 
-    @Test("convertToCDXComponent with all categories")
-    func convertToCDXComponentWithAllCategories() async throws {
-        let categories: [(SBOMComponent.Category, CDXComponent.Category)] = [
+    @Test("convertToCycloneDXComponent with all categories")
+    func convertToCycloneDXComponentWithAllCategories() async throws {
+        let categories: [(SBOMComponent.Category, CycloneDXComponent.Category)] = [
             (.application, .application),
             (.framework, .framework),
             (.library, .library),
@@ -182,7 +182,7 @@ struct CDXConverterTests {
                 scope: .runtime
             )
 
-            let result = try await convertToCDXComponent(from: component)
+            let result = try await convertToCycloneDXComponent(from: component)
 
             #expect(result.type == expectedCDXCategory)
             #expect(result.bomRef == "test-id")
@@ -193,9 +193,9 @@ struct CDXConverterTests {
         }
     }
 
-    @Test("convertToCDXComponent with all scopes")
-    func convertToCDXComponentWithAllScopes() async throws {
-        let scopes: [(SBOMComponent.Scope?, CDXComponent.Scope)] = [
+    @Test("convertToCycloneDXComponent with all scopes")
+    func convertToCycloneDXComponentWithAllScopes() async throws {
+        let scopes: [(SBOMComponent.Scope?, CycloneDXComponent.Scope)] = [
             (.runtime, .required),
             (.optional, .optional),
             (.test, .excluded),
@@ -213,7 +213,7 @@ struct CDXConverterTests {
                 scope: sbomScope
             )
 
-            let result = try await convertToCDXComponent(from: component)
+            let result = try await convertToCycloneDXComponent(from: component)
 
             #expect(result.type == .library)
             #expect(result.scope == expectedCDXScope)
@@ -224,8 +224,8 @@ struct CDXConverterTests {
         }
     }
 
-    @Test("convertToCDXComponent with pedigree")
-    func convertToCDXComponentWithPedigree() async throws {
+    @Test("convertToCycloneDXComponent with pedigree")
+    func convertToCycloneDXComponentWithPedigree() async throws {
         let originator = SBOMOriginator(commits: [
             SBOMCommit(
                 sha: "abc123",
@@ -252,7 +252,7 @@ struct CDXConverterTests {
             scope: .runtime
         )
 
-        let result = try await convertToCDXComponent(from: component)
+        let result = try await convertToCycloneDXComponent(from: component)
 
         #expect(result.type == .library)
         #expect(result.bomRef == "test-id")
@@ -275,9 +275,9 @@ struct CDXConverterTests {
         #expect(cdxAuthor.email == "john@example.com")
     }
 
-    @Test("convertToCDXDependency basic conversion")
-    func convertToCDXDependencyBasicConversion() async throws {
-        let result = try await convertToCDXDependency(from:
+    @Test("convertToCycloneDXDependency basic conversion")
+    func convertToCycloneDXDependencyBasicConversion() async throws {
+        let result = try await convertToCycloneDXDependency(from:
             SBOMRelationship(
                 id: "dep-1",
                 parentID: "parent-component",
@@ -289,9 +289,9 @@ struct CDXConverterTests {
         #expect(result.dependsOn == ["child1", "child2", "child3"])
     }
 
-    @Test("convertToCDXDependency with empty children")
-    func convertToCDXDependencyWithEmptyChildren() async throws {
-        let result = try await convertToCDXDependency(from:
+    @Test("convertToCycloneDXDependency with empty children")
+    func convertToCycloneDXDependencyWithEmptyChildren() async throws {
+        let result = try await convertToCycloneDXDependency(from:
             SBOMRelationship(
                 id: "dep-1",
                 parentID: "parent-component",
@@ -302,8 +302,8 @@ struct CDXConverterTests {
         #expect(result.dependsOn.isEmpty)
     }
 
-    @Test("convertToCDXMetadata basic conversion")
-    func convertToCDXMetadataBasicConversion() async throws {
+    @Test("convertToCycloneDXMetadata basic conversion")
+    func convertToCycloneDXMetadataBasicConversion() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
             spec: spec,
@@ -327,7 +327,7 @@ struct CDXConverterTests {
             dependencies: SBOMDependencies(components: [primaryComponent], relationships: nil)
         )
 
-        let result = try await convertToCDXMetadata(from: document)
+        let result = try await convertToCycloneDXMetadata(from: document)
 
         #expect(result.timestamp == "2025-01-01T00:00:00Z")
         #expect(result.component.bomRef == "primary-id")
@@ -338,8 +338,8 @@ struct CDXConverterTests {
         #expect(result.tools == nil)
     }
 
-    @Test("convertToCDXMetadata with nil timestamp")
-    func convertToCDXMetadataWithNilTimestamp() async throws {
+    @Test("convertToCycloneDXMetadata with nil timestamp")
+    func convertToCycloneDXMetadataWithNilTimestamp() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
             spec: spec,
@@ -362,7 +362,7 @@ struct CDXConverterTests {
             dependencies: SBOMDependencies(components: [primaryComponent], relationships: nil)
         )
 
-        let result = try await convertToCDXMetadata(from: document)
+        let result = try await convertToCycloneDXMetadata(from: document)
 
         #expect(result.timestamp == nil)
         #expect(result.component.bomRef == "primary-id")
@@ -373,8 +373,8 @@ struct CDXConverterTests {
         #expect(result.tools == nil)
     }
 
-    @Test("convertToCDXDocument with no components or dependencies")
-    func convertToCDXDocumentWithMinimalData() async throws {
+    @Test("convertToCycloneDXDocument with no components or dependencies")
+    func convertToCycloneDXDocumentWithMinimalData() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
             spec: spec,
@@ -399,7 +399,7 @@ struct CDXConverterTests {
             dependencies: SBOMDependencies(components: [], relationships: nil)
         )
 
-        let result = try await convertToCDXDocument(from: document)
+        let result = try await convertToCycloneDXDocument(from: document)
 
         #expect(result.bomFormat == "CycloneDX")
         #expect(result.specVersion == "1.7")
@@ -410,8 +410,8 @@ struct CDXConverterTests {
         #expect(result.dependencies?.isEmpty ?? false)
     }
 
-    @Test("convertToCDXDocument with components and dependencies")
-    func convertToCDXDocumentWithComponentsAndDependencies() async throws {
+    @Test("convertToCycloneDXDocument with components and dependencies")
+    func convertToCycloneDXDocumentWithComponentsAndDependencies() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
             spec: spec,
@@ -465,7 +465,7 @@ struct CDXConverterTests {
             )
         )
 
-        let result = try await convertToCDXDocument(from: document)
+        let result = try await convertToCycloneDXDocument(from: document)
 
         #expect(result.bomFormat == "CycloneDX")
         #expect(result.specVersion == "1.7")
@@ -503,8 +503,8 @@ struct CDXConverterTests {
         #expect(cdxDependency2.dependsOn == ["framework1-id"])
     }
 
-    @Test("convertToCDXDocument with empty components and dependencies")
-    func convertToCDXDocumentWithEmptyComponentsAndDependencies() async throws {
+    @Test("convertToCycloneDXDocument with empty components and dependencies")
+    func convertToCycloneDXDocumentWithEmptyComponentsAndDependencies() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
             spec: spec,
@@ -526,7 +526,7 @@ struct CDXConverterTests {
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: [])
         )
-        let result = try await convertToCDXDocument(from: document)
+        let result = try await convertToCycloneDXDocument(from: document)
 
         #expect(result.bomFormat == "CycloneDX")
         #expect(result.specVersion == "1.7")
@@ -540,8 +540,8 @@ struct CDXConverterTests {
         #expect(dependencies.isEmpty)
     }
 
-    @Test("convertToCDXMetadata with creators/tools")
-    func convertToCDXMetadataWithCreators() async throws {
+    @Test("convertToCycloneDXMetadata with creators/tools")
+    func convertToCycloneDXMetadataWithCreators() async throws {
         let tool1 = SBOMTool(
             id: "tool-1",
             name: "SwiftPM",
@@ -576,7 +576,7 @@ struct CDXConverterTests {
             dependencies: SBOMDependencies(components: [], relationships: [])
         )
 
-        let result = try await convertToCDXMetadata(from: document)
+        let result = try await convertToCycloneDXMetadata(from: document)
 
         #expect(result.timestamp == "2025-01-01T00:00:00Z")
         #expect(result.component.bomRef == "primary-id")
@@ -602,8 +602,8 @@ struct CDXConverterTests {
         #expect(cdxTool2.purl == "pkg:swift/github.com/swiftlang/Swift@5.9.0")
     }
 
-    @Test("convertToCDXMetadata with empty creators")
-    func convertToCDXMetadataWithEmptyCreators() async throws {
+    @Test("convertToCycloneDXMetadata with empty creators")
+    func convertToCycloneDXMetadataWithEmptyCreators() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
             spec: spec,
@@ -627,7 +627,7 @@ struct CDXConverterTests {
             dependencies: SBOMDependencies(components: [], relationships: [])
         )
 
-        let result = try await convertToCDXMetadata(from: document)
+        let result = try await convertToCycloneDXMetadata(from: document)
 
         #expect(result.timestamp == "2025-01-01T00:00:00Z")
         #expect(result.component.bomRef == "primary-id")
