@@ -38,7 +38,7 @@ package struct SBOMComponent: Codable, Equatable {
     }
 
     package let category: Category
-    package let id: String
+    package let id: SBOMIdentifier
     package let purl: String
     package let name: String
     package let version: Version
@@ -49,7 +49,7 @@ package struct SBOMComponent: Codable, Equatable {
 
     package init(
         category: Category,
-        id: String,
+        id: SBOMIdentifier,
         purl: String,
         name: String,
         version: Version,

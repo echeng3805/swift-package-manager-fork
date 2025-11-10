@@ -39,7 +39,7 @@ package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [any SPDX
     }
     var agents: [any SPDXObject] = []
     for creator in creators {
-        let creatorID = generateSPDXID(creator.id)
+        let creatorID = generateSPDXID(creator.id.value)
         let toolCreationInfoID = "\(creatorID):creationInfo"
         let toolCreationInfo = SPDXCreationInfo(
             id: toolCreationInfoID,
@@ -78,15 +78,15 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
         id: creationInfoID,
         type: .CreationInfo,
         specVersion: document.metadata.spec.version,
-        createdBy: creators.map { generateSPDXID($0.id) },
+        createdBy: creators.map { generateSPDXID($0.id.value) },
         created: timestamp
     )
     elements.append(creationInfo)
 
-    let spdxSBOMID = generateSBOMID()
+    let spdxSBOMID = SBOMIdentifier.generate().value
     let profileConformance = ["core", "software"]
 
-    let primaryComponentID = generateSPDXID(document.primaryComponent.id)
+    let primaryComponentID = generateSPDXID(document.primaryComponent.id.value)
     
     let spdxSBOM = SPDXSBOM(
         id: spdxSBOMID,
@@ -108,7 +108,7 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
     elements.append(describes)
 
     let spdxDocument = SPDXDocument(
-        id: generateSPDXID(document.id),
+        id: generateSPDXID(document.id.value),
         type: .SpdxDocument,
         creationInfoID: creationInfoID,
         profileConformance: profileConformance,
@@ -121,7 +121,7 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
 
 package func convertToSPDXPackage(from component: SBOMComponent) async throws -> SPDXPackage {
     await SPDXPackage(
-        id: generateSPDXID(component.id),
+        id: generateSPDXID(component.id.value),
         type: .SoftwarePackage,
         purpose: convertToSPDXPurpose(from: component.category),
         purl: component.purl,
@@ -141,7 +141,7 @@ package func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?)
     var commitToComponents: [String: (repository: String, componentIDs: [String])] = [:]
     for component in comps {
         if let commits = component.originator.commits {
-            let componentID = generateSPDXID(component.id)
+            let componentID = generateSPDXID(component.id.value)
             for commit in commits {
                 if commitToComponents[commit.sha] != nil {
                     commitToComponents[commit.sha]?.componentIDs.append(componentID)
@@ -181,11 +181,11 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
     var relationships: [any SPDXObject] = []
     if let sbomRelationships = dependencies.relationships {
         for dependency in sbomRelationships {
-            let parentID = generateSPDXID(dependency.parentID)
-            let childrenIDs = dependency.childrenID.map { generateSPDXID($0) }
+            let parentID = generateSPDXID(dependency.parentID.value)
+            let childrenIDs = dependency.childrenID.map { generateSPDXID($0.value) }
             
             let relationship = SPDXRelationship(
-                id: generateSPDXID("\(dependency.parentID)-dependsOn"),
+                id: generateSPDXID("\(dependency.parentID.value)-dependsOn"),
                 type: .Relationship,
                 category: .dependsOn,
                 creationInfoID: SPDXConstants.spdxRootCreationInfoID,
@@ -200,7 +200,7 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
                 guard let comp = dependencies.components.first(where: { $0.id == childID }) else {
                     continue
                 }
-                let spdxChildID = generateSPDXID(childID)
+                let spdxChildID = generateSPDXID(childID.value)
                 switch comp.scope {
                 case .optional:
                     optionalDependencies.append(spdxChildID)
@@ -212,7 +212,7 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
             }
             if !optionalDependencies.isEmpty {
                 let relationship = SPDXRelationship(
-                    id: generateSPDXID("\(dependency.parentID)-hasOptionalDependency"),
+                    id: generateSPDXID("\(dependency.parentID.value)-hasOptionalDependency"),
                     type: .Relationship,
                     category: .hasOptionalDependency,
                     creationInfoID: SPDXConstants.spdxRootCreationInfoID,
@@ -223,7 +223,7 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
             }
             if !testDependencies.isEmpty {
                 let relationship = SPDXRelationship(
-                    id: generateSPDXID("\(dependency.parentID)-hasTest"),
+                    id: generateSPDXID("\(dependency.parentID.value)-hasTest"),
                     type: .Relationship,
                     category: .hasTest,
                     creationInfoID: SPDXConstants.spdxRootCreationInfoID,

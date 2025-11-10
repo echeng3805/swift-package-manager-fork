@@ -71,7 +71,7 @@ extension PURL {
             scheme: "pkg",
             type: "swift",
             namespace: namespace,
-            name: extractComponentID(from: package),
+            name: extractComponentID(from: package).value,
             version: version.revision,
             qualifiers: qualifiers
         )
@@ -85,7 +85,7 @@ extension PURL {
             scheme: "pkg",
             type: "swift",
             namespace: (namespace == nil && qualifiers == nil) ? product.packageIdentity.description : namespace,
-            name: extractComponentID(from: product),
+            name: extractComponentID(from: product).value,
             version: version.revision,
             qualifiers: qualifiers
         )

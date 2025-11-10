@@ -71,7 +71,7 @@ package func convertToCycloneDXComponent(from comp: SBOMComponent) async throws 
     // TODO: ev_cheng, handle nested components?
     try await CycloneDXComponent(
         type: convertToCycloneDXCategory(from: comp.category),
-        bomRef: comp.id,
+        bomRef: comp.id.value,
         name: comp.name,
         version: comp.version.revision,
         scope: convertToCycloneDXScope(from: comp.scope ?? .runtime),
@@ -83,7 +83,7 @@ package func convertToCycloneDXComponent(from comp: SBOMComponent) async throws 
 private func convertToCycloneDXComponent(from tool: SBOMTool) async throws -> CycloneDXComponent {
     CycloneDXComponent(
         type: .application,
-        bomRef: tool.id,
+        bomRef: tool.id.value,
         name: tool.name,
         version: tool.version,
         scope: .excluded,
@@ -94,8 +94,8 @@ private func convertToCycloneDXComponent(from tool: SBOMTool) async throws -> Cy
 
 package func convertToCycloneDXDependency(from dep: SBOMRelationship) async throws -> CycloneDXDependency {
     CycloneDXDependency(
-        ref: dep.parentID,
-        dependsOn: dep.childrenID
+        ref: dep.parentID.value,
+        dependsOn: dep.childrenID.map(\.value)
     )
 }
 
@@ -140,7 +140,7 @@ package func convertToCycloneDXDocument(from document: SBOMDocument) async throw
         schema: convertToCycloneDXSchema(from: document.metadata.spec),
         bomFormat: "CycloneDX",
         specVersion: document.metadata.spec.version,
-        serialNumber: document.id,
+        serialNumber: document.id.value,
         version: 1,
         metadata: convertToCycloneDXMetadata(from: document),
         components: components,

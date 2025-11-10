@@ -11,14 +11,14 @@
 //===----------------------------------------------------------------------===//
 
 package struct SBOMRelationship: Codable, Equatable {
-    package let id: String
-    package let parentID: String
-    package let childrenID: [String]
+    package let id: SBOMIdentifier
+    package let parentID: SBOMIdentifier
+    package let childrenID: [SBOMIdentifier]
 
     package init(
-        id: String,
-        parentID: String,
-        childrenID: [String]
+        id: SBOMIdentifier,
+        parentID: SBOMIdentifier,
+        childrenID: [SBOMIdentifier]
     ) {
         self.id = id
         self.parentID = parentID

@@ -10,18 +10,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMPerson: Codable, Equatable {
-    package let id: SBOMIdentifier
-    package let name: String
-    package let email: String?
+import Foundation
 
-    package init(
-        id: SBOMIdentifier,
-        name: String,
-        email: String?
-    ) {
-        self.id = id
-        self.name = name
-        self.email = email
+package struct SBOMIdentifier: Codable, Equatable, Hashable {
+    package let value: String
+    
+    package init(value: String) {
+        self.value = value
+    }
+    
+    package static func generate() -> SBOMIdentifier {
+        SBOMIdentifier(value: "urn:uuid:\(UUID().uuidString.lowercased())")
     }
 }

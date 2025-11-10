@@ -32,7 +32,7 @@ struct SBOMExtractPrimaryComponentTests {
 
         #expect(component.category == SBOMComponent.Category.library)
         #expect(component.name == rootPackage.identity.description)
-        #expect(component.id == rootPackage.identity.description)
+        #expect(component.id.value == rootPackage.identity.description)
         #expect(component.purl == "pkg:swift/github.com/swiftlang/SwiftPM@\(expectedRevision)")
         #expect(component.version.revision == expectedRevision)
         #expect(component.version.commit?.sha == expectedRevision)
@@ -59,7 +59,7 @@ struct SBOMExtractPrimaryComponentTests {
 
         #expect(component.category == SBOMComponent.Category.application)
         #expect(component.name == rootPackage.identity.description)
-        #expect(component.id == rootPackage.identity.description)
+        #expect(component.id.value == rootPackage.identity.description)
         #expect(component.purl == "pkg:swift/github.com/swiftlang/swiftly@v1.0.0")
         #expect(component.version.revision == "v1.0.0")
         #expect(component.version.commit?.sha == expectedRevision)
@@ -87,7 +87,7 @@ struct SBOMExtractPrimaryComponentTests {
 
         #expect(component.category == SBOMComponent.Category.library)
         #expect(component.name == "SwiftPMDataModel")
-        #expect(component.id == "SwiftPM:SwiftPMDataModel")
+        #expect(component.id.value == "SwiftPM:SwiftPMDataModel")
         #expect(component.version.revision == actualRevision)
         #expect(component.scope == .runtime)
         #expect(component.purl.contains("pkg:swift/github.com/swiftlang/SwiftPM:SwiftPMDataModel@\(actualRevision)"))
@@ -113,7 +113,7 @@ struct SBOMExtractPrimaryComponentTests {
 
         #expect(component.category == SBOMComponent.Category.application)
         #expect(component.name == "swiftly")
-        #expect(component.id == "swiftly:swiftly")
+        #expect(component.id.value == "swiftly:swiftly")
         #expect(component.version.revision == "v1.0.0")
         #expect(component.scope == .runtime)
         #expect(component.purl.contains("pkg:swift/github.com/swiftlang/swiftly:swiftly@v1.0.0"))
@@ -137,12 +137,12 @@ struct SBOMExtractPrimaryComponentTests {
         let component = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, product: productName)
 
         #expect(component.name == productName)
-        #expect(component.id == "SwiftPM:\(productName)")
+        #expect(component.id.value == "SwiftPM:\(productName)")
         #expect(component.category == .library)
 
         let packageComponent = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store)
         #expect(packageComponent.name == "SwiftPM")
-        #expect(packageComponent.id == "SwiftPM")
+        #expect(packageComponent.id.value == "SwiftPM")
         #expect(component.category == .library)
 
         #expect(component.id != packageComponent.id)
@@ -211,7 +211,7 @@ struct SBOMExtractPrimaryComponentTests {
         for product in rootPackage.products {
             let productComponent = nestedComponents.first { $0.name == product.name }
             #expect(productComponent != nil, "Should have component for product \(product.name)")
-            #expect(productComponent?.id == "SwiftPM:\(product.name)")
+            #expect(productComponent?.id.value == "SwiftPM:\(product.name)")
         }
     }
 
@@ -228,7 +228,7 @@ struct SBOMExtractPrimaryComponentTests {
 
         #expect(component.category == .application, "Package with executable should be application category")
         #expect(component.name == "swiftly")
-        #expect(component.id == "swiftly")
+        #expect(component.id.value == "swiftly")
     }
 
     @Test("extractComponent from dependency package uses store version")
@@ -244,7 +244,7 @@ struct SBOMExtractPrimaryComponentTests {
         let component = try await SBOMModel.extractComponent(package: dependencyPackage, graph: graph, store: store)
 
         #expect(component.name == "swift-system")
-        #expect(component.id == "swift-system")
+        #expect(component.id.value == "swift-system")
         #expect(component.category == .library)
         #expect(component.version.revision == "1.3.2")
         let expectedSHA = SBOMTestStore.generateMockRevision(for: "swift-system")
@@ -263,7 +263,7 @@ struct SBOMExtractPrimaryComponentTests {
         let component = try await SBOMModel.extractComponent(product: product, graph: nil, store: store)
 
         #expect(component.name == "OrderedCollections")
-        #expect(component.id == "swift-collections:OrderedCollections")
+        #expect(component.id.value == "swift-collections:OrderedCollections")
         #expect(component.category == .library)
         #expect(component.version.revision == "1.1.4")
         #expect(component.description == nil, "Products should not have description")
@@ -383,9 +383,9 @@ struct SBOMExtractPrimaryComponentTests {
         let productComponents = try #require(packageComponent.components)
         #expect(productComponents.count == rootPackage.products.count)
 
-        for (index, product) in rootPackage.products.enumerated() {
+        for (_, product) in rootPackage.products.enumerated() {
             let productComponent = try #require(productComponents.first { $0.name == product.name })
-            #expect(productComponent.id == "SwiftPM:\(product.name)")
+            #expect(productComponent.id.value == "SwiftPM:\(product.name)")
             let expectedCategory: SBOMComponent.Category = product.type == .executable ? .application : .library
             #expect(productComponent.category == expectedCategory)
             #expect(productComponent.version.revision == expectedRevision)
@@ -413,7 +413,7 @@ struct SBOMExtractPrimaryComponentTests {
         let executableProduct = try #require(rootPackage.products.first { $0.type == .executable })
         let executableComponent = try #require(productComponents.first { $0.name == executableProduct.name })
         #expect(executableComponent.category == .application)
-        #expect(executableComponent.id == "swiftly:swiftly")
+        #expect(executableComponent.id.value == "swiftly:swiftly")
     }
 
     @Test("extractComponent from dependency package extracts products with store versions")
@@ -439,7 +439,7 @@ struct SBOMExtractPrimaryComponentTests {
         }
 
         let orderedCollections = try #require(productComponents.first { $0.name == "OrderedCollections" })
-        #expect(orderedCollections.id == "swift-collections:OrderedCollections")
+        #expect(orderedCollections.id.value == "swift-collections:OrderedCollections")
         #expect(orderedCollections.category == .library)
     }
 

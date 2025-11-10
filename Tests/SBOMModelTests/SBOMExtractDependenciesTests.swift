@@ -21,7 +21,7 @@ struct SBOMExtractDependenciesTests {
         // Build adjacency list
         var graph: [String: [String]] = [:]
         for dependency in dependencies {
-            graph[dependency.parentID] = dependency.childrenID
+            graph[dependency.parentID.value] = dependency.childrenID.map(\.value)
         }
         
         var visited: Set<String> = []
@@ -68,7 +68,7 @@ struct SBOMExtractDependenciesTests {
             product: product
         ).relationships)
         let rootPackage = try #require(graph.rootPackages.first)
-        let rootPackageID = await extractComponentID(from: rootPackage)
+        let rootPackageID = await extractComponentID(from: rootPackage).value
         let packageIDs = graph.packages.map(\.identity.description)
         
         if product != nil {
@@ -84,46 +84,46 @@ struct SBOMExtractDependenciesTests {
         #expect(cycles.isEmpty, "Dependency graph should not contain cycles. Found: \(cycles.joined(separator: "; "))")
         
         for dependency in dependencies {
-            #expect(!dependency.id.isEmpty, "Dependency ID should not be empty")
-            #expect(!dependency.parentID.isEmpty, "Parent ID should not be empty")
+            #expect(!dependency.id.value.isEmpty, "Dependency ID should not be empty")
+            #expect(!dependency.parentID.value.isEmpty, "Parent ID should not be empty")
             #expect(!dependency.childrenID.isEmpty, "Children ID should not be empty")
             
-            #expect(!dependency.childrenID.contains(dependency.parentID), "parent '\(dependency.parentID)' should not depend on itself")
+            #expect(!dependency.childrenID.map(\.value).contains(dependency.parentID.value), "parent '\(dependency.parentID.value)' should not depend on itself")
             
             if product != nil {
                 // Product-filtered validation
-                if packageIDs.contains(dependency.parentID) { // package component
+                if packageIDs.contains(dependency.parentID.value) { // package component
                     for child in dependency.childrenID {
-                        if child.contains(":") { // package-to-product dep (own product)
-                            #expect(child.hasPrefix(dependency.parentID), "Package '\(dependency.parentID)' product dependency '\(child)' should be its own product")
+                        if child.value.contains(":") { // package-to-product dep (own product)
+                            #expect(child.value.hasPrefix(dependency.parentID.value), "Package '\(dependency.parentID.value)' product dependency '\(child.value)' should be its own product")
                         } else { // package-to-package dep
-                            #expect(packageIDs.contains(child), "Package '\(dependency.parentID)' package dependency '\(child)' should be a valid package")
+                            #expect(packageIDs.contains(child.value), "Package '\(dependency.parentID.value)' package dependency '\(child.value)' should be a valid package")
                         }
                     }
                 } else {
                     // Products should only have product-to-product deps, not point back to packages
                     for child in dependency.childrenID {
-                        #expect(child.contains(":"), "Product '\(dependency.parentID)' should only depend on other products, but found package dependency '\(child)'")
+                        #expect(child.value.contains(":"), "Product '\(dependency.parentID.value)' should only depend on other products, but found package dependency '\(child.value)'")
                     }
                 }
             } else {
                 // Full graph validation
-                if dependency.parentID == rootPackageID { // root comp
-                    #expect(!dependency.childrenID.contains(rootPackageID))
+                if dependency.parentID.value == rootPackageID { // root comp
+                    #expect(!dependency.childrenID.map(\.value).contains(rootPackageID))
                     for child in dependency.childrenID {
-                        if child.contains(":") { // own product deps
-                            #expect(child.hasPrefix(dependency.parentID))
+                        if child.value.contains(":") { // own product deps
+                            #expect(child.value.hasPrefix(dependency.parentID.value))
                         } else { // other dependency packages
-                            #expect(packageIDs.contains(child))
+                            #expect(packageIDs.contains(child.value))
                         }
                     }
-                } else if packageIDs.contains(dependency.parentID) { // package comp, should have package-to-product deps
+                } else if packageIDs.contains(dependency.parentID.value) { // package comp, should have package-to-product deps
                     for child in dependency.childrenID {
-                        #expect(child.hasPrefix(dependency.parentID))
+                        #expect(child.value.hasPrefix(dependency.parentID.value))
                     }
                 } else { // product comp, should have product-to-product deps
                     for child in dependency.childrenID {
-                        #expect(child.contains(":"), "child ID should be product")
+                        #expect(child.value.contains(":"), "child ID should be product")
                     }
                 }
             }
@@ -181,21 +181,21 @@ struct SBOMExtractDependenciesTests {
         #expect(dependencies.count == 3, "Simple graph should have exactly 3 dependency relationships")
         
         // Find each dependency relationship
-        let myAppPackageDep = try #require(dependencies.first { $0.parentID == "MyApp" })
-        let utilsPackageDep = try #require(dependencies.first { $0.parentID == "Utils" })
-        let appProductDep = try #require(dependencies.first { $0.parentID == "MyApp:App" })
+        let myAppPackageDep = try #require(dependencies.first { $0.parentID.value == "MyApp" })
+        let utilsPackageDep = try #require(dependencies.first { $0.parentID.value == "Utils" })
+        let appProductDep = try #require(dependencies.first { $0.parentID.value == "MyApp:App" })
         
         // Verify MyApp package dependencies
         #expect(myAppPackageDep.childrenID.count == 2, "MyApp package should have 2 dependencies")
-        #expect(myAppPackageDep.childrenID.contains("Utils"), "MyApp should depend on Utils package")
-        #expect(myAppPackageDep.childrenID.contains("MyApp:App"), "MyApp should depend on its own App product")
+        #expect(myAppPackageDep.childrenID.map(\.value).contains("Utils"), "MyApp should depend on Utils package")
+        #expect(myAppPackageDep.childrenID.map(\.value).contains("MyApp:App"), "MyApp should depend on its own App product")
         
         // Verify Utils package dependencies
         #expect(utilsPackageDep.childrenID.count == 1, "Utils package should have 1 dependency")
-        #expect(utilsPackageDep.childrenID.contains("Utils:Utils"), "Utils should depend on its own Utils product")
+        #expect(utilsPackageDep.childrenID.map(\.value).contains("Utils:Utils"), "Utils should depend on its own Utils product")
         
         // Verify App product dependencies
         #expect(appProductDep.childrenID.count == 1, "App product should have 1 dependency")
-        #expect(appProductDep.childrenID.contains("Utils:Utils"), "App product should depend on Utils product")
+        #expect(appProductDep.childrenID.map(\.value).contains("Utils:Utils"), "App product should depend on Utils product")
     }
 }

@@ -67,20 +67,20 @@ struct SBOMExtractComponentsTests {
         #expect(components.count == expectations.totalComponentCount)
 
         let componentPackageIds = Set(components.compactMap { component in
-            component.id.components(separatedBy: ":").first
+            component.id.value.components(separatedBy: ":").first
         })
         #expect(componentPackageIds == expectations.expectedPackageIds, "Package IDs did not match")
 
-        let rootProducts = components.filter { $0.id.hasPrefix(expectations.rootPackagePrefix) }
+        let rootProducts = components.filter { $0.id.value.hasPrefix(expectations.rootPackagePrefix) }
         #expect(rootProducts.count == expectations.expectedRootProductCount)
         let rootProductNames = Set(rootProducts.map(\.name))
         #expect(rootProductNames == expectations.expectedRootProductNames)
 
-        let dependencyProducts = components.filter { !$0.id.hasPrefix(expectations.rootPackagePrefix) }
+        let dependencyProducts = components.filter { !$0.id.value.hasPrefix(expectations.rootPackagePrefix) }
         #expect(dependencyProducts.count == expectations.expectedDependencyProductCount)
 
         for component in components {
-            #expect(!component.id.isEmpty, "Component ID should not be empty")
+            #expect(!component.id.value.isEmpty, "Component ID should not be empty")
             #expect(!component.name.isEmpty, "Component name should not be empty")
             #expect(!component.purl.isEmpty, "Component PURL should not be empty")
             #expect(!component.version.revision.isEmpty, "Component version should not be empty")
@@ -133,7 +133,7 @@ struct SBOMExtractComponentsTests {
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
 
         let swiftLLBuildComponent = components.first { component in
-            component.id == "swift-llbuild" || component.name == "swift-llbuild"
+            component.id.value == "swift-llbuild" || component.name == "swift-llbuild"
         }
 
         let component = try #require(swiftLLBuildComponent, "swift-llbuild component should be found")
@@ -164,7 +164,7 @@ struct SBOMExtractComponentsTests {
         let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
 
         // Find a version-based dependency (swift-argument-parser uses version "1.5.1")
-        let swiftSystemComponent = components.first { component in component.id == "swift-system" }
+        let swiftSystemComponent = components.first { component in component.id.value == "swift-system" }
 
         let versionComponent = try #require(swiftSystemComponent, "component should be found")
 
@@ -201,7 +201,7 @@ struct SBOMExtractComponentsTests {
 
         #expect(components.count < allComponents.count)
 
-        let componentIDs = Set(components.map(\.id))
+        let componentIDs = Set(components.map(\.id.value))
         #expect(components.count > 0)
         #expect(components.count < allComponents.count)
 
@@ -233,7 +233,7 @@ struct SBOMExtractComponentsTests {
         let actualRevision = try spmRepo.getCurrentRevision().identifier
 
         let rootComponents = components.filter { component in
-            component.id == rootPackageID || component.id.hasPrefix("\(rootPackageID):")
+            component.id.value == rootPackageID || component.id.value.hasPrefix("\(rootPackageID):")
         }
 
         #expect(!rootComponents.isEmpty, "Should have root package components")
@@ -242,7 +242,7 @@ struct SBOMExtractComponentsTests {
             #expect(component.version.revision == actualRevision)
             #expect(
                 component.originator.commits != nil,
-                "Root package component '\(component.id)' should have commit information"
+                "Root package component '\(component.id.value)' should have commit information"
             )
             if let commits = component.originator.commits {
                 #expect(!commits.isEmpty)

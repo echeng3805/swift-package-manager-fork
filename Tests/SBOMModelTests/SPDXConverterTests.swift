@@ -46,7 +46,7 @@ struct SPDXConverterTests {
     @Test("convertToSPDXAgent with single creator")
     func convertToSPDXAgentWithSingleCreator() async throws {
         let creator = SBOMTool(
-            id: "tool-1",
+            id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
             version: "3.0.1"
         )
@@ -78,12 +78,12 @@ struct SPDXConverterTests {
     @Test("convertToSPDXAgent with multiple creators")
     func convertToSPDXAgentWithMultipleCreators() async throws {
         let creator1 = SBOMTool(
-            id: "tool-1",
+            id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
             version: "3.0.1"
         )
         let creator2 = SBOMTool(
-            id: "tool-2",
+            id: SBOMIdentifier(value: "tool-2"),
             name: "CustomTool",
             version: "1.0.0"
         )
@@ -124,11 +124,11 @@ struct SPDXConverterTests {
         let metadata = SBOMMetadata(
             spec: spec,
             timestamp: nil,
-            creators: [SBOMTool(id: "tool-1", name: "SwiftPM", version: "3.0.1")]
+            creators: [SBOMTool(id: SBOMIdentifier(value: "tool-1"), name: "SwiftPM", version: "3.0.1")]
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -136,7 +136,7 @@ struct SPDXConverterTests {
             scope: .runtime
         )
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: nil)
@@ -157,7 +157,7 @@ struct SPDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -165,7 +165,7 @@ struct SPDXConverterTests {
             scope: .runtime
         )
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: nil)
@@ -186,7 +186,7 @@ struct SPDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -194,7 +194,7 @@ struct SPDXConverterTests {
             scope: .runtime
         )
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: nil)
@@ -208,7 +208,7 @@ struct SPDXConverterTests {
     @Test("convertToSPDXDocument with valid data")
     func convertToSPDXDocumentWithValidData() async throws {
         let creator = SBOMTool(
-            id: "tool-1",
+            id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
             version: "3.0.1"
         )
@@ -220,7 +220,7 @@ struct SPDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -228,7 +228,7 @@ struct SPDXConverterTests {
             scope: .runtime
         )
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: nil)
@@ -281,7 +281,7 @@ struct SPDXConverterTests {
         for (sbomCategory, expectedSPDXPurpose) in categories {
             let component = SBOMComponent(
                 category: sbomCategory,
-                id: "test-id",
+                id: SBOMIdentifier(value: "test-id"),
                 purl: "pkg:swift/test@1.0.0",
                 name: "TestComponent",
                 version: SBOMComponent.Version(revision: "1.0.0"),
@@ -307,7 +307,7 @@ struct SPDXConverterTests {
     func convertToSPDXPackageWithNilDescription() async throws {
         let component = SBOMComponent(
             category: .library,
-            id: "urn:spdx:test-id",
+            id: SBOMIdentifier(value: "urn:spdx:test-id"),
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -340,7 +340,7 @@ struct SPDXConverterTests {
     func convertToSPDXExternalIdentifiersWithComponentsWithoutCommits() async throws {
         let component = SBOMComponent(
             category: .library,
-            id: "test-id",
+            id: SBOMIdentifier(value: "test-id"),
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -356,7 +356,7 @@ struct SPDXConverterTests {
     func convertToSPDXExternalIdentifiersWithComponentsWithEmptyCommits() async throws {
         let component = SBOMComponent(
             category: .library,
-            id: "test-id",
+            id: SBOMIdentifier(value: "test-id"),
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -378,7 +378,7 @@ struct SPDXConverterTests {
         )
         let component = SBOMComponent(
             category: .library,
-            id: "test-id",
+            id: SBOMIdentifier(value: "test-id"),
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -424,7 +424,7 @@ struct SPDXConverterTests {
         )
         let component = SBOMComponent(
             category: .library,
-            id: "test-id",
+            id: SBOMIdentifier(value: "test-id"),
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -465,7 +465,7 @@ struct SPDXConverterTests {
         )
         let component1 = SBOMComponent(
             category: .library,
-            id: "test-id-1",
+            id: SBOMIdentifier(value: "test-id-1"),
             purl: "pkg:swift/test1@1.0.0",
             name: "TestComponent1",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -474,7 +474,7 @@ struct SPDXConverterTests {
         )
         let component2 = SBOMComponent(
             category: .library,
-            id: "test-id-2",
+            id: SBOMIdentifier(value: "test-id-2"),
             purl: "pkg:swift/test2@1.0.0",
             name: "TestComponent2",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -519,9 +519,9 @@ struct SPDXConverterTests {
     @Test("convertToSPDXRelationships with single dependency")
     func convertToSPDXRelationshipsWithSingleDependency() async throws {
         let dependency = SBOMRelationship(
-            id: "dep-1",
-            parentID: "parent-component",
-            childrenID: ["child1", "child2"]
+            id: SBOMIdentifier(value: "dep-1"),
+            parentID: SBOMIdentifier(value: "parent-component"),
+            childrenID: [SBOMIdentifier(value: "child1"), SBOMIdentifier(value: "child2")]
         )
 
         let result = await convertToSPDXRelationships(from: SBOMDependencies(
@@ -543,14 +543,14 @@ struct SPDXConverterTests {
     @Test("convertToSPDXRelationships with multiple dependencies")
     func convertToSPDXRelationshipsWithMultipleDependencies() async throws {
         let dependency1 = SBOMRelationship(
-            id: "dep-1",
-            parentID: "parent1",
-            childrenID: ["child1"]
+            id: SBOMIdentifier(value: "dep-1"),
+            parentID: SBOMIdentifier(value: "parent1"),
+            childrenID: [SBOMIdentifier(value: "child1")]
         )
         let dependency2 = SBOMRelationship(
-            id: "dep-2",
-            parentID: "parent2",
-            childrenID: ["child2", "child3"]
+            id: SBOMIdentifier(value: "dep-2"),
+            parentID: SBOMIdentifier(value: "parent2"),
+            childrenID: [SBOMIdentifier(value: "child2"), SBOMIdentifier(value: "child3")]
         )
 
         let result = await convertToSPDXRelationships(from: SBOMDependencies(
@@ -585,7 +585,7 @@ struct SPDXConverterTests {
         )
         let parent = SBOMComponent(
             category: .library,
-            id: "parent-id",
+            id: SBOMIdentifier(value: "parent-id"),
             purl: "pkg:swift/test3@1.0.0",
             name: "TestComponent3",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -594,7 +594,7 @@ struct SPDXConverterTests {
         )
         let component = SBOMComponent(
             category: .library,
-            id: "test-id",
+            id: SBOMIdentifier(value: "test-id"),
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -603,7 +603,7 @@ struct SPDXConverterTests {
         )
         let component2 = SBOMComponent(
             category: .library,
-            id: "test-id2",
+            id: SBOMIdentifier(value: "test-id2"),
             purl: "pkg:swift/test2@1.0.0",
             name: "TestComponent2",
             version: SBOMComponent.Version(revision: "2.0.0"),
@@ -611,9 +611,9 @@ struct SPDXConverterTests {
             scope: .optional
         )
         let dependency1 = SBOMRelationship(
-            id: "dep1",
-            parentID: "parent-id",
-            childrenID: ["test-id", "test-id2"]
+            id: SBOMIdentifier(value: "dep1"),
+            parentID: SBOMIdentifier(value: "parent-id"),
+            childrenID: [SBOMIdentifier(value: "test-id"), SBOMIdentifier(value: "test-id2")]
         )
 
         let result = await convertToSPDXRelationships(from: SBOMDependencies(
@@ -643,11 +643,11 @@ struct SPDXConverterTests {
         let metadata = SBOMMetadata(
             spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
-            creators: [SBOMTool(id: "tool-1", name: "SwiftPM", version: "3.0.1")]
+            creators: [SBOMTool(id: SBOMIdentifier(value: "tool-1"), name: "SwiftPM", version: "3.0.1")]
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -655,7 +655,7 @@ struct SPDXConverterTests {
             scope: .runtime
         )
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: [])
@@ -669,7 +669,7 @@ struct SPDXConverterTests {
     @Test("convertToSPDXGraph with minimal SPDX document")
     func convertToSPDXGraphWithMinimalSPDXDocument() async throws {
         let creator = SBOMTool(
-            id: "tool-1",
+            id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
             version: "3.0.1"
         )
@@ -681,7 +681,7 @@ struct SPDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -689,7 +689,7 @@ struct SPDXConverterTests {
             scope: .runtime
         )
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: [])
@@ -706,7 +706,7 @@ struct SPDXConverterTests {
     @Test("convertToSPDXGraph with components and dependencies")
     func convertToSPDXGraphWithComponentsAndDependencies() async throws {
         let creator = SBOMTool(
-            id: "tool-1",
+            id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
             version: "3.0.1"
         )
@@ -718,7 +718,7 @@ struct SPDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -727,7 +727,7 @@ struct SPDXConverterTests {
         )
         let component1 = SBOMComponent(
             category: .library,
-            id: "lib1-id",
+            id: SBOMIdentifier(value: "lib1-id"),
             purl: "pkg:swift/lib1@1.0.0",
             name: "Library1",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -735,12 +735,12 @@ struct SPDXConverterTests {
             scope: .runtime
         )
         let dependency = SBOMRelationship(
-            id: "dep-1",
-            parentID: "primary-id",
-            childrenID: ["lib1-id"]
+            id: SBOMIdentifier(value: "dep-1"),
+            parentID: SBOMIdentifier(value: "primary-id"),
+            childrenID: [SBOMIdentifier(value: "lib1-id")]
         )
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [component1], relationships: [dependency])
@@ -776,7 +776,7 @@ struct SPDXConverterTests {
     @Test("convertToSPDXGraph with components containing commits")
     func convertToSPDXGraphWithComponentsContainingCommits() async throws {
         let creator = SBOMTool(
-            id: "tool-1",
+            id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
             version: "3.0.1"
         )
@@ -788,7 +788,7 @@ struct SPDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -804,7 +804,7 @@ struct SPDXConverterTests {
         )
         let component1 = SBOMComponent(
             category: .library,
-            id: "lib1-id",
+            id: SBOMIdentifier(value: "lib1-id"),
             purl: "pkg:swift/lib1@1.0.0",
             name: "Library1",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -812,7 +812,7 @@ struct SPDXConverterTests {
             scope: .runtime
         )
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [component1], relationships: nil)

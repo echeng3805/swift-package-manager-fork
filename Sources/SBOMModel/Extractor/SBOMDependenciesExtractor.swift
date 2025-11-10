@@ -61,7 +61,7 @@ private func extractDependenciesForProducts(
     var components: [SBOMComponent] = []
     var dependencies: [SBOMRelationship] = []
 
-    var dependenciesDict: [String: Set<String>] = [:] // parentID:childrenID
+    var dependenciesDict: [SBOMIdentifier: Set<SBOMIdentifier>] = [:] // parentID:childrenID
 
     func addComponent(_ component: SBOMComponent) {
         if !components.map(\.id).contains(component.id) {
@@ -69,9 +69,9 @@ private func extractDependenciesForProducts(
         }
     }
 
-    func trackDependency(parentID: String, childID: String) {
+    func trackDependency(parentID: SBOMIdentifier, childID: SBOMIdentifier) {
         guard parentID != childID else { return }  // prevent self-referential dependencies
-        var dependencies = dependenciesDict[parentID] ?? Set<String>()
+        var dependencies = dependenciesDict[parentID] ?? Set<SBOMIdentifier>()
         dependencies.insert(childID)
         dependenciesDict[parentID] = dependencies
     }
@@ -79,7 +79,7 @@ private func extractDependenciesForProducts(
     func processDependencies() {
         for (parentID, childrenSet) in dependenciesDict {
             dependencies.append(SBOMRelationship(
-                id: "\(parentID)-depends-on",
+                id: SBOMIdentifier(value: "\(parentID.value)-depends-on"),
                 parentID: parentID,
                 childrenID: Array(childrenSet)
             ))

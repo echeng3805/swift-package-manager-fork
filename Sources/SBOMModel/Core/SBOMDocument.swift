@@ -11,14 +11,14 @@
 //===----------------------------------------------------------------------===//
 
 package struct SBOMDocument: Codable, Equatable {
-    package let id: String
+    package let id: SBOMIdentifier
     package let metadata: SBOMMetadata
     package let primaryComponent: SBOMComponent
     package let dependencies: SBOMDependencies
     package let licenses: [SBOMLicense]?
 
     package init(
-        id: String,
+        id: SBOMIdentifier,
         metadata: SBOMMetadata,
         primaryComponent: SBOMComponent,
         dependencies: SBOMDependencies,

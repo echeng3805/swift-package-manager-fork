@@ -11,13 +11,13 @@
 //===----------------------------------------------------------------------===//
 
 package struct SBOMTool: Codable, Equatable {
-    package let id: String
+    package let id: SBOMIdentifier
     package let name: String
     package let version: String
     package let licenses: [SBOMLicense]?
 
     package init(
-        id: String,
+        id: SBOMIdentifier,
         name: String,
         version: String,
         licenses: [SBOMLicense]? = nil

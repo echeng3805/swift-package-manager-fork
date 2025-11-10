@@ -58,7 +58,7 @@ struct CycloneDXConverterTests {
                 repository: "https://github.com/swiftlang/swift-package-manager",
                 url: "https://github.com/swiftlang/swift-package-manager/commit/def456",
                 authors: [SBOMPerson(
-                    id: "author1",
+                    id: SBOMIdentifier(value: "author1"),
                     name: "John Doe",
                     email: "john@example.com"
                 )],
@@ -84,12 +84,12 @@ struct CycloneDXConverterTests {
     @Test("convertToCycloneDXPedigree with multiple commits")
     func convertToCycloneDXPedigreeWithMultipleCommits() async throws {
         let author1 = SBOMPerson(
-            id: "author1",
+            id: SBOMIdentifier(value: "author1"),
             name: "John Doe",
             email: "john@example.com"
         )
         let author2 = SBOMPerson(
-            id: "author2",
+            id: SBOMIdentifier(value: "author2"),
             name: "Jane Smith",
             email: "jane@example.com"
         )
@@ -134,12 +134,12 @@ struct CycloneDXConverterTests {
     @Test("convertToCycloneDXPedigree uses first author only")
     func convertToCycloneDXPedigreeUsesFirstAuthorOnly() async throws {
         let author1 = SBOMPerson(
-            id: "author1",
+            id: SBOMIdentifier(value: "author1"),
             name: "John Doe",
             email: "john@example.com"
         )
         let author2 = SBOMPerson(
-            id: "author2",
+            id: SBOMIdentifier(value: "author2"),
             name: "Jane Smith",
             email: "jane@example.com"
         )
@@ -174,7 +174,7 @@ struct CycloneDXConverterTests {
         for (sbomCategory, expectedCDXCategory) in categories {
             let component = SBOMComponent(
                 category: sbomCategory,
-                id: "test-id",
+                id: SBOMIdentifier(value: "test-id"),
                 purl: "pkg:swift/test@1.0.0",
                 name: "TestComponent",
                 version: SBOMComponent.Version(revision: "1.0.0"),
@@ -205,7 +205,7 @@ struct CycloneDXConverterTests {
         for (sbomScope, expectedCDXScope) in scopes {
             let component = SBOMComponent(
                 category: .library,
-                id: "test-id",
+                id: SBOMIdentifier(value: "test-id"),
                 purl: "pkg:swift/test@1.0.0",
                 name: "TestComponent",
                 version: SBOMComponent.Version(revision: "1.0.0"),
@@ -233,7 +233,7 @@ struct CycloneDXConverterTests {
                 url: "https://github.com/swiftlang/swift-package-manager/commit/abc123",
                 authors: [
                     SBOMPerson(
-                        id: "author1",
+                        id: SBOMIdentifier(value: "author1"),
                         name: "John Doe",
                         email: "john@example.com"
                     ),
@@ -244,7 +244,7 @@ struct CycloneDXConverterTests {
 
         let component = SBOMComponent(
             category: .library,
-            id: "test-id",
+            id: SBOMIdentifier(value: "test-id"),
             purl: "pkg:swift/test@1.0.0",
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -279,9 +279,9 @@ struct CycloneDXConverterTests {
     func convertToCycloneDXDependencyBasicConversion() async throws {
         let result = try await convertToCycloneDXDependency(from:
             SBOMRelationship(
-                id: "dep-1",
-                parentID: "parent-component",
-                childrenID: ["child1", "child2", "child3"]
+                id: SBOMIdentifier(value: "dep-1"),
+                parentID: SBOMIdentifier(value: "parent-component"),
+                childrenID: ["child1", "child2", "child3"].map { SBOMIdentifier(value: $0) }
             )
         )
 
@@ -293,8 +293,8 @@ struct CycloneDXConverterTests {
     func convertToCycloneDXDependencyWithEmptyChildren() async throws {
         let result = try await convertToCycloneDXDependency(from:
             SBOMRelationship(
-                id: "dep-1",
-                parentID: "parent-component",
+                id: SBOMIdentifier(value: "dep-1"),
+                parentID: SBOMIdentifier(value: "parent-component"),
                 childrenID: []
             )
         )
@@ -312,7 +312,7 @@ struct CycloneDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -321,7 +321,7 @@ struct CycloneDXConverterTests {
         )
 
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [primaryComponent], relationships: nil)
@@ -348,7 +348,7 @@ struct CycloneDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .framework,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@2.0.0",
             name: "PrimaryFramework",
             version: SBOMComponent.Version(revision: "2.0.0"),
@@ -356,7 +356,7 @@ struct CycloneDXConverterTests {
             scope: .runtime
         )
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [primaryComponent], relationships: nil)
@@ -384,7 +384,7 @@ struct CycloneDXConverterTests {
 
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -393,7 +393,7 @@ struct CycloneDXConverterTests {
         )
 
         let document = SBOMDocument(
-            id: "urn:uuid:12345678-1234-1234-1234-123456789abc",
+            id: SBOMIdentifier(value: "urn:uuid:12345678-1234-1234-1234-123456789abc"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: nil)
@@ -420,7 +420,7 @@ struct CycloneDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -429,7 +429,7 @@ struct CycloneDXConverterTests {
         )
         let component1 = SBOMComponent(
             category: .library,
-            id: "lib1-id",
+            id: SBOMIdentifier(value: "lib1-id"),
             purl: "pkg:swift/lib1@1.0.0",
             name: "Library1",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -438,7 +438,7 @@ struct CycloneDXConverterTests {
         )
         let component2 = SBOMComponent(
             category: .framework,
-            id: "framework1-id",
+            id: SBOMIdentifier(value: "framework1-id"),
             purl: "pkg:swift/framework1@2.0.0",
             name: "Framework1",
             version: SBOMComponent.Version(revision: "2.0.0"),
@@ -446,17 +446,17 @@ struct CycloneDXConverterTests {
             scope: .optional
         )
         let dependency1 = SBOMRelationship(
-            id: "dep-1",
-            parentID: "primary-id",
-            childrenID: ["lib1-id", "framework1-id"]
+            id: SBOMIdentifier(value: "dep-1"),
+            parentID: SBOMIdentifier(value: "primary-id"),
+            childrenID: ["lib1-id", "framework1-id"].map { SBOMIdentifier(value: $0) }
         )
         let dependency2 = SBOMRelationship(
-            id: "dep-2",
-            parentID: "lib1-id",
-            childrenID: ["framework1-id"]
+            id: SBOMIdentifier(value: "dep-2"),
+            parentID: SBOMIdentifier(value: "lib1-id"),
+            childrenID: ["framework1-id"].map { SBOMIdentifier(value: $0) }
         )
         let document = SBOMDocument(
-            id: "urn:uuid:12345678-1234-1234-1234-123456789abc",
+            id: SBOMIdentifier(value: "urn:uuid:12345678-1234-1234-1234-123456789abc"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(
@@ -513,7 +513,7 @@ struct CycloneDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -521,7 +521,7 @@ struct CycloneDXConverterTests {
             scope: .runtime
         )
         let document = SBOMDocument(
-            id: "urn:uuid:12345678-1234-1234-1234-123456789abc",
+            id: SBOMIdentifier(value: "urn:uuid:12345678-1234-1234-1234-123456789abc"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: [])
@@ -543,12 +543,12 @@ struct CycloneDXConverterTests {
     @Test("convertToCycloneDXMetadata with creators/tools")
     func convertToCycloneDXMetadataWithCreators() async throws {
         let tool1 = SBOMTool(
-            id: "tool-1",
+            id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
             version: "6.0.0"
         )
         let tool2 = SBOMTool(
-            id: "tool-2",
+            id: SBOMIdentifier(value: "tool-2"),
             name: "Swift",
             version: "5.9.0"
         )
@@ -561,7 +561,7 @@ struct CycloneDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -570,7 +570,7 @@ struct CycloneDXConverterTests {
         )
 
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: [])
@@ -612,7 +612,7 @@ struct CycloneDXConverterTests {
         )
         let primaryComponent = SBOMComponent(
             category: .application,
-            id: "primary-id",
+            id: SBOMIdentifier(value: "primary-id"),
             purl: "pkg:swift/primary@1.0.0",
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
@@ -621,7 +621,7 @@ struct CycloneDXConverterTests {
         )
 
         let document = SBOMDocument(
-            id: "doc-1",
+            id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: [])

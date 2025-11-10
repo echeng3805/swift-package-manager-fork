@@ -30,10 +30,6 @@ package actor SBOMVersionCache {
     }
 }
 
-package func generateSBOMID() -> String {
-    "urn:uuid:\(UUID().uuidString.lowercased())"
-}
-
 package func extractSpec(_ spec: Spec) async throws -> SBOMSpec {
     let concreteSpec = spec.latestSpec
     return SBOMSpec(
@@ -48,7 +44,7 @@ package func extractMetadata(_ spec: Spec) async throws -> SBOMMetadata {
         timestamp: Date().ISO8601Format(),
         creators: [
             SBOMTool(
-                id: generateSBOMID(),
+                id: SBOMIdentifier.generate(),
                 name: "swift-package-manager",
                 version: SwiftVersion.current.displayString,
                 licenses: [
@@ -175,12 +171,12 @@ private func extractComponentVersion(
     ))
 }
 
-package func extractComponentID(from package: ResolvedPackage) async -> String {
-    package.identity.description
+package func extractComponentID(from package: ResolvedPackage) async -> SBOMIdentifier {
+    SBOMIdentifier(value: package.identity.description)
 }
 
-package func extractComponentID(from product: ResolvedProduct) async -> String {
-    "\(product.packageIdentity):\(product.name)"
+package func extractComponentID(from product: ResolvedProduct) async -> SBOMIdentifier {
+    SBOMIdentifier(value: "\(product.packageIdentity):\(product.name)")
 }
 
 private func extractProductsFromPackage(
@@ -275,7 +271,7 @@ package func extractSBOM(
 ) async throws -> SBOMDocument {
     let cache = SBOMVersionCache()
     return try await SBOMDocument(
-        id: "\(generateSBOMID())",
+        id: SBOMIdentifier.generate(),
         metadata: extractMetadata(spec),
         primaryComponent: extractPrimaryComponent(graph: graph, store: store, product: product, cache: cache),
         dependencies: extractDependencies(graph: graph, store: store, product: product, cache: cache)
