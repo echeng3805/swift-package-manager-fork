@@ -40,17 +40,8 @@ package struct SBOMGitInfo {
     }
 }
 
-package func extractSpec(_ spec: Spec) async throws -> SBOMSpec {
-    let concreteSpec = spec.latestSpec
-    return SBOMSpec(
-        type: concreteSpec.type,
-        version: concreteSpec.version
-    )
-}
-
-package func extractMetadata(_ spec: Spec) async throws -> SBOMMetadata {
-    try await SBOMMetadata(
-        spec: extractSpec(spec),
+package func extractMetadata() async throws -> SBOMMetadata {
+    return SBOMMetadata(
         timestamp: Date().ISO8601Format(),
         creators: [
             SBOMTool(
@@ -293,7 +284,6 @@ package func extractPrimaryComponent(
 }
 
 package func extractSBOM(
-    spec: Spec,
     graph: ModulesGraph,
     store: ResolvedPackagesStore,
     product: String? = nil
@@ -301,7 +291,7 @@ package func extractSBOM(
     let cache = SBOMGitCache()
     return try await SBOMDocument(
         id: SBOMIdentifier.generate(),
-        metadata: extractMetadata(spec),
+        metadata: extractMetadata(),
         primaryComponent: extractPrimaryComponent(graph: graph, store: store, product: product, cache: cache),
         dependencies: extractDependencies(graph: graph, store: store, product: product, cache: cache)
     )

@@ -15,41 +15,9 @@ import Foundation
 import Testing
 
 struct SBOMExtractMetadataTests {
-    struct ExtractMetadataTestCase {
-        let input: Spec
-        let expectedSpecType: Spec
-        let expectedSpecVersion: String
-    }
-
-    static let metadataTestCases: [ExtractMetadataTestCase] = [
-        ExtractMetadataTestCase(
-            input: .cyclonedx,
-            expectedSpecType: .cyclonedx1,
-            expectedSpecVersion: CycloneDXConstants.cyclonedx1SpecVersion
-        ),
-        ExtractMetadataTestCase(
-            input: .cyclonedx1,
-            expectedSpecType: .cyclonedx1,
-            expectedSpecVersion: CycloneDXConstants.cyclonedx1SpecVersion
-        ),
-        ExtractMetadataTestCase(
-            input: .spdx,
-            expectedSpecType: .spdx3,
-            expectedSpecVersion: SPDXConstants.spdx3SpecVersion
-        ),
-        ExtractMetadataTestCase(
-            input: .spdx3,
-            expectedSpecType: .spdx3,
-            expectedSpecVersion: SPDXConstants.spdx3SpecVersion
-        ),
-    ]
-
-    @Test("extractMetadata good weather", arguments: metadataTestCases)
-    func extractMetadataParameterized(testCase: ExtractMetadataTestCase) async throws {
-        let metadata = try await SBOMModel.extractMetadata(testCase.input)
-
-        #expect(metadata.spec.type == testCase.expectedSpecType)
-        #expect(metadata.spec.version == testCase.expectedSpecVersion)
+    @Test("extractMetadata good weather")
+    func extractMetadataParameterized() async throws {
+        let metadata = try await SBOMModel.extractMetadata()
 
         let timestamp = try #require(metadata.timestamp)
         #expect(!timestamp.isEmpty)

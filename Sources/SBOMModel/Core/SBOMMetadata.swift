@@ -11,16 +11,13 @@
 //===----------------------------------------------------------------------===//
 
 package struct SBOMMetadata: Codable, Equatable {
-    package let spec: SBOMSpec
     package let timestamp: String?
     package let creators: [SBOMTool]?
 
     package init(
-        spec: SBOMSpec,
         timestamp: String?,
         creators: [SBOMTool]? = nil
     ) {
-        self.spec = spec
         self.timestamp = timestamp
         self.creators = creators
     }

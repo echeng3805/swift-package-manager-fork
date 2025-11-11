@@ -304,9 +304,7 @@ struct CycloneDXConverterTests {
 
     @Test("convertToCycloneDXMetadata basic conversion")
     func convertToCycloneDXMetadataBasicConversion() async throws {
-        let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: nil
         )
@@ -340,9 +338,7 @@ struct CycloneDXConverterTests {
 
     @Test("convertToCycloneDXMetadata with nil timestamp")
     func convertToCycloneDXMetadataWithNilTimestamp() async throws {
-        let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: nil,
             creators: nil
         )
@@ -377,7 +373,6 @@ struct CycloneDXConverterTests {
     func convertToCycloneDXDocumentWithMinimalData() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: nil
         )
@@ -399,7 +394,7 @@ struct CycloneDXConverterTests {
             dependencies: SBOMDependencies(components: [], relationships: nil)
         )
 
-        let result = try await convertToCycloneDXDocument(from: document)
+        let result = try await convertToCycloneDXDocument(from: document, spec: spec)
 
         #expect(result.bomFormat == "CycloneDX")
         #expect(result.specVersion == "1.7")
@@ -414,7 +409,6 @@ struct CycloneDXConverterTests {
     func convertToCycloneDXDocumentWithComponentsAndDependencies() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: nil
         )
@@ -465,7 +459,7 @@ struct CycloneDXConverterTests {
             )
         )
 
-        let result = try await convertToCycloneDXDocument(from: document)
+        let result = try await convertToCycloneDXDocument(from: document, spec: spec)
 
         #expect(result.bomFormat == "CycloneDX")
         #expect(result.specVersion == "1.7")
@@ -506,8 +500,8 @@ struct CycloneDXConverterTests {
     @Test("convertToCycloneDXDocument with empty components and dependencies")
     func convertToCycloneDXDocumentWithEmptyComponentsAndDependencies() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
+
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: nil
         )
@@ -526,7 +520,7 @@ struct CycloneDXConverterTests {
             primaryComponent: primaryComponent,
             dependencies: SBOMDependencies(components: [], relationships: [])
         )
-        let result = try await convertToCycloneDXDocument(from: document)
+        let result = try await convertToCycloneDXDocument(from: document, spec: spec)
 
         #expect(result.bomFormat == "CycloneDX")
         #expect(result.specVersion == "1.7")
@@ -552,10 +546,7 @@ struct CycloneDXConverterTests {
             name: "Swift",
             version: "5.9.0"
         )
-
-        let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: [tool1, tool2]
         )
@@ -568,7 +559,6 @@ struct CycloneDXConverterTests {
             originator: SBOMOriginator(commits: nil),
             scope: .runtime
         )
-
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
             metadata: metadata,
@@ -604,9 +594,7 @@ struct CycloneDXConverterTests {
 
     @Test("convertToCycloneDXMetadata with empty creators")
     func convertToCycloneDXMetadataWithEmptyCreators() async throws {
-        let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: []
         )

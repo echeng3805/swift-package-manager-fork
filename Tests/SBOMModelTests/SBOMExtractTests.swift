@@ -22,13 +22,13 @@ struct SBOMExtractTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         let productName = "SwiftPMPackageCollections"
-        let sbom = try await SBOMModel.extractSBOM(spec: .cyclonedx, graph: graph, store: store, product: productName)
+        let sbom = try await SBOMModel.extractSBOM( graph: graph, store: store, product: productName)
 
         #expect(sbom.primaryComponent.name == productName)
         #expect(sbom.primaryComponent.id.value == "SwiftPM:\(productName)")
         #expect(sbom.primaryComponent.category == .library)
 
-        let fullSbom = try await SBOMModel.extractSBOM(spec: .cyclonedx, graph: graph, store: store)
+        let fullSbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
         #expect(fullSbom.primaryComponent.name == "SwiftPM")
         #expect(fullSbom.primaryComponent.id.value == "SwiftPM")
         #expect(fullSbom.primaryComponent.category == .library)
@@ -57,13 +57,13 @@ struct SBOMExtractTests {
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
 
         let productName = "swiftly"
-        let sbom = try await SBOMModel.extractSBOM(spec: .spdx, graph: graph, store: store, product: productName)
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store, product: productName)
 
         #expect(sbom.primaryComponent.name == productName)
         #expect(sbom.primaryComponent.id.value == "swiftly:swiftly")
         #expect(sbom.primaryComponent.category == .application)
 
-        let fullSbom = try await SBOMModel.extractSBOM(spec: .spdx, graph: graph, store: store)
+        let fullSbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
         #expect(fullSbom.primaryComponent.name == "swiftly")
         #expect(fullSbom.primaryComponent.id.value == "swiftly")
         #expect(fullSbom.primaryComponent.category == .application)
@@ -123,7 +123,6 @@ struct SBOMExtractTests {
 
         await #expect(throws: SBOMExtractorError.self) {
             _ = try await SBOMModel.extractSBOM(
-                spec: .cyclonedx,
                 graph: graph,
                 store: store,
                 product: "NonExistentProduct"
@@ -149,62 +148,5 @@ struct SBOMExtractTests {
         #expect(uuid2String == uuid2String.lowercased(), "UUID should be lowercase")
 
         #expect(id1 != id2, "Each call should generate a unique ID")
-    }
-
-    @Test("extractComponentID from package returns package identity")
-    func extractComponentIDFromPackageReturnsPackageIdentity() async throws {
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
-        let rootPackage = try #require(graph.rootPackages.first)
-
-        let componentID = await SBOMModel.extractComponentID(from: rootPackage)
-
-        #expect(componentID.value == "MyApp")
-        #expect(componentID.value == rootPackage.identity.description)
-    }
-
-    @Test("extractComponentID from product returns package:product format")
-    func extractComponentIDFromProductReturnsPackageProductFormat() async throws {
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
-        let rootPackage = try #require(graph.rootPackages.first)
-        let product = try #require(rootPackage.products.first)
-
-        let componentID = await SBOMModel.extractComponentID(from: product)
-
-        #expect(componentID.value == "MyApp:App")
-        #expect(componentID.value.hasPrefix("\(product.packageIdentity):"))
-        #expect(componentID.value.hasSuffix(":\(product.name)"))
-    }
-
-    @Test("extractComponentID from multiple products maintains correct format")
-    func extractComponentIDFromMultipleProductsMaintainsCorrectFormat() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
-        let rootPackage = try #require(graph.rootPackages.first)
-
-        // Test multiple products
-        for product in rootPackage.products {
-            let componentID = await SBOMModel.extractComponentID(from: product)
-            let expectedID = "\(product.packageIdentity):\(product.name)"
-
-            #expect(componentID.value == expectedID)
-            #expect(componentID.value.contains(":"), "Product ID should contain colon separator")
-
-            let parts = componentID.value.split(separator: ":")
-            #expect(parts.count == 2, "Product ID should have exactly two parts")
-            #expect(String(parts[0]) == product.packageIdentity.description)
-            #expect(String(parts[1]) == product.name)
-        }
-    }
-
-    @Test("extractComponentID from dependency packages returns correct identity")
-    func extractComponentIDFromDependencyPackagesReturnsCorrectIdentity() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
-
-        // Test dependency packages
-        for package in graph.packages where package.identity.description != "SwiftPM" {
-            let componentID = await SBOMModel.extractComponentID(from: package)
-
-            #expect(componentID.value == package.identity.description)
-            #expect(!componentID.value.contains(":"), "Package ID should not contain colon")
-        }
     }
 }

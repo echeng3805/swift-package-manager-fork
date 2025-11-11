@@ -35,9 +35,6 @@ extension SwiftPackageCommand {
         @Option(help: "The product to generate an SBOM for.")
         var product: String?
 
-        @Option(help: "Whether to include information about test targets.")
-        var includeTestTargets: Bool = false // TODO ev_cheng
-
         func run(_ swiftCommandState: SwiftCommandState) async throws {
            let workspace = try swiftCommandState.getActiveWorkspace()
            let graph = try await workspace.loadPackageGraph(
@@ -47,10 +44,9 @@ extension SwiftPackageCommand {
            )
            let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
            
+           let sbom = try await SBOMModel.extractSBOM(graph: graph, store: resolvedPackagesStore, product: product)
            for spec in specs {
-            // TODO: ev_cheng fix this
-               let sbom = try await SBOMModel.extractSBOM(spec: spec, graph: graph, store: resolvedPackagesStore, product: product)
-               try await encodeSBOM(from: sbom, outputPath: outputPath)
+               try await encodeSBOM(from: sbom, spec: spec, outputPath: outputPath)
            }
         }
     }

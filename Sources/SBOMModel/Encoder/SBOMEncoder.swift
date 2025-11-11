@@ -14,8 +14,17 @@ import Basics
 import Foundation
 import TSCUtility
 
-package func encodeSBOM(from sbom: SBOMDocument, outputPath: AbsolutePath?) async throws {
-    let encoded = try await encodeSBOMData(from: sbom)
+package func getSpec(from spec: Spec) async throws -> SBOMSpec {
+    let concreteSpec = spec.latestSpec
+    return SBOMSpec(
+        type: concreteSpec.type,
+        version: concreteSpec.version
+    )
+}
+
+package func encodeSBOM(from sbom: SBOMDocument, spec: Spec, outputPath: AbsolutePath?) async throws {
+    let specWithVersion = try await getSpec(from: spec)
+    let encoded = try await encodeSBOMData(from: sbom, spec: specWithVersion)
     if let outputPath {
         try localFileSystem.writeFileContents(outputPath, data: encoded)
     } else {
@@ -23,14 +32,17 @@ package func encodeSBOM(from sbom: SBOMDocument, outputPath: AbsolutePath?) asyn
     }
 }
 
-package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
+package func encodeSBOMData(from sbom: SBOMDocument, spec: SBOMSpec) async throws -> Data {
     let data: any Encodable
-    if sbom.metadata.spec.type.supportsCycloneDX {
-        data = try await convertToCycloneDXDocument(from: sbom)
-    } else if sbom.metadata.spec.type.supportsSPDX {
-        data = try await convertToSPDXGraph(from: sbom)
-    } else {
-        throw SBOMError.unexpectedSpecType(expected: "cyclonedx or spdx", actual: sbom.metadata.spec.type)
+    switch spec.type {
+    case .cyclonedx, .cyclonedx1:
+        data = try await convertToCycloneDXDocument(from: sbom, spec: spec)
+    case .spdx, .spdx3:
+        data = try await convertToSPDXGraph(from: sbom, spec: spec)
+    // case .cyclonedx, .cyclonedx2:
+    //     data = try await convertToCycloneDX2Document(from: sbom, spec: spec)
+    // case .spdx, .spdx4:
+    //     data = try await convertToSPDX4Graph(from: sbom, spec: spec)
     }
 
     let encoder = JSONEncoder()
@@ -38,7 +50,7 @@ package func encodeSBOMData(from sbom: SBOMDocument) async throws -> Data {
     encoder.dateEncodingStrategy = .iso8601
     let encoded = try encoder.encode(data)
 
-    try await validateSBOM(from: encoded, spec: sbom.metadata.spec)
+    try await validateSBOM(from: encoded, spec: spec)
 
     return encoded
 }
@@ -52,11 +64,14 @@ package func validateSBOM(from encoded: Foundation.Data, spec: SBOMSpec) async t
 }
 
 private func getSchemaFilename(from spec: Spec) throws -> String {
-    if spec.supportsCycloneDX {
+    switch spec {
+    case .cyclonedx, .cyclonedx1:
         return CycloneDXConstants.cyclonedx1SchemaFile
-    } else if spec.supportsSPDX {
+    case .spdx, .spdx3:
         return SPDXConstants.spdx3SchemaFile
-    } else {
-        throw SBOMError.unexpectedSpecType(expected: "cyclonedx or spdx", actual: spec)
+    // case .cyclonedx, .cyclonedx2:
+    //     return CycloneDXConstants.cyclonedx2SchemaFile
+    // case .spdx, .spdx4:
+    //     return SPDXConstants.spdx4SchemaFile
     }
 }

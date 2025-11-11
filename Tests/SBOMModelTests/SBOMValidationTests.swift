@@ -20,7 +20,7 @@ import Testing
 struct SBOMValidationTests {
     struct ValidateGraphSBOMTestCase: CustomStringConvertible {
         let graphName: String
-        let inputSpec: Spec
+        let inputSpec: SBOMSpec
         let inputGraph: ModulesGraph
         let inputStore: ResolvedPackagesStore
         let wantError: Bool
@@ -34,28 +34,28 @@ struct SBOMValidationTests {
         try [
             ValidateGraphSBOMTestCase(
                 graphName: "SwiftPM",
-                inputSpec: .cyclonedx,
+                inputSpec: SBOMSpec(type: .cyclonedx, version: "1.7"),
                 inputGraph: SBOMTestGraph.createSPMModulesGraph(),
                 inputStore: SBOMTestStore.createSPMResolvedPackagesStore(),
                 wantError: false
             ),
             ValidateGraphSBOMTestCase(
                 graphName: "SwiftPM",
-                inputSpec: .spdx,
+                inputSpec: SBOMSpec(type: .spdx, version: "3.0.1"),
                 inputGraph: SBOMTestGraph.createSPMModulesGraph(),
                 inputStore: SBOMTestStore.createSPMResolvedPackagesStore(),
                 wantError: false
             ),
             ValidateGraphSBOMTestCase(
                 graphName: "Swiftly",
-                inputSpec: .cyclonedx,
+                inputSpec: SBOMSpec(type: .cyclonedx, version: "1.7"),
                 inputGraph: SBOMTestGraph.createSwiftlyModulesGraph(),
                 inputStore: SBOMTestStore.createSwiftlyResolvedPackagesStore(),
                 wantError: false
             ),
             ValidateGraphSBOMTestCase(
                 graphName: "Swiftly",
-                inputSpec: .spdx,
+                inputSpec: SBOMSpec(type: .spdx, version: "3.0.1"),
                 inputGraph: SBOMTestGraph.createSwiftlyModulesGraph(),
                 inputStore: SBOMTestStore.createSwiftlyResolvedPackagesStore(),
                 wantError: false
@@ -66,18 +66,17 @@ struct SBOMValidationTests {
     @Test("validate SBOM from graphs", arguments: try getValidateGraphSBOMTestCases())
     func validateSBOMFromGraph(testCase: ValidateGraphSBOMTestCase) async throws {
         let document = try await SBOMModel.extractSBOM(
-            spec: testCase.inputSpec,
             graph: testCase.inputGraph,
             store: testCase.inputStore
         )
-        let encodedData = try await encodeSBOMData(from: document)
+        let encodedData = try await encodeSBOMData(from: document, spec: testCase.inputSpec)
 
         if testCase.wantError {
             await #expect(throws: StringError.self) {
-                try await validateSBOM(from: encodedData, spec: document.metadata.spec)
+                try await validateSBOM(from: encodedData, spec: testCase.inputSpec)
             }
         } else {
-            try await validateSBOM(from: encodedData, spec: document.metadata.spec)
+            try await validateSBOM(from: encodedData, spec: testCase.inputSpec)
         }
     }
 

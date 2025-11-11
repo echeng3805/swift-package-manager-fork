@@ -60,7 +60,7 @@ package func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [any SPDX
     return agents
 }
 
-package func convertToSPDXDocument(from document: SBOMDocument) async throws -> [any SPDXObject] {
+package func convertToSPDXDocument(from document: SBOMDocument, spec: SBOMSpec) async throws -> [any SPDXObject] {
     guard let timestamp = document.metadata.timestamp,
           let creators = document.metadata.creators,
           !creators.isEmpty
@@ -77,7 +77,7 @@ package func convertToSPDXDocument(from document: SBOMDocument) async throws -> 
     let creationInfo = SPDXCreationInfo(
         id: creationInfoID,
         type: .CreationInfo,
-        specVersion: document.metadata.spec.version,
+        specVersion: spec.version,
         createdBy: creators.map { generateSPDXID($0.id.value) },
         created: timestamp
     )
@@ -238,13 +238,13 @@ package func convertToSPDXRelationships(from dependencies: SBOMDependencies?) as
     return relationships
 }
 
-package func convertToSPDXGraph(from document: SBOMDocument) async throws -> SPDXGraph {
-    guard document.metadata.spec.type.supportsSPDX else {
-        throw SBOMError.unexpectedSpecType(expected: "spdx", actual: document.metadata.spec.type)
+package func convertToSPDXGraph(from document: SBOMDocument, spec: SBOMSpec) async throws -> SPDXGraph {
+    guard spec.type.supportsSPDX else {
+        throw SBOMError.unexpectedSpecType(expected: "spdx", actual: spec.type)
     }
 
     let agents = await convertToSPDXAgent(from: document.metadata)
-    let elements = try await convertToSPDXDocument(from: document)
+    let elements = try await convertToSPDXDocument(from: document, spec: spec)
 
     var packages: [any SPDXObject] = []
     for comp in document.dependencies.components {

@@ -35,12 +35,15 @@ package struct SBOMSchema {
     }
     
     private func createValidator(for spec: SBOMSpec) throws -> any SBOMValidatorProtocol {
-        if spec.type.supportsSPDX {
-            return SPDXValidator(schema: schema)
-        } else if spec.type.supportsCycloneDX {
+        switch spec.type {
+        case .cyclonedx, .cyclonedx1:
             return CycloneDXValidator(schema: schema)
-        } else {
-            throw SBOMError.unexpectedSpecType(expected: "cyclonedx or spdx", actual: spec.type)
+        case .spdx, .spdx3:
+            return SPDXValidator(schema: schema)
+        // case .cyclonedx2:
+        //     return CycloneDX2Validator(schema: schema)
+        // case .spdx4:
+        //     return SPDX4Validator(schema: schema)
         }
     }
 }

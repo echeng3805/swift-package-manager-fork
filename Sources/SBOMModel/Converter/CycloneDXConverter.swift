@@ -128,9 +128,9 @@ package func convertToCycloneDXMetadata(from document: SBOMDocument) async throw
     )
 }
 
-package func convertToCycloneDXDocument(from document: SBOMDocument) async throws -> CycloneDXDocument {
-    guard document.metadata.spec.type.supportsCycloneDX else {
-        throw SBOMError.unexpectedSpecType(expected: "cyclonedx", actual: document.metadata.spec.type)
+package func convertToCycloneDXDocument(from document: SBOMDocument, spec: SBOMSpec) async throws -> CycloneDXDocument {
+    guard spec.type.supportsCycloneDX else {
+        throw SBOMError.unexpectedSpecType(expected: "cyclonedx", actual: spec.type)
     }
 
     var components: [CycloneDXComponent] = []
@@ -148,9 +148,9 @@ package func convertToCycloneDXDocument(from document: SBOMDocument) async throw
     }
 
     return try await CycloneDXDocument(
-        schema: convertToCycloneDXSchema(from: document.metadata.spec),
+        schema: convertToCycloneDXSchema(from: spec),
         bomFormat: "CycloneDX",
-        specVersion: document.metadata.spec.version,
+        specVersion: spec.version,
         serialNumber: document.id.value,
         version: 1,
         metadata: convertToCycloneDXMetadata(from: document),

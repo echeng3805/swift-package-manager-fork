@@ -24,7 +24,6 @@ struct SPDXConverterTests {
     @Test("convertToSPDXAgent with nil creators")
     func convertToSPDXAgentWithNilCreators() async throws {
         let metadata = SBOMMetadata(
-            spec: SBOMSpec(type: .spdx, version: "3.0.1"),
             timestamp: "1970-01-01T00:00:00Z",
             creators: nil
         )
@@ -35,7 +34,6 @@ struct SPDXConverterTests {
     @Test("convertToSPDXAgent with empty creators")
     func convertToSPDXAgentWithEmptyCreators() async throws {
         let metadata = SBOMMetadata(
-            spec: SBOMSpec(type: .spdx, version: "3.0.1"),
             timestamp: "2025-01-01T00:00:00Z",
             creators: []
         )
@@ -51,7 +49,6 @@ struct SPDXConverterTests {
             version: "3.0.1"
         )
         let metadata = SBOMMetadata(
-            spec: SBOMSpec(type: .spdx, version: "3.0.1"),
             timestamp: "2025-01-01T00:00:00Z",
             creators: [creator]
         )
@@ -89,7 +86,6 @@ struct SPDXConverterTests {
         )
         let spec = SBOMSpec(type: .spdx, version: "3.0.1")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: [creator1, creator2]
         )
@@ -122,7 +118,6 @@ struct SPDXConverterTests {
     func convertToSPDXDocumentWithMissingTimestamp() async throws {
         let spec = SBOMSpec(type: .spdx, version: "3.0.1")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: nil,
             creators: [SBOMTool(id: SBOMIdentifier(value: "tool-1"), name: "SwiftPM", version: "3.0.1")]
         )
@@ -143,7 +138,7 @@ struct SPDXConverterTests {
         )
 
         await #expect(throws: Error.self) {
-            try await convertToSPDXDocument(from: document)
+            try await convertToSPDXDocument(from: document, spec: spec)
         }
     }
 
@@ -151,7 +146,6 @@ struct SPDXConverterTests {
     func convertToSPDXDocumentWithMissingCreators() async throws {
         let spec = SBOMSpec(type: .spdx, version: "3.0.1")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: nil
         )
@@ -172,7 +166,7 @@ struct SPDXConverterTests {
         )
 
         await #expect(throws: Error.self) {
-            try await convertToSPDXDocument(from: document)
+            try await convertToSPDXDocument(from: document, spec: spec)
         }
     }
 
@@ -180,7 +174,6 @@ struct SPDXConverterTests {
     func convertToSPDXDocumentWithEmptyCreators() async throws {
         let spec = SBOMSpec(type: .spdx, version: "3.0.1")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: []
         )
@@ -201,7 +194,7 @@ struct SPDXConverterTests {
         )
 
         await #expect(throws: Error.self) {
-            try await convertToSPDXDocument(from: document)
+            try await convertToSPDXDocument(from: document, spec: spec)
         }
     }
 
@@ -214,7 +207,6 @@ struct SPDXConverterTests {
         )
         let spec = SBOMSpec(type: .spdx, version: "3.0.1")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: [creator]
         )
@@ -234,7 +226,7 @@ struct SPDXConverterTests {
             dependencies: SBOMDependencies(components: [], relationships: nil)
         )
 
-        let result = try await convertToSPDXDocument(from: document)
+        let result = try await convertToSPDXDocument(from: document, spec: spec)
         #expect(result.count == 4)
 
         let creationInfo = result[0] as? SPDXCreationInfo
@@ -641,7 +633,6 @@ struct SPDXConverterTests {
     func convertToSPDXGraphWithNonSPDXSpec() async throws {
         let spec = SBOMSpec(type: .cyclonedx, version: "1.7")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: [SBOMTool(id: SBOMIdentifier(value: "tool-1"), name: "SwiftPM", version: "3.0.1")]
         )
@@ -662,7 +653,7 @@ struct SPDXConverterTests {
         )
 
         await #expect(throws: Error.self) {
-            try await convertToSPDXGraph(from: document)
+            try await convertToSPDXGraph(from: document, spec: spec)
         }
     }
 
@@ -675,7 +666,6 @@ struct SPDXConverterTests {
         )
         let spec = SBOMSpec(type: .spdx, version: "3.0.1")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: [creator]
         )
@@ -695,12 +685,11 @@ struct SPDXConverterTests {
             dependencies: SBOMDependencies(components: [], relationships: [])
         )
 
-        let result = try await convertToSPDXGraph(from: document)
+        let result = try await convertToSPDXGraph(from: document, spec: spec)
 
         #expect(result.context == SPDXConstants.spdx3Context)
         #expect(result.graph
-            .count ==
-            6) // 1 agent CreationInfo + 1 agent + 4 document elements + 0 packages + 0 relationships + 0 commits
+            .count == 6) // 1 agent CreationInfo + 1 agent + 4 document elements + 0 packages + 0 relationships + 0 commits
     }
 
     @Test("convertToSPDXGraph with components and dependencies")
@@ -712,7 +701,6 @@ struct SPDXConverterTests {
         )
         let spec = SBOMSpec(type: .spdx3, version: "3.0.1")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: [creator]
         )
@@ -746,12 +734,10 @@ struct SPDXConverterTests {
             dependencies: SBOMDependencies(components: [component1], relationships: [dependency])
         )
 
-        let result = try await convertToSPDXGraph(from: document)
+        let result = try await convertToSPDXGraph(from: document, spec: spec)
 
         #expect(result.context == SPDXConstants.spdx3Context)
-        #expect(result.graph
-            .count ==
-            8) // 1 agent CreationInfo + 1 agent + 4 document elements + 1 package + 1 relationship + 0 commits
+        #expect(result.graph.count == 8) // 1 agent CreationInfo + 1 agent + 4 document elements + 1 package + 1 relationship + 0 commits
 
         let agents = result.graph.compactMap { $0.getValue() as SPDXAgent? }
         #expect(agents.count == 1)
@@ -782,7 +768,6 @@ struct SPDXConverterTests {
         )
         let spec = SBOMSpec(type: .spdx, version: "3.0.1")
         let metadata = SBOMMetadata(
-            spec: spec,
             timestamp: "2025-01-01T00:00:00Z",
             creators: [creator]
         )
@@ -818,7 +803,7 @@ struct SPDXConverterTests {
             dependencies: SBOMDependencies(components: [component1], relationships: nil)
         )
 
-        let result = try await convertToSPDXGraph(from: document)
+        let result = try await convertToSPDXGraph(from: document, spec: spec)
 
         #expect(result.context == SPDXConstants.spdx3Context)
 
