@@ -26,7 +26,7 @@ extension SwiftPackageCommand {
         var globalOptions: GlobalOptions
 
         @Option(help: "Set the SBOM specification.")
-        var specs: [SBOMModel.Spec] = []
+        var spec: [SBOMModel.Spec] = []
 
         @Option(name: [.long, .customShort("o") ],
                 help: "The absolute or relative path to generate the SBOM at.")
@@ -45,8 +45,8 @@ extension SwiftPackageCommand {
            let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
            
            let sbom = try await SBOMModel.extractSBOM(graph: graph, store: resolvedPackagesStore, product: product)
-           for spec in specs {
-               try await encodeSBOM(from: sbom, spec: spec, outputPath: outputPath)
+           for s in spec {
+               try await encodeSBOM(from: sbom, spec: s, outputPath: outputPath)
            }
         }
     }

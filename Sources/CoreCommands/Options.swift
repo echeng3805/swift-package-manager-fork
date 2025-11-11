@@ -765,7 +765,7 @@ public struct SBOMOptions: ParsableArguments {
     /// SBOM specification(s) to generate.
     @Option(
         name: .customLong("sbom-spec"),
-        help: "Set the SBOM specification(s)."
+        help: "Set the SBOM specification(s) and generate SBOM(s)."
     )
     var sbomSpecs: [SBOMModel.Spec] = []
 
