@@ -22,9 +22,8 @@ package func extractDependencies(
     graph: ModulesGraph,
     store: ResolvedPackagesStore,
     product: String? = nil,
-    cache: SBOMVersionCache? = nil
+    cache: SBOMGitCache? = nil
 ) async throws -> SBOMDependencies {
-
     guard let rootPackage = graph.rootPackages.first else {
         throw SBOMExtractorError.noRootPackage(context: "extract dependencies")
     }
@@ -51,7 +50,7 @@ private func extractDependenciesForProducts(
     graph: ModulesGraph,
     store: ResolvedPackagesStore,
     targetProducts: [ResolvedProduct],
-    cache: SBOMVersionCache? = nil
+    cache: SBOMGitCache? = nil
 ) async throws -> SBOMDependencies {
     guard let rootPackage = graph.rootPackages.first else {
         throw SBOMExtractorError.noRootPackage(context: "extract dependencies")

@@ -17,6 +17,7 @@ import PackageGraph
 import PackageModel
 @testable import SBOMModel
 import Testing
+import class TSCBasic.Process
 
 struct SBOMExtractComponentsTests {
     struct TestExpectations {
@@ -248,6 +249,58 @@ struct SBOMExtractComponentsTests {
                 #expect(!commits.isEmpty)
                 #expect(commits[0].sha == actualRevision)
             }
+        }
+    }
+
+    @Test("Root package components should include all remotes in originator")
+    func rootPackageComponentsShouldIncludeAllRemotesInOriginator() async throws {
+        let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        // Add a second remote to test multiple remotes
+        try await Process.checkNonZeroExit(
+            args: "git",
+            "-C",
+            spmPath.pathString,
+            "remote",
+            "add",
+            "upstream",
+            "https://github.com/fork/swift-package-manager.git"
+        )
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+
+        let rootPackage = try #require(graph.rootPackages.first)
+        let rootPackageID = rootPackage.identity.description
+
+        let actualRevision = try spmRepo.getCurrentRevision().identifier
+
+        let rootComponents = components.filter { component in
+            component.id.value == rootPackageID || component.id.value.hasPrefix("\(rootPackageID):")
+        }
+
+        #expect(!rootComponents.isEmpty, "Should have root package components")
+
+        for component in rootComponents {
+            let commits = try #require(
+                component.originator.commits,
+                "Root package component '\(component.id.value)' should have commit information"
+            )
+            
+            #expect(commits.count == 2, "Should have commits for both remotes (origin and upstream)")
+            
+            for commit in commits {
+                #expect(commit.sha == actualRevision, "All commits should have the same SHA")
+            }
+            
+            let repositories = Set(commits.map(\.repository))
+            #expect(repositories.contains(SBOMTestStore.swiftPMURL), "Should include origin remote")
+            #expect(
+                repositories.contains("https://github.com/fork/swift-package-manager.git"),
+                "Should include upstream remote"
+            )
         }
     }
 }

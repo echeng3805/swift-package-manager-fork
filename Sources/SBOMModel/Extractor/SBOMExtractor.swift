@@ -18,15 +18,25 @@ import PackageModel
 import SourceControl
 import TSCUtility
 
-/// Cache for storing root package version from Git (to minimize calls to Git)
-package actor SBOMVersionCache {
-    private var cache: [PackageIdentity: SBOMComponent.Version] = [:]
-    package func get(_ identity: PackageIdentity) -> SBOMComponent.Version? {
+/// Cache for storing root package Git info (to minimize calls to Git)
+package actor SBOMGitCache {
+    private var cache: [PackageIdentity: SBOMGitInfo] = [:]
+    package func get(_ identity: PackageIdentity) -> SBOMGitInfo? {
         self.cache[identity]
     }
 
-    package func set(_ identity: PackageIdentity, version: SBOMComponent.Version) {
-        self.cache[identity] = version
+    package func set(_ identity: PackageIdentity, gitInfo: SBOMGitInfo) {
+        self.cache[identity] = gitInfo
+    }
+}
+
+package struct SBOMGitInfo {
+    package let version: SBOMComponent.Version
+    package let originator: SBOMOriginator
+    
+    package init(version: SBOMComponent.Version, originator: SBOMOriginator) {
+        self.version = version
+        self.originator = originator
     }
 }
 
@@ -48,7 +58,7 @@ package func extractMetadata(_ spec: Spec) async throws -> SBOMMetadata {
                 name: "swift-package-manager",
                 version: SwiftVersion.current.displayString,
                 licenses: [
-                    SBOMLicense(
+                    SBOMLicense( // TODO ev_cheng: better way to get license without network call?
                         name: PackageCollectionsModel.LicenseType.Apache2_0.description,
                         url: "http://swift.org/LICENSE.txt"
                     ),
@@ -96,59 +106,77 @@ package func extractScope(from package: ResolvedPackage) async throws -> SBOMCom
     return .runtime
 }
 
-/// Extracts version information from Git for the root package
-private func extractComponentVersionFromGit(packagePath: AbsolutePath) async throws -> SBOMComponent.Version {
+private func extractComponentInfoFromGit(packagePath: AbsolutePath) async throws -> SBOMGitInfo {
     let gitRepo = GitRepository(path: packagePath, isWorkingRepo: true)
-    
     guard let currentRevision = try? gitRepo.getCurrentRevision() else {
-        return SBOMComponent.Version(revision: "unknown")
+        return SBOMGitInfo(
+            version: SBOMComponent.Version(revision: "unknown"),
+            originator: SBOMOriginator(commits: nil)
+        )
     }
-    
     let remotes = (try? gitRepo.remotes()) ?? []
-    let repositoryURL = remotes.first(where: { $0.name == "origin" })?.url ?? remotes.first?.url ?? packagePath
-        .pathString
-    
-    if let currentTag = gitRepo.getCurrentTag() {
-        return SBOMComponent.Version(
-            revision: gitRepo.hasUncommittedChanges() ? "\(currentTag)-modified" : currentTag,
-            commit: SBOMCommit(
-                sha: currentRevision.identifier,
-                repository: repositoryURL
-            )
+    let hasUncommittedChanges = gitRepo.hasUncommittedChanges()
+    let commits: [SBOMCommit] = remotes.map { remote in
+        SBOMCommit(
+            sha: currentRevision.identifier,
+            repository: remote.url
         )
     }
+    let revisionString: String
+    if let currentTag = gitRepo.getCurrentTag() {
+        revisionString = hasUncommittedChanges ? "\(currentTag)-modified" : currentTag
+    } else {
+        revisionString = hasUncommittedChanges ? "\(currentRevision.identifier)-modified" : currentRevision.identifier
+    }
     
-    return SBOMComponent.Version(
-        revision: gitRepo.hasUncommittedChanges() ? "\(currentRevision.identifier)-modified" : currentRevision
-            .identifier,
-        commit: SBOMCommit(
+    // Use the origin remote (or first remote as fallback) for the version's commit field
+    let originRemote = remotes.first(where: { $0.name == "origin" })
+    let versionCommit: SBOMCommit?
+    if let originRemote {
+        versionCommit = SBOMCommit(
             sha: currentRevision.identifier,
-            repository: repositoryURL
+            repository: originRemote.url
         )
+    } else if let firstRemote = remotes.first {
+        versionCommit = SBOMCommit(
+            sha: currentRevision.identifier,
+            repository: firstRemote.url
+        )
+    } else {
+        versionCommit = nil
+    }
+    
+    return SBOMGitInfo(
+        version: SBOMComponent.Version(
+            revision: revisionString,
+            commit: versionCommit
+        ),
+        originator: SBOMOriginator(commits: commits.isEmpty ? nil : commits)
     )
 }
 
-private func extractComponentVersion(
+private func extractComponentVersionAndCommits(
     from packageIdentity: PackageIdentity,
     graph: ModulesGraph? = nil,
     store resolvedPackagesStore: ResolvedPackagesStore,
-    cache: SBOMVersionCache?
-) async throws -> SBOMComponent.Version {
-    if let cache, let cachedVersion = await cache.get(packageIdentity) {
-        return cachedVersion
+    cache: SBOMGitCache?
+) async throws -> SBOMGitInfo {
+    if let cache, let cachedGitInfo = await cache.get(packageIdentity) {
+        return cachedGitInfo
     }
-
-    // root package (try to get version from git)
+    // root package (try to get version and commits from git)
     if let graph, let rootPackage = graph.rootPackages.first(where: { $0.identity == packageIdentity }) {
-        let version = try await extractComponentVersionFromGit(packagePath: rootPackage.path)
+        let gitInfo = try await extractComponentInfoFromGit(packagePath: rootPackage.path)
         if let cache {
-            await cache.set(packageIdentity, version: version)
+            await cache.set(packageIdentity, gitInfo: gitInfo)
         }
-        return version
+        return gitInfo
     }
-
     guard let resolvedPackage = resolvedPackagesStore.resolvedPackages[packageIdentity] else {
-        return SBOMComponent.Version(revision: "unknown")
+        return SBOMGitInfo(
+            version: SBOMComponent.Version(revision: "unknown"),
+            originator: SBOMOriginator(commits: nil)
+        )
     }
     // non-root package (version is from store)
     let version: String
@@ -165,12 +193,15 @@ private func extractComponentVersion(
         version = revision
         sha = revision
     }
-    return SBOMComponent.Version(revision: version, commit: SBOMCommit(
+    let commit = SBOMCommit(
         sha: sha,
         repository: resolvedPackage.packageRef.kind.locationString // absolute path, URL string, or package identity
-    ))
+    )
+    return SBOMGitInfo(
+        version: SBOMComponent.Version(revision: version, commit: commit),
+        originator: SBOMOriginator(commits: [commit])
+    )
 }
-
 package func extractComponentID(from package: ResolvedPackage) async -> SBOMIdentifier {
     SBOMIdentifier(value: package.identity.description)
 }
@@ -183,7 +214,7 @@ private func extractProductsFromPackage(
     package: ResolvedPackage,
     graph: ModulesGraph? = nil,
     store: ResolvedPackagesStore,
-    cache: SBOMVersionCache? = nil
+    cache: SBOMGitCache? = nil
 ) async throws -> [SBOMComponent] {
     var productComponents: [SBOMComponent] = []
     for product in package.products {
@@ -197,9 +228,9 @@ package func extractComponent(
     package: ResolvedPackage,
     graph: ModulesGraph? = nil,
     store: ResolvedPackagesStore,
-    cache: SBOMVersionCache? = nil
+    cache: SBOMGitCache? = nil
 ) async throws -> SBOMComponent {
-    let componentVersion = try await extractComponentVersion(
+    let gitInfo = try await extractComponentVersionAndCommits(
         from: package.identity,
         graph: graph,
         store: store,
@@ -209,10 +240,10 @@ package func extractComponent(
     return try await SBOMComponent(
         category: extractCategory(from: package),
         id: extractComponentID(from: package),
-        purl: PURL.from(package: package, version: componentVersion).description,
+        purl: PURL.from(package: package, version: gitInfo.version).description,
         name: package.identity.description,
-        version: componentVersion,
-        originator: SBOMOriginator(commits: componentVersion.commit.map { [$0] }),
+        version: gitInfo.version,
+        originator: gitInfo.originator,
         description: package.description,
         scope: extractScope(from: package),
         components: products
@@ -223,9 +254,9 @@ package func extractComponent(
     product: ResolvedProduct,
     graph: ModulesGraph? = nil,
     store: ResolvedPackagesStore,
-    cache: SBOMVersionCache? = nil
+    cache: SBOMGitCache? = nil
 ) async throws -> SBOMComponent {
-    let componentVersion = try await extractComponentVersion(
+    let gitInfo = try await extractComponentVersionAndCommits(
         from: product.packageIdentity,
         graph: graph,
         store: store,
@@ -234,10 +265,10 @@ package func extractComponent(
     return try await SBOMComponent(
         category: extractCategory(from: product),
         id: extractComponentID(from: product),
-        purl: PURL.from(product: product, version: componentVersion).description,
+        purl: PURL.from(product: product, version: gitInfo.version).description,
         name: product.name,
-        version: componentVersion,
-        originator: SBOMOriginator(commits: componentVersion.commit.map { [$0] }),
+        version: gitInfo.version,
+        originator: gitInfo.originator,
         description: nil,
         scope: extractScope(from: product)
     )
@@ -247,7 +278,7 @@ package func extractPrimaryComponent(
     graph: ModulesGraph,
     store: ResolvedPackagesStore,
     product: String? = nil,
-    cache: SBOMVersionCache? = nil
+    cache: SBOMGitCache? = nil
 ) async throws -> SBOMComponent {
     guard let rootPackage = graph.rootPackages.first else {
         throw SBOMExtractorError.noRootPackage(context: "determine primary component for SBOM")
@@ -269,7 +300,7 @@ package func extractSBOM(
     store: ResolvedPackagesStore,
     product: String? = nil
 ) async throws -> SBOMDocument {
-    let cache = SBOMVersionCache()
+    let cache = SBOMGitCache()
     return try await SBOMDocument(
         id: SBOMIdentifier.generate(),
         metadata: extractMetadata(spec),

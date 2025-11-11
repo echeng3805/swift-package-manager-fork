@@ -10,6 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
+// package enum SBOMEntity: String, Codable, Equatable, CaseIterable, ExpressibleByArgument, Comparable {
+//     case all
+//     case product
+//     case package
+
+
+
 package struct SBOMDependencies: Codable, Equatable {
     package let components: [SBOMComponent]
     package let relationships: [SBOMRelationship]?

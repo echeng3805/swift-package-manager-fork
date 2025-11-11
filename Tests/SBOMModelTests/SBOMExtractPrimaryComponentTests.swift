@@ -17,6 +17,7 @@ import PackageModel
 @testable import SBOMModel
 import SourceControl
 import Testing
+import class TSCBasic.Process
 
 struct SBOMExtractPrimaryComponentTests {
     @Test("extractPrimaryComponent from sample SwiftPM ModulesGraph")
@@ -157,14 +158,14 @@ struct SBOMExtractPrimaryComponentTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
-        let cache = SBOMVersionCache()
+        let cache = SBOMGitCache()
 
         let component1 = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, cache: cache)
         #expect(component1.version.revision == expectedRevision)
 
         let cachedVersion = await cache.get(rootPackage.identity)
         #expect(cachedVersion != nil, "Cache should contain version for root package")
-        #expect(cachedVersion?.revision == expectedRevision, "Cached version should match expected revision")
+        #expect(cachedVersion?.version.revision == expectedRevision, "Cached version should match expected revision")
 
         let gitPath = spmPath.appending(".git")
         try localFileSystem.removeFileTree(gitPath)
@@ -190,7 +191,7 @@ struct SBOMExtractPrimaryComponentTests {
         )
 
         let cachedVersionAfter = await cache.get(rootPackage.identity)
-        #expect(cachedVersionAfter?.revision == expectedRevision, "Cache should still contain same version")
+        #expect(cachedVersionAfter?.version.revision == expectedRevision, "Cache should still contain same version")
     }
 
     @Test("extractComponent from package includes all products as nested components")
@@ -488,5 +489,105 @@ struct SBOMExtractPrimaryComponentTests {
         let expectedProductNames = rootPackage.products.map(\.name)
 
         #expect(productNames == expectedProductNames, "Product components should maintain the same order as package products")
+    }
+
+    @Test("extractComponent uses origin remote for version commit")
+    func extractComponentUsesOriginRemoteForVersionCommit() async throws {
+        let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        defer { try? SBOMTestRepo.cleanup(spmPath) }
+
+        // Add a second remote to verify origin is preferred
+        try await Process.checkNonZeroExit(
+            args: "git",
+            "-C",
+            spmPath.pathString,
+            "remote",
+            "add",
+            "upstream",
+            "https://github.com/apple/swift-package-manager.git"
+        )
+
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+        let expectedRevision = try spmRepo.getCurrentRevision().identifier
+
+        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        // Verify the version commit uses the origin remote, not upstream
+        #expect(component.version.commit?.repository == SBOMTestStore.swiftPMURL)
+        #expect(component.version.commit?.sha == expectedRevision)
+
+        // Verify originator still contains all remotes
+        #expect(component.originator.commits != nil)
+        let commits = try #require(component.originator.commits)
+        #expect(commits.count == 2, "Should have commits for both origin and upstream remotes")
+        
+        let originCommit = commits.first { $0.repository == SBOMTestStore.swiftPMURL }
+        let upstreamCommit = commits.first { $0.repository == "https://github.com/apple/swift-package-manager.git" }
+        #expect(originCommit != nil, "Should have commit for origin remote")
+        #expect(upstreamCommit != nil, "Should have commit for upstream remote")
+    }
+
+    @Test("extractComponent falls back to first remote when no origin exists")
+    func extractComponentFallsBackToFirstRemoteWhenNoOriginExists() async throws {
+        let uniqueID = UUID().uuidString
+        let path = AbsolutePath("/tmp/SwiftPM-no-origin-\(uniqueID)")
+        defer { try? SBOMTestRepo.cleanup(path) }
+
+        try localFileSystem.createDirectory(path, recursive: true)
+        initGitRepo(path, addFile: true)
+
+        // Add a remote with a different name (not "origin")
+        let customRemoteURL = "https://github.com/custom/repo.git"
+        try await Process.checkNonZeroExit(
+            args: "git",
+            "-C",
+            path.pathString,
+            "remote",
+            "add",
+            "custom",
+            customRemoteURL
+        )
+
+        let gitRepo = GitRepository(path: path)
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: path.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+        let expectedRevision = try gitRepo.getCurrentRevision().identifier
+
+        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+
+        // Should fall back to the first (and only) remote
+        #expect(component.version.commit?.repository == customRemoteURL)
+        #expect(component.version.commit?.sha == expectedRevision)
+
+        // Verify originator contains the custom remote
+        #expect(component.originator.commits != nil)
+        let commits = try #require(component.originator.commits)
+        #expect(commits.count == 1)
+        #expect(commits.first?.repository == customRemoteURL)
+    }
+
+    @Test("extractComponent handles repository with no remotes")
+    func extractComponentHandlesRepositoryWithNoRemotes() async throws {
+        let uniqueID = UUID().uuidString
+        let path = AbsolutePath("/tmp/SwiftPM-no-remotes-\(uniqueID)")
+        defer { try? SBOMTestRepo.cleanup(path) }
+
+        try localFileSystem.createDirectory(path, recursive: true)
+        initGitRepo(path, addFile: true)
+
+        // Don't add any remotes
+        let gitRepo = GitRepository(path: path)
+        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: path.pathString)
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let rootPackage = try #require(graph.rootPackages.first)
+        let expectedRevision = try gitRepo.getCurrentRevision().identifier
+
+        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        #expect(component.version.commit == nil)
+        #expect(component.version.revision == expectedRevision)
+        #expect(component.originator.commits == nil)
     }
 }
