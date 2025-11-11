@@ -91,7 +91,6 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         try validateValue(value, path: path, schema: self.schema)
     }
     
-    // Private helper that accepts a schema parameter for internal recursive calls
     internal func validateValue(_ value: Any, path: String, schema: [String: Any]) throws {
         // Type validation
         if let expectedType = schema[SchemaKeys.type] as? String {
@@ -494,7 +493,6 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
         let minLength = schema[SchemaKeys.minLength] as? Int
         let maxLength = schema[SchemaKeys.maxLength] as? Int
         let length = value.count
-        
         // Check minimum length
         if let min = minLength, length < min {
             throw SBOMValidatorError.constraintViolation(
@@ -502,7 +500,6 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
                 message: "String is shorter than minimum length. Expected at least \(min), got \(length)"
             )
         }
-        
         // Check maximum length
         if let max = maxLength, length > max {
             throw SBOMValidatorError.constraintViolation(
@@ -546,14 +543,12 @@ internal struct SBOMValidator: SBOMValidatorProtocol {
 
     private func validateNumericConstraints(_ value: NSNumber, schema: [String: Any], path: String) throws {
         let doubleValue = value.doubleValue
-        
         if let minimum = schema[SchemaKeys.minimum] as? NSNumber {
             let minValue = minimum.doubleValue
             if doubleValue < minValue {
                 throw SBOMValidatorError.constraintViolation(path: path, message: "Value is below minimum: \(minimum). Got: \(value)")
             }
         }
-
         if let maximum = schema[SchemaKeys.maximum] as? NSNumber {
             let maxValue = maximum.doubleValue
             if doubleValue > maxValue {
