@@ -10,12 +10,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-// package enum SBOMEntity: String, Codable, Equatable, CaseIterable, ExpressibleByArgument, Comparable {
-//     case all
-//     case product
-//     case package
+package enum Entity: String, Codable, Equatable, CaseIterable {
+    case all
+    case product
+    case package
 
-
+    package var defaultValueDescription: String {
+        switch self {
+        case .all: return "Include all entities in the SBOM"
+        case .product: return "Only include product information and product dependencies"
+        case .package: return "Only include package information and package dependencies"
+        }
+    }
+}
 
 package struct SBOMDependencies: Codable, Equatable {
     package let components: [SBOMComponent]

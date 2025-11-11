@@ -10,9 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ArgumentParser
-
-package enum Spec: String, Codable, Equatable, CaseIterable, ExpressibleByArgument, Comparable {
+package enum Spec: String, Codable, Equatable, CaseIterable, Comparable {
     case cyclonedx
     case spdx
     case cyclonedx1

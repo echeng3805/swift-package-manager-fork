@@ -29,6 +29,9 @@ import enum PackageModel.Sanitizer
 
 import enum PackageModel.TraitConfiguration
 
+import enum SBOMModel.Entity
+import enum SBOMModel.Spec
+
 import struct SPMBuildCore.BuildParameters
 import struct SPMBuildCore.BuildSystemProvider
 
@@ -66,6 +69,9 @@ public struct GlobalOptions: ParsableArguments {
 
     @OptionGroup(title: "Trait Options")
     public var traits: TraitOptions
+
+    @OptionGroup(title: "SBOM")
+    public var sbom: SBOMOptions
 }
 
 public struct LocationOptions: ParsableArguments {
@@ -753,6 +759,32 @@ extension TraitConfiguration {
     }
 }
 
+public struct SBOMOptions: ParsableArguments {
+    public init() {}
+
+    /// SBOM specification(s) to generate.
+    @Option(
+        name: .customLong("sbom-spec"),
+        help: "Set the SBOM specification(s)."
+    )
+    var sbomSpecs: [SBOMModel.Spec] = []
+
+    /// Directory path to generate SBOM(s) in.
+    @Option(
+        name: .customLong("sbom-dir"),
+        help: "The absolute or relative directory path to generate the SBOM(s) in. Must be used with --sbom-spec.",
+        completion: .directory
+    )
+    var sbomDirectory: AbsolutePath?
+
+    /// Filter SBOM components and dependencies by entity.
+    @Option(
+        name: .customLong("sbom-entity"),
+        help: "Filter the SBOM components and dependencies by entity. Must be used with --sbom-spec."
+    )
+    var sbomEntity: SBOMModel.Entity = .all
+}
+
 // MARK: - Extensions
 
 extension BuildConfiguration {
@@ -829,4 +861,6 @@ extension Sanitizer: ExpressibleByArgument {}
 extension BuildSystemProvider.Kind: ExpressibleByArgument {}
 extension Version: @retroactive ExpressibleByArgument {}
 extension PackageIdentity: ExpressibleByArgument {}
+extension Spec: ExpressibleByArgument {}
+extension Entity: ExpressibleByArgument {}
 extension URL: @retroactive ExpressibleByArgument {}
