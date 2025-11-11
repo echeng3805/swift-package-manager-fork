@@ -116,12 +116,7 @@ private func extractComponentInfoFromGit(packagePath: AbsolutePath) async throws
     }
     let remotes = (try? gitRepo.remotes()) ?? []
     let hasUncommittedChanges = gitRepo.hasUncommittedChanges()
-    let commits: [SBOMCommit] = remotes.map { remote in
-        SBOMCommit(
-            sha: currentRevision.identifier,
-            repository: remote.url
-        )
-    }
+    
     let revisionString: String
     if let currentTag = gitRepo.getCurrentTag() {
         revisionString = hasUncommittedChanges ? "\(currentTag)-modified" : currentTag
@@ -129,21 +124,24 @@ private func extractComponentInfoFromGit(packagePath: AbsolutePath) async throws
         revisionString = hasUncommittedChanges ? "\(currentRevision.identifier)-modified" : currentRevision.identifier
     }
     
-    // Use the origin remote (or first remote as fallback) for the version's commit field
+    // use the origin remote to avoid listing commits that may not exist in all remotes
     let originRemote = remotes.first(where: { $0.name == "origin" })
+    // else fall back to the first remote option
+    let primaryRemote = originRemote ?? remotes.first
+    
     let versionCommit: SBOMCommit?
-    if let originRemote {
-        versionCommit = SBOMCommit(
+    let commits: [SBOMCommit]?
+    
+    if let primaryRemote {
+        let commit = SBOMCommit(
             sha: currentRevision.identifier,
-            repository: originRemote.url
+            repository: primaryRemote.url
         )
-    } else if let firstRemote = remotes.first {
-        versionCommit = SBOMCommit(
-            sha: currentRevision.identifier,
-            repository: firstRemote.url
-        )
+        versionCommit = commit
+        commits = [commit]
     } else {
         versionCommit = nil
+        commits = nil
     }
     
     return SBOMGitInfo(
@@ -151,7 +149,7 @@ private func extractComponentInfoFromGit(packagePath: AbsolutePath) async throws
             revision: revisionString,
             commit: versionCommit
         ),
-        originator: SBOMOriginator(commits: commits.isEmpty ? nil : commits)
+        originator: SBOMOriginator(commits: commits)
     )
 }
 

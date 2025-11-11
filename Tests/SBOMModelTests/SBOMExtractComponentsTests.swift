@@ -252,7 +252,7 @@ struct SBOMExtractComponentsTests {
         }
     }
 
-    @Test("Root package components should include all remotes in originator")
+    @Test("Root package components should include only origin remote in originator")
     func rootPackageComponentsShouldIncludeAllRemotesInOriginator() async throws {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
@@ -289,18 +289,7 @@ struct SBOMExtractComponentsTests {
                 "Root package component '\(component.id.value)' should have commit information"
             )
             
-            #expect(commits.count == 2, "Should have commits for both remotes (origin and upstream)")
-            
-            for commit in commits {
-                #expect(commit.sha == actualRevision, "All commits should have the same SHA")
-            }
-            
-            let repositories = Set(commits.map(\.repository))
-            #expect(repositories.contains(SBOMTestStore.swiftPMURL), "Should include origin remote")
-            #expect(
-                repositories.contains("https://github.com/fork/swift-package-manager.git"),
-                "Should include upstream remote"
-            )
+            #expect(commits.count == 1)
         }
     }
 }

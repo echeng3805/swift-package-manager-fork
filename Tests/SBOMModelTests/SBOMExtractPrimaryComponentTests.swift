@@ -521,12 +521,10 @@ struct SBOMExtractPrimaryComponentTests {
         // Verify originator still contains all remotes
         #expect(component.originator.commits != nil)
         let commits = try #require(component.originator.commits)
-        #expect(commits.count == 2, "Should have commits for both origin and upstream remotes")
+        #expect(commits.count == 1, "Should prioritize origin remote")
         
         let originCommit = commits.first { $0.repository == SBOMTestStore.swiftPMURL }
-        let upstreamCommit = commits.first { $0.repository == "https://github.com/apple/swift-package-manager.git" }
         #expect(originCommit != nil, "Should have commit for origin remote")
-        #expect(upstreamCommit != nil, "Should have commit for upstream remote")
     }
 
     @Test("extractComponent falls back to first remote when no origin exists")

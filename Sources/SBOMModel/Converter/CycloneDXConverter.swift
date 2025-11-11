@@ -68,14 +68,25 @@ package func convertToCycloneDXPedigree(from originator: SBOMOriginator) async t
 }
 
 package func convertToCycloneDXComponent(from comp: SBOMComponent) async throws -> CycloneDXComponent {
-    // TODO: ev_cheng, handle nested components?
-    try await CycloneDXComponent(
+    // Recursively convert nested components
+    // var nestedComponents: [CycloneDXComponent]? = nil
+    // if let components = comp.components, !components.isEmpty {
+    //     var convertedComponents: [CycloneDXComponent] = []
+    //     for nestedComp in components {
+    //         let cyclonedxComp = try await convertToCycloneDXComponent(from: nestedComp)
+    //         convertedComponents.append(cyclonedxComp)
+    //     }
+    //     nestedComponents = convertedComponents
+    // }
+    
+    return try await CycloneDXComponent(
         type: convertToCycloneDXCategory(from: comp.category),
         bomRef: comp.id.value,
         name: comp.name,
         version: comp.version.revision,
         scope: convertToCycloneDXScope(from: comp.scope ?? .runtime),
         purl: comp.purl,
+        // components: nestedComponents,
         pedigree: convertToCycloneDXPedigree(from: comp.originator)
     )
 }
