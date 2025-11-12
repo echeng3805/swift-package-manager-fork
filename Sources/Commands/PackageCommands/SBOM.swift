@@ -17,6 +17,7 @@ import PackageGraph
 import Workspace
 import SBOMModel
 import SPMBuildCore
+import TSCBasic
 
 extension SwiftPackageCommand {
     struct SBOM: AsyncSwiftCommand {
@@ -38,6 +39,10 @@ extension SwiftPackageCommand {
             )
             let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
            
+            guard swiftCommandState.options.build.buildSystem == .swiftbuild else {
+                throw StringError("SBOM generation requires the SwiftBuild build system. Please use '--build-system swiftbuild'.")
+            }
+            
             let buildSystem = try await swiftCommandState.createBuildSystem(
                 explicitProduct: product
             )
