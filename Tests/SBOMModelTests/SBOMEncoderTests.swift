@@ -52,7 +52,7 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         
         try await writeSBOMs(from: sbom, specs: [.cyclonedx], outputDir: outputDir)
         
@@ -66,7 +66,7 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         
         try await writeSBOMs(from: sbom, specs: [.cyclonedx, .spdx], outputDir: outputDir)
         
@@ -91,7 +91,7 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         
         try await writeSBOMs(from: sbom, specs: [.cyclonedx, .cyclonedx1], outputDir: outputDir)
         
@@ -105,7 +105,7 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         
         try await writeSBOMs(from: sbom, specs: [.cyclonedx], outputDir: outputDir)
         
@@ -123,7 +123,7 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         
         try await writeSBOMs(from: sbom, specs: [.cyclonedx], outputDir: outputDir)
         
@@ -143,7 +143,7 @@ struct SBOMEncoderTests {
     func encodeSBOMWithNilOutputDirDoesNotWriteFile() async throws {
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         let spec = SBOMSpec(type: .cyclonedx1, version: "1.7")
         
         // Should not throw and should not create any files
@@ -160,7 +160,7 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         let spec = SBOMSpec(type: .cyclonedx1, version: "1.7")
         
         try await encodeSBOM(from: sbom, spec: spec, outputDir: outputDir)
@@ -176,7 +176,7 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         
         try await writeSBOMs(from: sbom, specs: [.cyclonedx, .spdx], outputDir: outputDir)
         
@@ -197,7 +197,7 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         
         try await writeSBOMs(from: sbom, specs: [.cyclonedx, .spdx], outputDir: outputDir)
         

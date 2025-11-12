@@ -337,7 +337,8 @@ package func extractPrimaryComponent(
 }
 
 package func extractSBOM(
-    graph: ModulesGraph,
+    modulesGraph: ModulesGraph,
+    dependencyGraph: [String: [String]]?,
     store: ResolvedPackagesStore,
     product: String? = nil
 ) async throws -> SBOMDocument {
@@ -346,7 +347,7 @@ package func extractSBOM(
     return try await SBOMDocument(
         id: SBOMIdentifier.generate(),
         metadata: extractMetadata(),
-        primaryComponent: extractPrimaryComponent(graph: graph, store: store, product: product, gitCache: gitCache, componentCache: componentCache),
-        dependencies: extractDependencies(graph: graph, store: store, product: product, gitCache: gitCache, componentCache: componentCache)
+        primaryComponent: extractPrimaryComponent(graph: modulesGraph, store: store, product: product, gitCache: gitCache, componentCache: componentCache),
+        dependencies: extractDependencies(graph: modulesGraph, store: store, product: product, gitCache: gitCache, componentCache: componentCache)
     )
 }

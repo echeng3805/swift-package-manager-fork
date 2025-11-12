@@ -127,6 +127,7 @@ public struct BuildResult {
         buildPlan: BuildPlan? = nil,
         replArguments: CLIArguments?,
         builtArtifacts: [(String, PluginInvocationBuildResult.BuiltArtifact)]? = nil,
+        // TODO: ev_cheng, there's probably a better type for this
         dependencyGraph: [String: [String]]? = nil
     ) {
         self.serializedDiagnosticPathsByTargetName = serializedDiagnosticPathsByTargetName

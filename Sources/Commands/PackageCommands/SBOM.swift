@@ -38,8 +38,17 @@ extension SwiftPackageCommand {
             )
             let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
            
+            let buildSystem = try await swiftCommandState.createBuildSystem(
+                explicitProduct: product
+            )
+            let buildResult = try await buildSystem.build(
+                subset: product.map { .product($0) } ?? .allExcludingTests,
+                buildOutputs: [.dependencyGraph]
+            )
+
             let sbom = try await SBOMModel.extractSBOM(
-                graph: packageGraph,
+                modulesGraph: packageGraph,
+                dependencyGraph: buildResult.dependencyGraph,
                 store: resolvedPackagesStore,
                 product: product
             )

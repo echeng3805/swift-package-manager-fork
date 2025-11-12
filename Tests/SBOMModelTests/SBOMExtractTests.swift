@@ -22,13 +22,13 @@ struct SBOMExtractTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         let productName = "SwiftPMPackageCollections"
-        let sbom = try await SBOMModel.extractSBOM( graph: graph, store: store, product: productName)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store, product: productName)
 
         #expect(sbom.primaryComponent.name == productName)
         #expect(sbom.primaryComponent.id.value == "SwiftPM:\(productName)")
         #expect(sbom.primaryComponent.category == .library)
 
-        let fullSbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let fullSbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         #expect(fullSbom.primaryComponent.name == "SwiftPM")
         #expect(fullSbom.primaryComponent.id.value == "SwiftPM")
         #expect(fullSbom.primaryComponent.category == .library)
@@ -57,13 +57,13 @@ struct SBOMExtractTests {
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
 
         let productName = "swiftly"
-        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store, product: productName)
+        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store, product: productName)
 
         #expect(sbom.primaryComponent.name == productName)
         #expect(sbom.primaryComponent.id.value == "swiftly:swiftly")
         #expect(sbom.primaryComponent.category == .application)
 
-        let fullSbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let fullSbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
         #expect(fullSbom.primaryComponent.name == "swiftly")
         #expect(fullSbom.primaryComponent.id.value == "swiftly")
         #expect(fullSbom.primaryComponent.category == .application)
@@ -123,7 +123,8 @@ struct SBOMExtractTests {
 
         await #expect(throws: SBOMExtractorError.self) {
             _ = try await SBOMModel.extractSBOM(
-                graph: graph,
+                modulesGraph: graph,
+                dependencyGraph: nil,
                 store: store,
                 product: "NonExistentProduct"
             )

@@ -66,7 +66,8 @@ struct SBOMValidationTests {
     @Test("validate SBOM from graphs", arguments: try getValidateGraphSBOMTestCases())
     func validateSBOMFromGraph(testCase: ValidateGraphSBOMTestCase) async throws {
         let document = try await SBOMModel.extractSBOM(
-            graph: testCase.inputGraph,
+            modulesGraph: testCase.inputGraph,
+            dependencyGraph: nil,
             store: testCase.inputStore
         )
         let encodedData = try await encodeSBOMData(from: document, spec: testCase.inputSpec)

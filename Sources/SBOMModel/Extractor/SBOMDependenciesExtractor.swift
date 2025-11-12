@@ -77,9 +77,7 @@ private func extractDependenciesForProducts(
 
     func trackDependency(parentID: SBOMIdentifier, childID: SBOMIdentifier) {
         guard parentID != childID else { return }  // prevent self-referential dependencies
-        var dependencies = dependenciesDict[parentID] ?? Set<SBOMIdentifier>()
-        dependencies.insert(childID)
-        dependenciesDict[parentID] = dependencies
+        dependenciesDict[parentID, default: []].insert(childID)
     }
 
     func processDependencies() {
@@ -128,10 +126,8 @@ private func extractDependenciesForProducts(
         from product: ResolvedProduct,
         dependentProduct: ResolvedProduct
     ) async throws -> ResolvedProduct? {
-        // Create a unique key for this product dependency pair
+
         let pairKey = "\(product.id):\(dependentProduct.id)"
-        
-        // Skip if we've already processed this exact dependency relationship
         guard !processedProductPairs.contains(pairKey) else {
             return dependentProduct
         }
