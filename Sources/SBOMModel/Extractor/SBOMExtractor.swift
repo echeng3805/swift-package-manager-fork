@@ -30,6 +30,30 @@ package actor SBOMGitCache {
     }
 }
 
+/// Cache for storing extracted components (to avoid redundant extraction)
+package actor SBOMComponentCache {
+    private var packageCache: [PackageIdentity: SBOMComponent] = [:]
+    private var productCache: [String: SBOMComponent] = [:] // key: "packageIdentity:productName"
+    
+    package func getPackage(_ identity: PackageIdentity) -> SBOMComponent? {
+        self.packageCache[identity]
+    }
+    
+    package func setPackage(_ identity: PackageIdentity, component: SBOMComponent) {
+        self.packageCache[identity] = component
+    }
+    
+    package func getProduct(_ packageIdentity: PackageIdentity, productName: String) -> SBOMComponent? {
+        let key = "\(packageIdentity):\(productName)"
+        return self.productCache[key]
+    }
+    
+    package func setProduct(_ packageIdentity: PackageIdentity, productName: String, component: SBOMComponent) {
+        let key = "\(packageIdentity):\(productName)"
+        self.productCache[key] = component
+    }
+}
+
 package struct SBOMGitInfo {
     package let version: SBOMComponent.Version
     package let originator: SBOMOriginator
@@ -99,26 +123,27 @@ package func extractScope(from package: ResolvedPackage) async throws -> SBOMCom
 
 private func extractComponentInfoFromGit(packagePath: AbsolutePath) async throws -> SBOMGitInfo {
     let gitRepo = GitRepository(path: packagePath, isWorkingRepo: true)
-    guard let currentRevision = try? gitRepo.getCurrentRevision() else {
+    
+    let currentRevision = try? gitRepo.getCurrentRevision()
+    guard let currentRevision else {
         return SBOMGitInfo(
             version: SBOMComponent.Version(revision: "unknown"),
             originator: SBOMOriginator(commits: nil)
         )
     }
+    
     let remotes = (try? gitRepo.remotes()) ?? []
     let hasUncommittedChanges = gitRepo.hasUncommittedChanges()
+    let currentTag = gitRepo.getCurrentTag()
     
     let revisionString: String
-    if let currentTag = gitRepo.getCurrentTag() {
+    if let currentTag {
         revisionString = hasUncommittedChanges ? "\(currentTag)-modified" : currentTag
     } else {
         revisionString = hasUncommittedChanges ? "\(currentRevision.identifier)-modified" : currentRevision.identifier
     }
     
-    // use the origin remote to avoid listing commits that may not exist in all remotes
-    let originRemote = remotes.first(where: { $0.name == "origin" })
-    // else fall back to the first remote option
-    let primaryRemote = originRemote ?? remotes.first
+    let primaryRemote = remotes.first(where: { $0.name == "origin" }) ?? remotes.first
     
     let versionCommit: SBOMCommit?
     let commits: [SBOMCommit]?
@@ -203,11 +228,12 @@ private func extractProductsFromPackage(
     package: ResolvedPackage,
     graph: ModulesGraph? = nil,
     store: ResolvedPackagesStore,
-    cache: SBOMGitCache? = nil
+    gitCache: SBOMGitCache? = nil,
+    componentCache: SBOMComponentCache? = nil
 ) async throws -> [SBOMComponent] {
     var productComponents: [SBOMComponent] = []
     for product in package.products {
-        let productComponent = try await extractComponent(product: product, graph: graph, store: store, cache: cache)
+        let productComponent = try await extractComponent(product: product, graph: graph, store: store, gitCache: gitCache, componentCache: componentCache)
         productComponents.append(productComponent)
     }
     return productComponents
@@ -217,16 +243,22 @@ package func extractComponent(
     package: ResolvedPackage,
     graph: ModulesGraph? = nil,
     store: ResolvedPackagesStore,
-    cache: SBOMGitCache? = nil
+    gitCache: SBOMGitCache? = nil,
+    componentCache: SBOMComponentCache? = nil
 ) async throws -> SBOMComponent {
+    // Check component cache first
+    if let componentCache, let cached = await componentCache.getPackage(package.identity) {
+        return cached
+    }
+    
     let gitInfo = try await extractComponentVersionAndCommits(
         from: package.identity,
         graph: graph,
         store: store,
-        cache: cache
+        cache: gitCache
     )
-    let products = try await extractProductsFromPackage(package: package, graph: graph, store: store, cache: cache)
-    return try await SBOMComponent(
+    let products = try await extractProductsFromPackage(package: package, graph: graph, store: store, gitCache: gitCache, componentCache: componentCache)
+    let component = try await SBOMComponent(
         category: extractCategory(from: package),
         id: extractComponentID(from: package),
         purl: PURL.from(package: package, version: gitInfo.version).description,
@@ -237,21 +269,34 @@ package func extractComponent(
         scope: extractScope(from: package),
         components: products
     )
+    
+    // Cache the component
+    if let componentCache {
+        await componentCache.setPackage(package.identity, component: component)
+    }
+    
+    return component
 }
 
 package func extractComponent(
     product: ResolvedProduct,
     graph: ModulesGraph? = nil,
     store: ResolvedPackagesStore,
-    cache: SBOMGitCache? = nil
+    gitCache: SBOMGitCache? = nil,
+    componentCache: SBOMComponentCache? = nil
 ) async throws -> SBOMComponent {
+    // Check component cache first
+    if let componentCache, let cached = await componentCache.getProduct(product.packageIdentity, productName: product.name) {
+        return cached
+    }
+    
     let gitInfo = try await extractComponentVersionAndCommits(
         from: product.packageIdentity,
         graph: graph,
         store: store,
-        cache: cache
+        cache: gitCache
     )
-    return try await SBOMComponent(
+    let component = try await SBOMComponent(
         category: extractCategory(from: product),
         id: extractComponentID(from: product),
         purl: PURL.from(product: product, version: gitInfo.version).description,
@@ -261,13 +306,21 @@ package func extractComponent(
         description: nil,
         scope: extractScope(from: product)
     )
+    
+    // Cache the component
+    if let componentCache {
+        await componentCache.setProduct(product.packageIdentity, productName: product.name, component: component)
+    }
+    
+    return component
 }
 
 package func extractPrimaryComponent(
     graph: ModulesGraph,
     store: ResolvedPackagesStore,
     product: String? = nil,
-    cache: SBOMGitCache? = nil
+    gitCache: SBOMGitCache? = nil,
+    componentCache: SBOMComponentCache? = nil
 ) async throws -> SBOMComponent {
     guard let rootPackage = graph.rootPackages.first else {
         throw SBOMExtractorError.noRootPackage(context: "determine primary component for SBOM")
@@ -277,10 +330,10 @@ package func extractPrimaryComponent(
         guard let resolvedProduct = rootPackage.products.first(where: { $0.name == productName }) else {
             throw SBOMExtractorError.productNotFound(productName: productName, packageIdentity: rootPackage.identity.description)
         }
-        return try await extractComponent(product: resolvedProduct, graph: graph, store: store, cache: cache)
+        return try await extractComponent(product: resolvedProduct, graph: graph, store: store, gitCache: gitCache, componentCache: componentCache)
     }
     // root package
-    return try await extractComponent(package: rootPackage, graph: graph, store: store, cache: cache)
+    return try await extractComponent(package: rootPackage, graph: graph, store: store, gitCache: gitCache, componentCache: componentCache)
 }
 
 package func extractSBOM(
@@ -288,11 +341,12 @@ package func extractSBOM(
     store: ResolvedPackagesStore,
     product: String? = nil
 ) async throws -> SBOMDocument {
-    let cache = SBOMGitCache()
+    let gitCache = SBOMGitCache()
+    let componentCache = SBOMComponentCache()
     return try await SBOMDocument(
         id: SBOMIdentifier.generate(),
         metadata: extractMetadata(),
-        primaryComponent: extractPrimaryComponent(graph: graph, store: store, product: product, cache: cache),
-        dependencies: extractDependencies(graph: graph, store: store, product: product, cache: cache)
+        primaryComponent: extractPrimaryComponent(graph: graph, store: store, product: product, gitCache: gitCache, componentCache: componentCache),
+        dependencies: extractDependencies(graph: graph, store: store, product: product, gitCache: gitCache, componentCache: componentCache)
     )
 }

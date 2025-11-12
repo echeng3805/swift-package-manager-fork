@@ -158,12 +158,13 @@ struct SBOMExtractPrimaryComponentTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
-        let cache = SBOMGitCache()
+        let gitCache = SBOMGitCache()
+        let componentCache = SBOMComponentCache()
 
-        let component1 = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, cache: cache)
+        let component1 = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, gitCache: gitCache, componentCache: componentCache)
         #expect(component1.version.revision == expectedRevision)
 
-        let cachedVersion = await cache.get(rootPackage.identity)
+        let cachedVersion = await gitCache.get(rootPackage.identity)
         #expect(cachedVersion != nil, "Cache should contain version for root package")
         #expect(cachedVersion?.version.revision == expectedRevision, "Cached version should match expected revision")
 
@@ -171,7 +172,7 @@ struct SBOMExtractPrimaryComponentTests {
         try localFileSystem.removeFileTree(gitPath)
         #expect(!localFileSystem.exists(gitPath), "Git directory should be removed")
 
-        let component2 = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, cache: cache)
+        let component2 = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, gitCache: gitCache, componentCache: componentCache)
         #expect(component2.version.revision == expectedRevision, "Should return cached version even without Git")
         #expect(
             component2.version.revision == component1.version.revision,
@@ -183,14 +184,15 @@ struct SBOMExtractPrimaryComponentTests {
             product: resolvedProduct,
             graph: graph,
             store: store,
-            cache: cache
+            gitCache: gitCache,
+            componentCache: componentCache
         )
         #expect(
             productComponent.version.revision == expectedRevision,
             "Product should use cached version from root package"
         )
 
-        let cachedVersionAfter = await cache.get(rootPackage.identity)
+        let cachedVersionAfter = await gitCache.get(rootPackage.identity)
         #expect(cachedVersionAfter?.version.revision == expectedRevision, "Cache should still contain same version")
     }
 
