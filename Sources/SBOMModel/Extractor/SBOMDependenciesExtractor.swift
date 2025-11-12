@@ -19,6 +19,36 @@ import SourceControl
 import TSCUtility
 
 extension SBOMExtractor {
+    /// Converts a ModulesGraph product name to a dependency graph target name.
+    /// Products in the dependency graph have a "-product" suffix.
+    package static func productNameToTargetName(_ productName: String) -> String {
+        return "\(productName)-product"
+    }
+    
+    /// Converts a dependency graph target name back to a ModulesGraph product name.
+    /// Removes the "-product" suffix if present.
+    package static func targetNameToProductName(_ targetName: String) -> String? {
+        guard targetName.hasSuffix("-product") else {
+            return nil
+        }
+        return String(targetName.dropLast("-product".count))
+    }
+    
+    /// Converts a ModulesGraph module name to a dependency graph target name.
+    /// Module names remain unchanged in the dependency graph.
+    package static func moduleNameToTargetName(_ moduleName: String) -> String {
+        return moduleName
+    }
+    
+    /// Converts a dependency graph target name back to a ModulesGraph module name.
+    /// Returns the target name if it's not a product (doesn't have "-product" suffix).
+    package static func targetNameToModuleName(_ targetName: String) -> String? {
+        guard !targetName.hasSuffix("-product") else {
+            return nil
+        }
+        return targetName
+    }
+
     package func extractDependencies(product: String? = nil) async throws -> SBOMDependencies {
         guard let rootPackage = modulesGraph.rootPackages.first else {
             throw SBOMExtractorError.noRootPackage(context: "extract dependencies")
