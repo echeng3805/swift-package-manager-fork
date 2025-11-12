@@ -767,22 +767,22 @@ public struct SBOMOptions: ParsableArguments {
         name: .customLong("sbom-spec"),
         help: "Set the SBOM specification(s) and generate SBOM(s)."
     )
-    var sbomSpecs: [SBOMModel.Spec] = []
+    package var sbomSpecs: [SBOMModel.Spec] = []
 
     /// Directory path to generate SBOM(s) in.
     @Option(
         name: .customLong("sbom-dir"),
-        help: "The absolute or relative directory path to generate the SBOM(s) in. Must be used with --sbom-spec.",
+        help: "The absolute or relative directory path to generate the SBOM(s) in. Must be used with --sbom-spec. (default: <scratch_path>/sboms)",
         completion: .directory
     )
-    var sbomDirectory: AbsolutePath?
+    package var sbomDirectory: AbsolutePath?
 
     /// Filter SBOM components and dependencies by entity.
     @Option(
         name: .customLong("sbom-entity"),
         help: "Filter the SBOM components and dependencies by entity. Must be used with --sbom-spec."
     )
-    var sbomEntity: SBOMModel.Entity = .all
+    package var sbomEntity: SBOMModel.Entity = .all
 }
 
 // MARK: - Extensions

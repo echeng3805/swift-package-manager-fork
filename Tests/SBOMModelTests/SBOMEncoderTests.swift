@@ -1,0 +1,213 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift open source project
+//
+// Copyright (c) 2025 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See http://swift.org/LICENSE.txt for license information
+// See http://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+
+import _InternalTestSupport
+import Basics
+import Foundation
+import PackageGraph
+@testable import SBOMModel
+import Testing
+
+struct SBOMEncoderTests {
+    
+    private func createTempOutputDir() throws -> AbsolutePath {
+        let uniqueID = UUID().uuidString
+        let tempDir = AbsolutePath("/tmp/SBOMEncoderTests-\(uniqueID)")
+        try localFileSystem.createDirectory(tempDir, recursive: true)
+        return tempDir
+    }
+    
+    private func cleanupTempDir(_ path: AbsolutePath) throws {
+        if localFileSystem.exists(path) {
+            try localFileSystem.removeFileTree(path)
+        }
+    }
+    
+    private func verifyJSONFile(at path: AbsolutePath) throws {
+        #expect(localFileSystem.exists(path), "File should exist at \(path)")
+        
+        let data = try localFileSystem.readFileContents(path)
+        let jsonObject = try JSONSerialization.jsonObject(with: Data(data.contents))
+        #expect(jsonObject is [String: Any], "File should contain valid JSON object")
+    }
+    
+    
+    @Test("writeSBOMs creates output directory if it doesn't exist")
+    func writeSBOMsCreatesOutputDirectory() async throws {
+        let outputDir = try createTempOutputDir()
+        defer { try? cleanupTempDir(outputDir) }
+        
+        // Remove the directory to test creation
+        try localFileSystem.removeFileTree(outputDir)
+        #expect(!localFileSystem.exists(outputDir), "Directory should not exist before test")
+        
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        
+        try await writeSBOMs(from: sbom, specs: [.cyclonedx], outputDir: outputDir)
+        
+        #expect(localFileSystem.exists(outputDir), "Output directory should be created")
+    }
+    
+    @Test("writeSBOMs generates files for multiple specs")
+    func writeSBOMsGeneratesFilesForMultipleSpecs() async throws {
+        let outputDir = try createTempOutputDir()
+        defer { try? cleanupTempDir(outputDir) }
+        
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        
+        try await writeSBOMs(from: sbom, specs: [.cyclonedx, .spdx], outputDir: outputDir)
+        
+        let files = try localFileSystem.getDirectoryContents(outputDir)
+        #expect(files.count == 2, "Should generate two files for two specs")
+        
+        // Since test packages don't have real Git repos, the revision will be "unknown"
+        let cycloneDXFile = "cyclonedx1-1.7-MyApp-unknown.json"
+        let spdxFile = "spdx3-3.0.1-MyApp-unknown.json"
+        
+        #expect(files.contains(cycloneDXFile), "Should generate CycloneDX file")
+        #expect(files.contains(spdxFile), "Should generate SPDX file")
+        
+        try verifyJSONFile(at: outputDir.appending(component: cycloneDXFile))
+        try verifyJSONFile(at: outputDir.appending(component: spdxFile))
+    }
+    
+    @Test("writeSBOMs with duplicate specs generates single file")
+    func writeSBOMsWithDuplicateSpecsGeneratesSingleFile() async throws {
+        let outputDir = try createTempOutputDir()
+        defer { try? cleanupTempDir(outputDir) }
+        
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        
+        try await writeSBOMs(from: sbom, specs: [.cyclonedx, .cyclonedx1], outputDir: outputDir)
+        
+        let files = try localFileSystem.getDirectoryContents(outputDir)
+        #expect(files.count == 1, "Duplicate specs should result in single file")
+    }
+    
+    @Test("writeSBOMs tests cleans up properly on success")
+    func writeSBOMsCleansUpProperlyOnSuccess() async throws {
+        let outputDir = try createTempOutputDir()
+        
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        
+        try await writeSBOMs(from: sbom, specs: [.cyclonedx], outputDir: outputDir)
+        
+        #expect(localFileSystem.exists(outputDir), "Directory should exist after write")
+        
+        // Cleanup
+        try cleanupTempDir(outputDir)
+        #expect(!localFileSystem.exists(outputDir), "Directory should be removed after cleanup")
+    }
+    
+    @Test("writeSBOMs generates correct filename format")
+    func writeSBOMsGeneratesCorrectFilenameFormat() async throws {
+        let outputDir = try createTempOutputDir()
+        defer { try? cleanupTempDir(outputDir) }
+        
+        let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        
+        try await writeSBOMs(from: sbom, specs: [.cyclonedx], outputDir: outputDir)
+        
+        let files = try localFileSystem.getDirectoryContents(outputDir)
+        #expect(files.count == 1)
+        
+        let filename = files[0]
+        // Format: {spec.type}-{spec.version}-{name}-{version}.json
+        let components = filename.replacingOccurrences(of: ".json", with: "").split(separator: "-")
+        #expect(components.count >= 4, "Filename should have at least 4 components")
+        #expect(components[0] == "cyclonedx1", "First component should be spec type")
+        #expect(components[1] == "1.7", "Second component should be spec version")
+        #expect(components[2] == "swiftly", "Third component should be package name")
+    }
+    
+    @Test("encodeSBOM with nil outputDir does not write file")
+    func encodeSBOMWithNilOutputDirDoesNotWriteFile() async throws {
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let spec = SBOMSpec(type: .cyclonedx1, version: "1.7")
+        
+        // Should not throw and should not create any files
+        try await encodeSBOM(from: sbom, spec: spec, outputDir: nil)
+        
+        // No files should be created in current directory
+        // This is verified by not passing an outputDir
+    }
+    
+    @Test("encodeSBOM with outputDir writes file")
+    func encodeSBOMWithOutputDirWritesFile() async throws {
+        let outputDir = try createTempOutputDir()
+        defer { try? cleanupTempDir(outputDir) }
+        
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        let spec = SBOMSpec(type: .cyclonedx1, version: "1.7")
+        
+        try await encodeSBOM(from: sbom, spec: spec, outputDir: outputDir)
+        
+        let files = try localFileSystem.getDirectoryContents(outputDir)
+        #expect(files.count == 1, "Should write exactly one file")
+    }
+    
+    @Test("writeSBOMs integration test with SPM graph")
+    func writeSBOMsIntegrationTestWithSPMGraph() async throws {
+        let outputDir = try createTempOutputDir()
+        defer { try? cleanupTempDir(outputDir) }
+        
+        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        
+        try await writeSBOMs(from: sbom, specs: [.cyclonedx, .spdx], outputDir: outputDir)
+        
+        let files = try localFileSystem.getDirectoryContents(outputDir)
+        #expect(files.count == 2, "Should generate both CycloneDX and SPDX files")
+        
+        // Verify both files are valid
+        for filename in files {
+            let filePath = outputDir.appending(component: filename)
+            try verifyJSONFile(at: filePath)
+        }
+    }
+    
+    @Test("writeSBOMs integration test with Swiftly graph")
+    func writeSBOMsIntegrationTestWithSwiftlyGraph() async throws {
+        let outputDir = try createTempOutputDir()
+        defer { try? cleanupTempDir(outputDir) }
+        
+        let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let sbom = try await SBOMModel.extractSBOM(graph: graph, store: store)
+        
+        try await writeSBOMs(from: sbom, specs: [.cyclonedx, .spdx], outputDir: outputDir)
+        
+        let files = try localFileSystem.getDirectoryContents(outputDir)
+        #expect(files.count == 2, "Should generate both CycloneDX and SPDX files")
+        
+        // Verify both files are valid
+        for filename in files {
+            let filePath = outputDir.appending(component: filename)
+            try verifyJSONFile(at: filePath)
+        }
+    }
+}

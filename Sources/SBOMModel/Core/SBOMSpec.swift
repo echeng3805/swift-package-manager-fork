@@ -71,7 +71,7 @@ package enum Spec: String, Codable, Equatable, CaseIterable, Comparable {
     }
 }
 
-package struct SBOMSpec: Codable, Equatable {
+package struct SBOMSpec: Codable, Equatable, Hashable {
     package let type: Spec
     package let version: String
 

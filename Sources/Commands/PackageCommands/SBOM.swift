@@ -16,38 +16,39 @@ import CoreCommands
 import PackageGraph
 import Workspace
 import SBOMModel
+import SPMBuildCore
 
 extension SwiftPackageCommand {
     struct SBOM: AsyncSwiftCommand {
         static let configuration = CommandConfiguration(
             abstract: "Generate a Software Bill of Materials (SBOM).")
 
-        @OptionGroup(visibility: .hidden)
+        @OptionGroup()
         var globalOptions: GlobalOptions
-
-        @Option(help: "Set the SBOM specification.")
-        var spec: [SBOMModel.Spec] = []
-
-        @Option(name: [.long, .customShort("o") ],
-                help: "The absolute or relative path to generate the SBOM at.")
-        var outputPath: AbsolutePath?
 
         @Option(help: "The product to generate an SBOM for.")
         var product: String?
 
         func run(_ swiftCommandState: SwiftCommandState) async throws {
-           let workspace = try swiftCommandState.getActiveWorkspace()
-           let graph = try await workspace.loadPackageGraph(
-               rootInput: try swiftCommandState.getWorkspaceRoot(),
-               explicitProduct: product,
-               observabilityScope: swiftCommandState.observabilityScope
-           )
-           let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
+            let workspace = try swiftCommandState.getActiveWorkspace()
+            let packageGraph = try await workspace.loadPackageGraph(
+                rootInput: try swiftCommandState.getWorkspaceRoot(),
+                explicitProduct: product,
+                observabilityScope: swiftCommandState.observabilityScope
+            )
+            let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
            
-           let sbom = try await SBOMModel.extractSBOM(graph: graph, store: resolvedPackagesStore, product: product)
-           for s in spec {
-               try await encodeSBOM(from: sbom, spec: s, outputPath: outputPath)
-           }
+            let sbom = try await SBOMModel.extractSBOM(
+                graph: packageGraph,
+                store: resolvedPackagesStore,
+                product: product
+            )
+
+            try await writeSBOMs(
+                from: sbom,
+                specs: globalOptions.sbom.sbomSpecs,
+                outputDir: try globalOptions.sbom.sbomDirectory ?? swiftCommandState.productsBuildParameters.buildPath.appending(component: "sboms")
+            )
         }
     }
 }

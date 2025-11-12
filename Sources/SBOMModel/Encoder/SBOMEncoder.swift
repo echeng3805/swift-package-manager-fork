@@ -14,7 +14,7 @@ import Basics
 import Foundation
 import TSCUtility
 
-package func getSpec(from spec: Spec) async throws -> SBOMSpec {
+package func getSpec(from spec: Spec) async -> SBOMSpec {
     let concreteSpec = spec.latestSpec
     return SBOMSpec(
         type: concreteSpec.type,
@@ -22,13 +22,29 @@ package func getSpec(from spec: Spec) async throws -> SBOMSpec {
     )
 }
 
-package func encodeSBOM(from sbom: SBOMDocument, spec: Spec, outputPath: AbsolutePath?) async throws {
-    let specWithVersion = try await getSpec(from: spec)
-    let encoded = try await encodeSBOMData(from: sbom, spec: specWithVersion)
-    if let outputPath {
+package func getSpecs(from specs: [Spec]) async -> [SBOMSpec] {
+    var result: Set<SBOMSpec> = Set<SBOMSpec>()
+    for spec in specs {
+        result.insert(await getSpec(from: spec))
+    }
+    return Array(result)
+}
+
+package func writeSBOMs(from sbom: SBOMDocument, specs: [Spec], outputDir: AbsolutePath) async throws {
+    try localFileSystem.createDirectory(outputDir, recursive: true)
+    let specs = await getSpecs(from: specs)
+    for spec in specs {
+        try await encodeSBOM(from: sbom, spec: spec, outputDir: outputDir)
+    }
+}
+
+
+package func encodeSBOM(from sbom: SBOMDocument, spec: SBOMSpec, outputDir: AbsolutePath?) async throws {
+    let encoded = try await encodeSBOMData(from: sbom, spec: spec)
+    if let outputDir {
+        let filename = "\(spec.type)-\(spec.version)-\(sbom.primaryComponent.name)-\(sbom.primaryComponent.version.revision).json"
+        let outputPath = outputDir.appending(component: filename)
         try localFileSystem.writeFileContents(outputPath, data: encoded)
-    } else {
-        print(String(decoding: encoded, as: UTF8.self))
     }
 }
 
