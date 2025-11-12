@@ -65,19 +65,21 @@ struct SBOMValidationTests {
 
     @Test("validate SBOM from graphs", arguments: try getValidateGraphSBOMTestCases())
     func validateSBOMFromGraph(testCase: ValidateGraphSBOMTestCase) async throws {
-        let document = try await SBOMModel.extractSBOM(
+        let extractor = SBOMExtractor(
             modulesGraph: testCase.inputGraph,
             dependencyGraph: nil,
             store: testCase.inputStore
         )
-        let encodedData = try await encodeSBOMData(from: document, spec: testCase.inputSpec)
+        let document = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: document)
+        let encodedData = try await encoder.encodeSBOMData(spec: testCase.inputSpec)
 
         if testCase.wantError {
             await #expect(throws: StringError.self) {
-                try await validateSBOM(from: encodedData, spec: testCase.inputSpec)
+                try await SBOMEncoder.validateSBOM(from: encodedData, spec: testCase.inputSpec)
             }
         } else {
-            try await validateSBOM(from: encodedData, spec: testCase.inputSpec)
+            try await SBOMEncoder.validateSBOM(from: encodedData, spec: testCase.inputSpec)
         }
     }
 
@@ -180,10 +182,10 @@ struct SBOMValidationTests {
 
         if testCase.wantError {
             await #expect(throws: (any Error).self) {
-                try await validateSBOM(from: encodedData, spec: testCase.inputSBOMSpec)
+                try await SBOMEncoder.validateSBOM(from: encodedData, spec: testCase.inputSBOMSpec)
             }
         } else {
-            try await validateSBOM(from: encodedData, spec: testCase.inputSBOMSpec)
+            try await SBOMEncoder.validateSBOM(from: encodedData, spec: testCase.inputSBOMSpec)
         }
     }
 }

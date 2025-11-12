@@ -27,7 +27,7 @@ struct SBOMExtractPrimaryComponentTests {
 
         let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let component = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractPrimaryComponent() }()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
 
@@ -54,7 +54,7 @@ struct SBOMExtractPrimaryComponentTests {
 
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
-        let component = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractPrimaryComponent() }()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try swiftlyRepo.getCurrentRevision().identifier
 
@@ -84,7 +84,7 @@ struct SBOMExtractPrimaryComponentTests {
         let resolvedProduct = try #require(rootPackage.products.first { $0.name == "SwiftPMDataModel" })
         let actualRevision = try gitRepo.getCurrentRevision().identifier
 
-        let component = try await SBOMModel.extractComponent(product: resolvedProduct, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(product: resolvedProduct) }()
 
         #expect(component.category == SBOMComponent.Category.library)
         #expect(component.name == "SwiftPMDataModel")
@@ -110,7 +110,7 @@ struct SBOMExtractPrimaryComponentTests {
         let resolvedProduct = try #require(rootPackage.products.first)
         let actualRevision = try swiftlyRepo.getCurrentRevision().identifier
 
-        let component = try await SBOMModel.extractComponent(product: resolvedProduct, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(product: resolvedProduct) }()
 
         #expect(component.category == SBOMComponent.Category.application)
         #expect(component.name == "swiftly")
@@ -135,13 +135,13 @@ struct SBOMExtractPrimaryComponentTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         let productName = "SwiftPMDataModel"
-        let component = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, product: productName)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractPrimaryComponent(product: productName) }()
 
         #expect(component.name == productName)
         #expect(component.id.value == "SwiftPM:\(productName)")
         #expect(component.category == .library)
 
-        let packageComponent = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store)
+        let packageComponent = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractPrimaryComponent() }()
         #expect(packageComponent.name == "SwiftPM")
         #expect(packageComponent.id.value == "SwiftPM")
         #expect(component.category == .library)
@@ -161,7 +161,7 @@ struct SBOMExtractPrimaryComponentTests {
         let gitCache = SBOMGitCache()
         let componentCache = SBOMComponentCache()
 
-        let component1 = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, gitCache: gitCache, componentCache: componentCache)
+        let component1 = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store, gitCache: gitCache, componentCache: componentCache); return try await extractor.extractPrimaryComponent() }()
         #expect(component1.version.revision == expectedRevision)
 
         let cachedVersion = await gitCache.get(rootPackage.identity)
@@ -172,7 +172,7 @@ struct SBOMExtractPrimaryComponentTests {
         try localFileSystem.removeFileTree(gitPath)
         #expect(!localFileSystem.exists(gitPath), "Git directory should be removed")
 
-        let component2 = try await SBOMModel.extractPrimaryComponent(graph: graph, store: store, gitCache: gitCache, componentCache: componentCache)
+        let component2 = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store, gitCache: gitCache, componentCache: componentCache); return try await extractor.extractPrimaryComponent() }()
         #expect(component2.version.revision == expectedRevision, "Should return cached version even without Git")
         #expect(
             component2.version.revision == component1.version.revision,
@@ -180,13 +180,7 @@ struct SBOMExtractPrimaryComponentTests {
         )
 
         let resolvedProduct = try #require(rootPackage.products.first { $0.name == "SwiftPMDataModel" })
-        let productComponent = try await SBOMModel.extractComponent(
-            product: resolvedProduct,
-            graph: graph,
-            store: store,
-            gitCache: gitCache,
-            componentCache: componentCache
-        )
+        let productComponent = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store, gitCache: gitCache, componentCache: componentCache); return try await extractor.extractComponent(product: resolvedProduct) }()
         #expect(
             productComponent.version.revision == expectedRevision,
             "Product should use cached version from root package"
@@ -205,7 +199,7 @@ struct SBOMExtractPrimaryComponentTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
-        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         #expect(component.components != nil, "Package component should have nested product components")
         let nestedComponents = try #require(component.components)
@@ -227,7 +221,7 @@ struct SBOMExtractPrimaryComponentTests {
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
-        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         #expect(component.category == .application, "Package with executable should be application category")
         #expect(component.name == "swiftly")
@@ -244,7 +238,7 @@ struct SBOMExtractPrimaryComponentTests {
         
         let dependencyPackage = try #require(graph.packages.first { $0.identity.description == "swift-system" })
 
-        let component = try await SBOMModel.extractComponent(package: dependencyPackage, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: dependencyPackage) }()
 
         #expect(component.name == "swift-system")
         #expect(component.id.value == "swift-system")
@@ -263,7 +257,7 @@ struct SBOMExtractPrimaryComponentTests {
         let dependencyPackage = try #require(graph.packages.first { $0.identity.description == "swift-collections" })
         let product = try #require(dependencyPackage.products.first { $0.name == "OrderedCollections" })
 
-        let component = try await SBOMModel.extractComponent(product: product, graph: nil, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(product: product) }()
 
         #expect(component.name == "OrderedCollections")
         #expect(component.id.value == "swift-collections:OrderedCollections")
@@ -281,7 +275,7 @@ struct SBOMExtractPrimaryComponentTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
-        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         #expect(component.purl.hasPrefix("pkg:swift/github.com/swiftlang/SwiftPM@"))
         #expect(component.purl.contains("github.com/swiftlang/SwiftPM"))
@@ -297,7 +291,7 @@ struct SBOMExtractPrimaryComponentTests {
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first { $0.name == "SwiftPMPackageCollections" })
 
-        let component = try await SBOMModel.extractComponent(product: product, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(product: product) }()
 
         #expect(component.purl.contains("pkg:swift/github.com/swiftlang/SwiftPM:SwiftPMPackageCollections@"))
         #expect(component.purl.contains(":SwiftPMPackageCollections@"))
@@ -313,7 +307,7 @@ struct SBOMExtractPrimaryComponentTests {
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
 
-        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         #expect(component.originator.commits != nil)
         let commits = try #require(component.originator.commits)
@@ -333,7 +327,7 @@ struct SBOMExtractPrimaryComponentTests {
         let product = try #require(rootPackage.products.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
 
-        let component = try await SBOMModel.extractComponent(product: product, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(product: product) }()
 
         #expect(component.originator.commits != nil)
         let commits = try #require(component.originator.commits)
@@ -351,7 +345,7 @@ struct SBOMExtractPrimaryComponentTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
-        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         #expect(component.description == rootPackage.description)
     }
@@ -366,7 +360,7 @@ struct SBOMExtractPrimaryComponentTests {
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first)
 
-        let component = try await SBOMModel.extractComponent(product: product, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(product: product) }()
 
         #expect(component.description == nil, "Products should not have description")
     }
@@ -381,7 +375,7 @@ struct SBOMExtractPrimaryComponentTests {
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
 
-        let packageComponent = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let packageComponent = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         let productComponents = try #require(packageComponent.components)
         #expect(productComponents.count == rootPackage.products.count)
@@ -408,7 +402,7 @@ struct SBOMExtractPrimaryComponentTests {
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
-        let packageComponent = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let packageComponent = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         let productComponents = try #require(packageComponent.components)
         #expect(productComponents.count == rootPackage.products.count)
@@ -429,7 +423,7 @@ struct SBOMExtractPrimaryComponentTests {
         
         let dependencyPackage = try #require(graph.packages.first { $0.identity.description == "swift-collections" })
 
-        let packageComponent = try await SBOMModel.extractComponent(package: dependencyPackage, graph: graph, store: store)
+        let packageComponent = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: dependencyPackage) }()
 
         let productComponents = try #require(packageComponent.components)
         #expect(productComponents.count == dependencyPackage.products.count)
@@ -468,8 +462,9 @@ struct SBOMExtractPrimaryComponentTests {
             products: []
         )
 
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let component = try await SBOMModel.extractComponent(package: resolvedPackage, graph: nil, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: resolvedPackage) }()
 
         #expect(component.components != nil)
         #expect(component.components?.isEmpty == true, "Package with no products should have empty components array")
@@ -484,7 +479,7 @@ struct SBOMExtractPrimaryComponentTests {
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
-        let packageComponent = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let packageComponent = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         let productComponents = try #require(packageComponent.components)
         let productNames = productComponents.map(\.name)
@@ -514,7 +509,7 @@ struct SBOMExtractPrimaryComponentTests {
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
 
-        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         // Verify the version commit uses the origin remote, not upstream
         #expect(component.version.commit?.repository == SBOMTestStore.swiftPMURL)
@@ -556,7 +551,7 @@ struct SBOMExtractPrimaryComponentTests {
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try gitRepo.getCurrentRevision().identifier
 
-        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
 
         // Should fall back to the first (and only) remote
         #expect(component.version.commit?.repository == customRemoteURL)
@@ -585,29 +580,29 @@ struct SBOMExtractPrimaryComponentTests {
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try gitRepo.getCurrentRevision().identifier
 
-        let component = try await SBOMModel.extractComponent(package: rootPackage, graph: graph, store: store)
+        let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: rootPackage) }()
         #expect(component.version.commit == nil)
         #expect(component.version.revision == expectedRevision)
         #expect(component.originator.commits == nil)
     }
     @Test("extractComponentID from package returns package identity")
-    func extractComponentIDFromPackageReturnsPackageIdentity() async throws {
+    func extractComponentIDFromPackageReturnsPackageIdentity() throws {
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
 
-        let componentID = await SBOMModel.extractComponentID(from: rootPackage)
+        let componentID = SBOMExtractor.extractComponentID(from: rootPackage)
 
         #expect(componentID.value == "MyApp")
         #expect(componentID.value == rootPackage.identity.description)
     }
 
     @Test("extractComponentID from product returns package:product format")
-    func extractComponentIDFromProductReturnsPackageProductFormat() async throws {
+    func extractComponentIDFromProductReturnsPackageProductFormat() throws {
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first)
 
-        let componentID = await SBOMModel.extractComponentID(from: product)
+        let componentID = SBOMExtractor.extractComponentID(from: product)
 
         #expect(componentID.value == "MyApp:App")
         #expect(componentID.value.hasPrefix("\(product.packageIdentity):"))
@@ -615,11 +610,11 @@ struct SBOMExtractPrimaryComponentTests {
     }
 
     @Test("extractComponentID from multiple products maintains correct format")
-    func extractComponentIDFromMultipleProductsMaintainsCorrectFormat() async throws {
+    func extractComponentIDFromMultipleProductsMaintainsCorrectFormat() throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
         for product in rootPackage.products {
-            let componentID = await SBOMModel.extractComponentID(from: product)
+            let componentID = SBOMExtractor.extractComponentID(from: product)
             let expectedID = "\(product.packageIdentity):\(product.name)"
 
             #expect(componentID.value == expectedID)
@@ -633,10 +628,10 @@ struct SBOMExtractPrimaryComponentTests {
     }
 
     @Test("extractComponentID from dependency packages returns correct identity")
-    func extractComponentIDFromDependencyPackagesReturnsCorrectIdentity() async throws {
+    func extractComponentIDFromDependencyPackagesReturnsCorrectIdentity() throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         for package in graph.packages where package.identity.description != "SwiftPM" {
-            let componentID = await SBOMModel.extractComponentID(from: package)
+            let componentID = SBOMExtractor.extractComponentID(from: package)
 
             #expect(componentID.value == package.identity.description)
             #expect(!componentID.value.contains(":"), "Package ID should not contain colon")

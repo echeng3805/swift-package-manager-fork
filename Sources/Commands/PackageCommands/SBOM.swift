@@ -46,15 +46,14 @@ extension SwiftPackageCommand {
                 buildOutputs: [.dependencyGraph]
             )
 
-            let sbom = try await SBOMModel.extractSBOM(
+            let extractor = SBOMExtractor(
                 modulesGraph: packageGraph,
                 dependencyGraph: buildResult.dependencyGraph,
-                store: resolvedPackagesStore,
-                product: product
+                store: resolvedPackagesStore
             )
-
-            try await writeSBOMs(
-                from: sbom,
+            let sbom = try await extractor.extractSBOM(product: product)
+            let encoder = SBOMEncoder(sbom: sbom)
+            try await encoder.writeSBOMs(
                 specs: globalOptions.sbom.sbomSpecs,
                 outputDir: try globalOptions.sbom.sbomDirectory ?? swiftCommandState.productsBuildParameters.buildPath.appending(component: "sboms")
             )

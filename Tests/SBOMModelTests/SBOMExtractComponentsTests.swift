@@ -100,7 +100,8 @@ struct SBOMExtractComponentsTests {
     func extractComponentsFromSPMModulesGraph() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let components = try await extractor.extractDependencies().components
         self.verifyComponents(components: components, graph: graph, expectations: Self.spmExpectations)
     }
 
@@ -108,7 +109,8 @@ struct SBOMExtractComponentsTests {
     func extractComponentsFromSwiftlyModulesGraph() async throws {
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
-        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let components = try await extractor.extractDependencies().components
         self.verifyComponents(components: components, graph: graph, expectations: Self.swiftlyExpectations)
     }
 
@@ -123,7 +125,8 @@ struct SBOMExtractComponentsTests {
         )
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         await #expect(throws: SBOMExtractorError.self) {
-            _ = try await SBOMModel.extractDependencies(graph: emptyGraph, store: store).components
+            let extractor = SBOMExtractor(modulesGraph: emptyGraph, dependencyGraph: nil, store: store)
+            _ = try await extractor.extractDependencies().components
         }
     }
 
@@ -131,7 +134,8 @@ struct SBOMExtractComponentsTests {
     func extractComponentsForNonMainBranch() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let components = try await extractor.extractDependencies().components
 
         let swiftLLBuildComponent = components.first { component in
             component.id.value == "swift-llbuild" || component.name == "swift-llbuild"
@@ -162,7 +166,8 @@ struct SBOMExtractComponentsTests {
     func extractComponentsUsesVersionTagWhenAvailable() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let components = try await extractor.extractDependencies().components
 
         // Find a version-based dependency (swift-argument-parser uses version "1.5.1")
         let swiftSystemComponent = components.first { component in component.id.value == "swift-system" }
@@ -196,9 +201,9 @@ struct SBOMExtractComponentsTests {
     func extractComponentsWithProductFilter() async throws {
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel
-            .extractDependencies(graph: graph, store: store, product: "SwiftPMDataModel").components
-        let allComponents = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let components = try await extractor.extractDependencies(product: "SwiftPMDataModel").components
+        let allComponents = try await extractor.extractDependencies().components
 
         #expect(components.count < allComponents.count)
 
@@ -226,7 +231,8 @@ struct SBOMExtractComponentsTests {
 
         let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let components = try await extractor.extractDependencies().components
 
         let rootPackage = try #require(graph.rootPackages.first)
         let rootPackageID = rootPackage.identity.description
@@ -270,7 +276,8 @@ struct SBOMExtractComponentsTests {
 
         let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let components = try await SBOMModel.extractDependencies(graph: graph, store: store).components
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let components = try await extractor.extractDependencies().components
 
         let rootPackage = try #require(graph.rootPackages.first)
         let rootPackageID = rootPackage.identity.description

@@ -52,9 +52,11 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let sbom = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: sbom)
         
-        try await writeSBOMs(from: sbom, specs: [.cyclonedx], outputDir: outputDir)
+        try await encoder.writeSBOMs(specs: [.cyclonedx], outputDir: outputDir)
         
         #expect(localFileSystem.exists(outputDir), "Output directory should be created")
     }
@@ -66,9 +68,11 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let sbom = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: sbom)
         
-        try await writeSBOMs(from: sbom, specs: [.cyclonedx, .spdx], outputDir: outputDir)
+        try await encoder.writeSBOMs(specs: [.cyclonedx, .spdx], outputDir: outputDir)
         
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 2, "Should generate two files for two specs")
@@ -91,9 +95,11 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let sbom = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: sbom)
         
-        try await writeSBOMs(from: sbom, specs: [.cyclonedx, .cyclonedx1], outputDir: outputDir)
+        try await encoder.writeSBOMs(specs: [.cyclonedx, .cyclonedx1], outputDir: outputDir)
         
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 1, "Duplicate specs should result in single file")
@@ -105,9 +111,11 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let sbom = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: sbom)
         
-        try await writeSBOMs(from: sbom, specs: [.cyclonedx], outputDir: outputDir)
+        try await encoder.writeSBOMs(specs: [.cyclonedx], outputDir: outputDir)
         
         #expect(localFileSystem.exists(outputDir), "Directory should exist after write")
         
@@ -123,9 +131,11 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let sbom = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: sbom)
         
-        try await writeSBOMs(from: sbom, specs: [.cyclonedx], outputDir: outputDir)
+        try await encoder.writeSBOMs(specs: [.cyclonedx], outputDir: outputDir)
         
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 1)
@@ -143,11 +153,13 @@ struct SBOMEncoderTests {
     func encodeSBOMWithNilOutputDirDoesNotWriteFile() async throws {
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let sbom = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: sbom)
         let spec = SBOMSpec(type: .cyclonedx1, version: "1.7")
         
         // Should not throw and should not create any files
-        try await encodeSBOM(from: sbom, spec: spec, outputDir: nil)
+        try await encoder.encodeSBOM(spec: spec, outputDir: nil)
         
         // No files should be created in current directory
         // This is verified by not passing an outputDir
@@ -160,10 +172,12 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let sbom = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: sbom)
         let spec = SBOMSpec(type: .cyclonedx1, version: "1.7")
         
-        try await encodeSBOM(from: sbom, spec: spec, outputDir: outputDir)
+        try await encoder.encodeSBOM(spec: spec, outputDir: outputDir)
         
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 1, "Should write exactly one file")
@@ -176,9 +190,11 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let sbom = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: sbom)
         
-        try await writeSBOMs(from: sbom, specs: [.cyclonedx, .spdx], outputDir: outputDir)
+        try await encoder.writeSBOMs(specs: [.cyclonedx, .spdx], outputDir: outputDir)
         
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 2, "Should generate both CycloneDX and SPDX files")
@@ -197,9 +213,11 @@ struct SBOMEncoderTests {
         
         let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
-        let sbom = try await SBOMModel.extractSBOM(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let sbom = try await extractor.extractSBOM()
+        let encoder = SBOMEncoder(sbom: sbom)
         
-        try await writeSBOMs(from: sbom, specs: [.cyclonedx, .spdx], outputDir: outputDir)
+        try await encoder.writeSBOMs(specs: [.cyclonedx, .spdx], outputDir: outputDir)
         
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 2, "Should generate both CycloneDX and SPDX files")

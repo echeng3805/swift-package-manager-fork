@@ -17,7 +17,10 @@ import Testing
 struct SBOMExtractMetadataTests {
     @Test("extractMetadata good weather")
     func extractMetadataParameterized() async throws {
-        let metadata = try await SBOMModel.extractMetadata()
+        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let metadata = try await extractor.extractMetadata()
 
         let timestamp = try #require(metadata.timestamp)
         #expect(!timestamp.isEmpty)

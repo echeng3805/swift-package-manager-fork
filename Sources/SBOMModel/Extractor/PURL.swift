@@ -67,11 +67,11 @@ extension PURL {
     package static func from(package: ResolvedPackage, version: SBOMComponent.Version) async -> PURL {
         let namespace = await extractNamespace(from: version.commit)
         let qualifiers = await extractQualifiers(from: version.commit)
-        return await PURL(
+        return PURL(
             scheme: "pkg",
             type: "swift",
             namespace: namespace,
-            name: extractComponentID(from: package).value,
+            name: SBOMExtractor.extractComponentID(from: package).value,
             version: version.revision,
             qualifiers: qualifiers
         )
@@ -81,11 +81,11 @@ extension PURL {
         let namespace = await extractNamespace(from: version.commit)
         let qualifiers = await extractQualifiers(from: version.commit)
 
-        return await PURL(
+        return PURL(
             scheme: "pkg",
             type: "swift",
             namespace: (namespace == nil && qualifiers == nil) ? product.packageIdentity.description : namespace,
-            name: extractComponentID(from: product).value,
+            name: SBOMExtractor.extractComponentID(from: product).value,
             version: version.revision,
             qualifiers: qualifiers
         )

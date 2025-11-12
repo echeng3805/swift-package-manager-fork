@@ -46,7 +46,7 @@ struct SBOMGetSpecTests {
 
     @Test("getSpec good weather", arguments: specTestCases)
     func getSpecParameterized(testCase: GetSpecTestCase) async throws {
-        let spec = try await SBOMModel.getSpec(from: testCase.input)
+        let spec = await SBOMEncoder.getSpec(from: testCase.input)
 
         #expect(spec.type == testCase.expectedType)
         #expect(spec.version == testCase.expectedVersion)
@@ -56,7 +56,7 @@ struct SBOMGetSpecTests {
     
     @Test("getSpecs returns unique specs")
     func getSpecsReturnsUniqueSpecs() async throws {
-        let specs = await getSpecs(from: [.cyclonedx, .cyclonedx1, .spdx, .spdx3])
+        let specs = await SBOMEncoder.getSpecs(from: [.cyclonedx, .cyclonedx1, .spdx, .spdx3])
         
         #expect(specs.count == 2, "Should return only unique specs")
         
@@ -67,14 +67,14 @@ struct SBOMGetSpecTests {
     
     @Test("getSpecs handles empty array")
     func getSpecsHandlesEmptyArray() async throws {
-        let specs = await getSpecs(from: [])
+        let specs = await SBOMEncoder.getSpecs(from: [])
         
         #expect(specs.isEmpty, "Should return empty array for empty input")
     }
     
     @Test("getSpecs handles single spec")
     func getSpecsHandlesSingleSpec() async throws {
-        let specs = await getSpecs(from: [.cyclonedx])
+        let specs = await SBOMEncoder.getSpecs(from: [.cyclonedx])
         
         #expect(specs.count == 1)
         #expect(specs[0].type == .cyclonedx1)

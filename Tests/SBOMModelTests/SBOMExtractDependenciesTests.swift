@@ -62,13 +62,10 @@ struct SBOMExtractDependenciesTests {
         store: ResolvedPackagesStore,
         product: String? = nil
     ) async throws {
-        let dependencies = try await #require(SBOMModel.extractDependencies(
-            graph: graph,
-            store: store,
-            product: product
-        ).relationships)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let dependencies = try await #require(extractor.extractDependencies(product: product).relationships)
         let rootPackage = try #require(graph.rootPackages.first)
-        let rootPackageID = await extractComponentID(from: rootPackage).value
+        let rootPackageID = SBOMExtractor.extractComponentID(from: rootPackage).value
         let packageIDs = graph.packages.map(\.identity.description)
         
         if product != nil {
@@ -171,7 +168,8 @@ struct SBOMExtractDependenciesTests {
         let graph = try SBOMTestGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
         try await self.verifyDependencies(graph: graph, store: store)
-        let dependencies = try await #require(SBOMModel.extractDependencies(graph: graph, store: store).relationships)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        let dependencies = try await #require(extractor.extractDependencies().relationships)
         
         // Expected structure:
         // - MyApp package depends on Utils package and App product
