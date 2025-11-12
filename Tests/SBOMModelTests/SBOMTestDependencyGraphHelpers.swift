@@ -13,6 +13,6 @@
 import Foundation
 @testable import SBOMModel
 
-enum SBOMTestDependencyGraph {
+struct SBOMTestDependencyGraph {
 
 }

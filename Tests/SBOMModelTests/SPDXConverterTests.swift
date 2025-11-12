@@ -513,7 +513,6 @@ struct SPDXConverterTests {
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "parent-component"),
             childrenID: [SBOMIdentifier(value: "child1"), SBOMIdentifier(value: "child2")],
-            metadata: SBOMRelationship.Metadata(source: .all)
         )
 
         let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
@@ -538,13 +537,11 @@ struct SPDXConverterTests {
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "parent1"),
             childrenID: [SBOMIdentifier(value: "child1")],
-            metadata: SBOMRelationship.Metadata(source: .all)
         )
         let dependency2 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-2"),
             parentID: SBOMIdentifier(value: "parent2"),
             childrenID: [SBOMIdentifier(value: "child2"), SBOMIdentifier(value: "child3")],
-            metadata: SBOMRelationship.Metadata(source: .all)
         )
 
         let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
@@ -608,7 +605,6 @@ struct SPDXConverterTests {
             id: SBOMIdentifier(value: "dep1"),
             parentID: SBOMIdentifier(value: "parent-id"),
             childrenID: [SBOMIdentifier(value: "test-id"), SBOMIdentifier(value: "test-id2")],
-            metadata: SBOMRelationship.Metadata(source: .all)
         )
 
         let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
@@ -729,7 +725,6 @@ struct SPDXConverterTests {
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "primary-id"),
             childrenID: [SBOMIdentifier(value: "lib1-id")],
-            metadata: SBOMRelationship.Metadata(source: .all)
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),

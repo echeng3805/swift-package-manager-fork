@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMCommit: Codable, Equatable {
+package struct SBOMCommit: Hashable, Codable, Equatable {
     package let sha: String
     package let repository: String
     package let url: String?

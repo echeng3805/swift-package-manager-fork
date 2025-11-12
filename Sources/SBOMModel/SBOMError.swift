@@ -77,12 +77,16 @@ package enum SBOMConverterError: Error, LocalizedError, CustomStringConvertible 
 package enum SBOMExtractorError: Error, LocalizedError, CustomStringConvertible {
     /// No root package found in package graph
     case noRootPackage(context: String)
+    /// No build graph available 
+    case noBuildGraph(context: String)
     /// Product not found in package
     case productNotFound(productName: String, packageIdentity: String)
     package var errorDescription: String? {
         switch self {
         case .noRootPackage(let context):
             return "No root package found in package graph, cannot \(context)"
+        case .noBuildGraph(let context):
+            return "No build graph available, cannot \(context)"
         case .productNotFound(let productName, let packageIdentity):
             return "Product '\(productName)' not found in root package '\(packageIdentity)'"
         }

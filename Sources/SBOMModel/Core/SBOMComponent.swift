@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMComponent: Codable, Equatable {
+package struct SBOMComponent: Codable, Equatable, Hashable {
     package enum Category: String, Codable, Equatable {
         case application
         case framework
@@ -24,7 +24,7 @@ package struct SBOMComponent: Codable, Equatable {
         case test
     }
 
-    package struct Version: Codable, Equatable {
+    package struct Version: Codable, Equatable, Hashable {
         package let revision: String
         package let commit: SBOMCommit?
 

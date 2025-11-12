@@ -14,11 +14,6 @@ import Foundation
 @testable import SBOMModel
 
 extension SBOMTestDependencyGraph {
-    /// Creates a simple dependency graph for testing
-    /// Structure:
-    /// - MyApp (package) -> [Utils (package), MyApp:App (product)]
-    /// - Utils (package) -> [Utils:Utils (product)]
-    /// - MyApp:App (product) -> [Utils:Utils (product)]
     static func createSimpleDependencyGraph() -> [String: [String]] {
         [
             "MyApp": ["Utils", "MyApp:App"],

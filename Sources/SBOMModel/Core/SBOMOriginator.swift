@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMOriginator: Codable, Equatable {
+package struct SBOMOriginator: Codable, Equatable, Hashable {
     package let commits: [SBOMCommit]?
 
     package init(

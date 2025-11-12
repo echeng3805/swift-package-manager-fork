@@ -13,7 +13,9 @@
 import ArgumentParser
 import Basics
 import CoreCommands
+import Foundation
 import PackageGraph
+import PackageModel
 import Workspace
 import SBOMModel
 import SPMBuildCore
@@ -29,8 +31,16 @@ extension SwiftPackageCommand {
 
         @Option(help: "The product to generate an SBOM for.")
         var product: String?
-
+        
+        @Flag(help: "Print graph structure for test fixture generation.")
+        var printGraphStructure: Bool = false
+        
         func run(_ swiftCommandState: SwiftCommandState) async throws {
+
+            guard swiftCommandState.options.build.buildSystem == .swiftbuild else {
+                throw StringError("SBOM generation requires the SwiftBuild build system. Please use '--build-system swiftbuild'.")
+            }
+
             let workspace = try swiftCommandState.getActiveWorkspace()
             let packageGraph = try await workspace.loadPackageGraph(
                 rootInput: try swiftCommandState.getWorkspaceRoot(),
@@ -38,9 +48,11 @@ extension SwiftPackageCommand {
                 observabilityScope: swiftCommandState.observabilityScope
             )
             let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
-           
-            guard swiftCommandState.options.build.buildSystem == .swiftbuild else {
-                throw StringError("SBOM generation requires the SwiftBuild build system. Please use '--build-system swiftbuild'.")
+            
+            // Print graph structure if requested
+            if printGraphStructure {
+                printModulesGraphStructure(packageGraph)
+                return
             }
             
             let buildSystem = try await swiftCommandState.createBuildSystem(
@@ -62,6 +74,71 @@ extension SwiftPackageCommand {
                 specs: globalOptions.sbom.sbomSpecs,
                 outputDir: try globalOptions.sbom.sbomDirectory ?? swiftCommandState.productsBuildParameters.buildPath.appending(component: "sboms")
             )
+        }
+        
+        func printModulesGraphStructure(_ graph: ModulesGraph) {
+            print("=== PACKAGES ===")
+            for package in graph.packages.sorted(by: { $0.identity.description < $1.identity.description }) {
+                print("\nPackage: \(package.identity.description)")
+                print("  Display Name: \(package.manifest.displayName)")
+                print("  Path: \(package.manifest.path.pathString)")
+                
+                print("  Modules:")
+                for module in package.modules.sorted(by: { $0.name < $1.name }) {
+                    print("    - \(module.name) (\(module.type))")
+                }
+                
+                print("  Products:")
+                for product in package.products.sorted(by: { $0.name < $1.name }) {
+                    let moduleNames = product.modules.map { $0.name }.sorted().joined(separator: ", ")
+                    print("    - \(product.name) (\(product.type)): [\(moduleNames)]")
+                }
+                
+                print("  Dependencies:")
+                for dep in package.dependencies.sorted(by: { $0.description < $1.description }) {
+                    print("    - \(dep.description)")
+                }
+            }
+            
+            print("\n=== MODULE DEPENDENCIES ===")
+            for package in graph.packages.sorted(by: { $0.identity.description < $1.identity.description }) {
+                for module in package.modules.sorted(by: { $0.name < $1.name }) {
+                    if !module.dependencies.isEmpty {
+                        print("\nModule: \(package.identity.description).\(module.name)")
+                        for dep in module.dependencies {
+                            switch dep {
+                            case .module(let targetDep, _):
+                                print("  -> module: \(targetDep.packageIdentity.description).\(targetDep.name)")
+                            case .product(let productDep, _):
+                                let moduleNames = productDep.modules.map { $0.name }.sorted().joined(separator: ", ")
+                                print("  -> product: \(productDep.packageIdentity.description).\(productDep.name) [\(moduleNames)]")
+                            }
+                        }
+                    }
+                }
+            }
+            
+            print("\n=== PACKAGE REFERENCES ===")
+            for ref in graph.requiredDependencies.sorted(by: { $0.identity.description < $1.identity.description }) {
+                print("\nPackage Reference: \(ref.identity.description)")
+                switch ref.kind {
+                case .root(let path):
+                    print("  Kind: root")
+                    print("  Path: \(path.pathString)")
+                case .fileSystem(let path):
+                    print("  Kind: fileSystem")
+                    print("  Path: \(path.pathString)")
+                case .localSourceControl(let path):
+                    print("  Kind: localSourceControl")
+                    print("  Path: \(path.pathString)")
+                case .remoteSourceControl(let url):
+                    print("  Kind: remoteSourceControl")
+                    print("  URL: \(url)")
+                case .registry(let identity):
+                    print("  Kind: registry")
+                    print("  Identity: \(identity)")
+                }
+            }
         }
     }
 }

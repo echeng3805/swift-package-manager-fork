@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMPerson: Codable, Equatable {
+package struct SBOMPerson: Codable, Equatable, Hashable {
     package let id: SBOMIdentifier
     package let name: String
     package let email: String?
