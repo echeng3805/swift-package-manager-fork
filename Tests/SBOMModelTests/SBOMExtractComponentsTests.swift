@@ -98,7 +98,7 @@ struct SBOMExtractComponentsTests {
 
     @Test("extractComponents with sample SPM ModulesGraph")
     func extractComponentsFromSPMModulesGraph() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let components = try await extractor.extractDependencies().components
@@ -107,7 +107,7 @@ struct SBOMExtractComponentsTests {
 
     @Test("extractComponents with sample Swiftly ModulesGraph")
     func extractComponentsFromSwiftlyModulesGraph() async throws {
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let components = try await extractor.extractDependencies().components
@@ -132,7 +132,7 @@ struct SBOMExtractComponentsTests {
 
     @Test("extractComponents verifies commit extraction for non-main branch dependency")
     func extractComponentsForNonMainBranch() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let components = try await extractor.extractDependencies().components
@@ -164,7 +164,7 @@ struct SBOMExtractComponentsTests {
 
     @Test("extractComponents uses version tag when available for version, but keeps pedigree as commit sha")
     func extractComponentsUsesVersionTagWhenAvailable() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let components = try await extractor.extractDependencies().components
@@ -199,7 +199,7 @@ struct SBOMExtractComponentsTests {
 
     @Test("extractComponents with product filter")
     func extractComponentsWithProductFilter() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let components = try await extractor.extractDependencies(product: "SwiftPMDataModel").components
@@ -229,7 +229,7 @@ struct SBOMExtractComponentsTests {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let components = try await extractor.extractDependencies().components
@@ -274,7 +274,7 @@ struct SBOMExtractComponentsTests {
             "https://github.com/fork/swift-package-manager.git"
         )
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let components = try await extractor.extractDependencies().components

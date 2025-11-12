@@ -486,7 +486,7 @@ struct PURLTests {
 
     @Test("Create PURL from ResolvedPackage")
     func createPURLFromResolvedPackage() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
         let purl = await PURL.from(package: rootPackage, version: SBOMComponent.Version(revision: "1.0.0", commit: nil))
 
@@ -500,7 +500,7 @@ struct PURLTests {
 
     @Test("Create PURL from ResolvedProduct with package location")
     func createPURLFromResolvedProduct() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first { $0.name == "SwiftPMDataModel" })
         let purl = await PURL.from(
@@ -521,7 +521,7 @@ struct PURLTests {
 
     @Test("Create PURL from ResolvedProduct with local package")
     func createPURLFromResolvedProductLocalPackage() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first { $0.name == "SwiftPMDataModel" })
         let localPath = "/Users/someuser/myCode/SwiftPM/"
@@ -541,7 +541,7 @@ struct PURLTests {
 
     @Test("Create PURL from ResolvedProduct with SSH URL")
     func createPURLFromResolvedProductSSH() async throws {
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first)
         let purl = await PURL.from(

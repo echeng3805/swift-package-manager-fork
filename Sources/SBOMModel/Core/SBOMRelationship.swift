@@ -11,17 +11,40 @@
 //===----------------------------------------------------------------------===//
 
 package struct SBOMRelationship: Codable, Equatable {
+    package enum Source: String, Codable, Equatable {
+        case modules // from ModulesGraph
+        case build // from build dependency graph
+        case all // appears in all graphs
+    }
+
+    package struct Metadata: Codable, Equatable {
+        let source: Source
+
+        package init(
+            source: Source,
+        ) {
+            self.source = source
+        }
+    }
+
     package let id: SBOMIdentifier
     package let parentID: SBOMIdentifier
     package let childrenID: [SBOMIdentifier]
+    package let metadata: Metadata
 
     package init(
         id: SBOMIdentifier,
         parentID: SBOMIdentifier,
-        childrenID: [SBOMIdentifier]
+        childrenID: [SBOMIdentifier],
+        metadata: Metadata,
     ) {
         self.id = id
         self.parentID = parentID
         self.childrenID = childrenID
+        self.metadata = metadata
     }
 }
+
+
+
+

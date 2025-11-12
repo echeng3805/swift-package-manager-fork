@@ -18,7 +18,7 @@ import Testing
 struct SBOMExtractTests {
     @Test("extractSBOM with product filter for SwiftPM")
     func extractSBOMWithProductFilterForSwiftPM() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         let productName = "SwiftPMPackageCollections"
@@ -54,7 +54,7 @@ struct SBOMExtractTests {
 
     @Test("extractSBOM with product filter for Swiftly")
     func extractSBOMWithProductFilterForSwiftly() async throws {
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
 
         let productName = "swiftly"
@@ -120,7 +120,7 @@ struct SBOMExtractTests {
 
     @Test("extractSBOM with invalid product name throws error")
     func extractSBOMWithInvalidProductNameThrowsError() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         await #expect(throws: SBOMExtractorError.self) {

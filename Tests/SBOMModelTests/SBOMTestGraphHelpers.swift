@@ -17,7 +17,7 @@ import PackageGraph
 import PackageModel
 @testable import SBOMModel
 
-enum SBOMTestGraph {
+enum SBOMTestModulesGraph {
     // MARK: - Helper functions
 
     static func createSwiftModule(

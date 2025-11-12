@@ -25,7 +25,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractPrimaryComponent() }()
         let rootPackage = try #require(graph.rootPackages.first)
@@ -52,7 +52,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (swiftlyRepo, swiftlyPath) = try SBOMTestRepo.setupSwiftlyTestRepo()
         defer { try? SBOMTestRepo.cleanup(swiftlyPath) }
 
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractPrimaryComponent() }()
         let rootPackage = try #require(graph.rootPackages.first)
@@ -78,7 +78,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (gitRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let resolvedProduct = try #require(rootPackage.products.first { $0.name == "SwiftPMDataModel" })
@@ -104,7 +104,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (swiftlyRepo, swiftlyPath) = try SBOMTestRepo.setupSwiftlyTestRepo()
         defer { try? SBOMTestRepo.cleanup(swiftlyPath) }
 
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let resolvedProduct = try #require(rootPackage.products.first)
@@ -131,7 +131,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         let productName = "SwiftPMDataModel"
@@ -154,7 +154,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
@@ -195,7 +195,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
@@ -217,7 +217,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, swiftlyPath) = try SBOMTestRepo.setupSwiftlyTestRepo()
         defer { try? SBOMTestRepo.cleanup(swiftlyPath) }
 
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
@@ -233,7 +233,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         
         let dependencyPackage = try #require(graph.packages.first { $0.identity.description == "swift-system" })
@@ -251,7 +251,7 @@ struct SBOMExtractPrimaryComponentTests {
 
     @Test("extractComponent from product without graph uses store version")
     func extractComponentFromProductWithoutGraphUsesStoreVersion() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         
         let dependencyPackage = try #require(graph.packages.first { $0.identity.description == "swift-collections" })
@@ -271,7 +271,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
@@ -286,7 +286,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first { $0.name == "SwiftPMPackageCollections" })
@@ -302,7 +302,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
@@ -321,7 +321,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first)
@@ -341,7 +341,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
@@ -355,7 +355,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first)
@@ -370,7 +370,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
@@ -398,7 +398,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, swiftlyPath) = try SBOMTestRepo.setupSwiftlyTestRepo()
         defer { try? SBOMTestRepo.cleanup(swiftlyPath) }
 
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph(rootPath: swiftlyPath.pathString)
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
@@ -418,7 +418,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         
         let dependencyPackage = try #require(graph.packages.first { $0.identity.description == "swift-collections" })
@@ -444,25 +444,25 @@ struct SBOMExtractPrimaryComponentTests {
     func extractComponentFromPackageWithNoProductsHasEmptyComponentsArray() async throws {
         // Create a simple package with no products for testing
         let packageIdentity = PackageIdentity.plain("TestPackage")
-        let module = SBOMTestGraph.createSwiftModule(name: "TestModule")
-        let package = SBOMTestGraph.createPackage(
+        let module = SBOMTestModulesGraph.createSwiftModule(name: "TestModule")
+        let package = SBOMTestModulesGraph.createPackage(
             identity: packageIdentity,
             displayName: "TestPackage",
             path: "/TestPackage",
             modules: [module],
             products: []
         )
-        let resolvedModule = SBOMTestGraph.createResolvedModule(
+        let resolvedModule = SBOMTestModulesGraph.createResolvedModule(
             packageIdentity: packageIdentity,
             module: module
         )
-        let resolvedPackage = SBOMTestGraph.createResolvedPackage(
+        let resolvedPackage = SBOMTestModulesGraph.createResolvedPackage(
             package: package,
             modules: IdentifiableSet([resolvedModule]),
             products: []
         )
 
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(package: resolvedPackage) }()
 
@@ -475,7 +475,7 @@ struct SBOMExtractPrimaryComponentTests {
         let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
 
@@ -504,7 +504,7 @@ struct SBOMExtractPrimaryComponentTests {
             "https://github.com/apple/swift-package-manager.git"
         )
 
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: spmPath.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
@@ -546,7 +546,7 @@ struct SBOMExtractPrimaryComponentTests {
         )
 
         let gitRepo = GitRepository(path: path)
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: path.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: path.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try gitRepo.getCurrentRevision().identifier
@@ -575,7 +575,7 @@ struct SBOMExtractPrimaryComponentTests {
 
         // Don't add any remotes
         let gitRepo = GitRepository(path: path)
-        let graph = try SBOMTestGraph.createSPMModulesGraph(rootPath: path.pathString)
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: path.pathString)
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try gitRepo.getCurrentRevision().identifier
@@ -587,7 +587,7 @@ struct SBOMExtractPrimaryComponentTests {
     }
     @Test("extractComponentID from package returns package identity")
     func extractComponentIDFromPackageReturnsPackageIdentity() throws {
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
 
         let componentID = SBOMExtractor.extractComponentID(from: rootPackage)
@@ -598,7 +598,7 @@ struct SBOMExtractPrimaryComponentTests {
 
     @Test("extractComponentID from product returns package:product format")
     func extractComponentIDFromProductReturnsPackageProductFormat() throws {
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
         let product = try #require(rootPackage.products.first)
 
@@ -611,7 +611,7 @@ struct SBOMExtractPrimaryComponentTests {
 
     @Test("extractComponentID from multiple products maintains correct format")
     func extractComponentIDFromMultipleProductsMaintainsCorrectFormat() throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let rootPackage = try #require(graph.rootPackages.first)
         for product in rootPackage.products {
             let componentID = SBOMExtractor.extractComponentID(from: product)
@@ -629,7 +629,7 @@ struct SBOMExtractPrimaryComponentTests {
 
     @Test("extractComponentID from dependency packages returns correct identity")
     func extractComponentIDFromDependencyPackagesReturnsCorrectIdentity() throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         for package in graph.packages where package.identity.description != "SwiftPM" {
             let componentID = SBOMExtractor.extractComponentID(from: package)
 

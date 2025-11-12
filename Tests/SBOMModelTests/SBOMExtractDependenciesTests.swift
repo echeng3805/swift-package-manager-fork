@@ -133,21 +133,21 @@ struct SBOMExtractDependenciesTests {
 
     @Test("extractDependencies with sample SPM ModulesGraph")
     func extractDependenciesFromSPMModulesGraph() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         try await self.verifyDependencies(graph: graph, store: store)
     }
 
     @Test("extractDependencies with sample Swiftly ModulesGraph")
     func extractDependenciesFromSwiftlyModulesGraph() async throws {
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         try await self.verifyDependencies(graph: graph, store: store)
     }
 
     @Test("extractDependencies with product filter SwiftPMPackageCollections")
     func extractDependenciesWithProductFilter() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         let productName = "SwiftPMPackageCollections"
@@ -156,7 +156,7 @@ struct SBOMExtractDependenciesTests {
 
     @Test("extractDependencies with product filter SwiftPMDataModel")
     func extractDependenciesWithProductFilterSwiftPMDataModel() async throws {
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
 
         let productName = "SwiftPMDataModel"
@@ -165,7 +165,7 @@ struct SBOMExtractDependenciesTests {
 
     @Test("extractDependencies with simple test graph")
     func extractDependenciesFromSimpleGraph() async throws {
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
         try await self.verifyDependencies(graph: graph, store: store)
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)

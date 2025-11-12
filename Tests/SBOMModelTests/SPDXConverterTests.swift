@@ -512,7 +512,8 @@ struct SPDXConverterTests {
         let dependency = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "parent-component"),
-            childrenID: [SBOMIdentifier(value: "child1"), SBOMIdentifier(value: "child2")]
+            childrenID: [SBOMIdentifier(value: "child1"), SBOMIdentifier(value: "child2")],
+            metadata: SBOMRelationship.Metadata(source: .all)
         )
 
         let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
@@ -524,8 +525,8 @@ struct SPDXConverterTests {
         let relationship = result[0] as? SPDXRelationship
         let relationshipUnwrapped = try #require(relationship)
         #expect(relationshipUnwrapped.id == "urn:spdx:parent-component-dependsOn")
-        #expect(relationshipUnwrapped.type == .Relationship)
-        #expect(relationshipUnwrapped.category == .dependsOn)
+        #expect(relationshipUnwrapped.type == SPDXType.Relationship)
+        #expect(relationshipUnwrapped.category == SPDXRelationship.Category.dependsOn)
         #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
         #expect(relationshipUnwrapped.parentID == "urn:spdx:parent-component")
         #expect(relationshipUnwrapped.childrenID == ["urn:spdx:child1", "urn:spdx:child2"])
@@ -536,12 +537,14 @@ struct SPDXConverterTests {
         let dependency1 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "parent1"),
-            childrenID: [SBOMIdentifier(value: "child1")]
+            childrenID: [SBOMIdentifier(value: "child1")],
+            metadata: SBOMRelationship.Metadata(source: .all)
         )
         let dependency2 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-2"),
             parentID: SBOMIdentifier(value: "parent2"),
-            childrenID: [SBOMIdentifier(value: "child2"), SBOMIdentifier(value: "child3")]
+            childrenID: [SBOMIdentifier(value: "child2"), SBOMIdentifier(value: "child3")],
+            metadata: SBOMRelationship.Metadata(source: .all)
         )
 
         let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
@@ -555,14 +558,14 @@ struct SPDXConverterTests {
         #expect(relationship1Unwrapped.id == "urn:spdx:parent1-dependsOn")
         #expect(relationship1Unwrapped.parentID == "urn:spdx:parent1")
         #expect(relationship1Unwrapped.childrenID == ["urn:spdx:child1"])
-        #expect(relationship1Unwrapped.category == .dependsOn)
+        #expect(relationship1Unwrapped.category == SPDXRelationship.Category.dependsOn)
 
         let relationship2 = result[1] as? SPDXRelationship
         let relationship2Unwrapped = try #require(relationship2)
         #expect(relationship2Unwrapped.id == "urn:spdx:parent2-dependsOn")
         #expect(relationship2Unwrapped.parentID == "urn:spdx:parent2")
         #expect(relationship2Unwrapped.childrenID == ["urn:spdx:child2", "urn:spdx:child3"])
-        #expect(relationship2Unwrapped.category == .dependsOn)
+        #expect(relationship2Unwrapped.category == SPDXRelationship.Category.dependsOn)
     }
 
     @Test("convertToSPDXRelationships with test and optional relationships")
@@ -604,7 +607,8 @@ struct SPDXConverterTests {
         let dependency1 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep1"),
             parentID: SBOMIdentifier(value: "parent-id"),
-            childrenID: [SBOMIdentifier(value: "test-id"), SBOMIdentifier(value: "test-id2")]
+            childrenID: [SBOMIdentifier(value: "test-id"), SBOMIdentifier(value: "test-id2")],
+            metadata: SBOMRelationship.Metadata(source: .all)
         )
 
         let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
@@ -618,14 +622,14 @@ struct SPDXConverterTests {
         #expect(relationship2Unwrapped.id == "urn:spdx:parent-id-hasOptionalDependency")
         #expect(relationship2Unwrapped.parentID == "urn:spdx:parent-id")
         #expect(relationship2Unwrapped.childrenID == ["urn:spdx:test-id2"])
-        #expect(relationship2Unwrapped.category == .hasOptionalDependency)
+        #expect(relationship2Unwrapped.category == SPDXRelationship.Category.hasOptionalDependency)
 
         let relationship1 = result[2] as? SPDXRelationship
         let relationship1Unwrapped = try #require(relationship1)
         #expect(relationship1Unwrapped.id == "urn:spdx:parent-id-hasTest")
         #expect(relationship1Unwrapped.parentID == "urn:spdx:parent-id")
         #expect(relationship1Unwrapped.childrenID == ["urn:spdx:test-id"])
-        #expect(relationship1Unwrapped.category == .hasTest)
+        #expect(relationship1Unwrapped.category == SPDXRelationship.Category.hasTest)
     }
 
     @Test("convertToSPDXGraph with non-SPDX spec throws error")
@@ -724,7 +728,8 @@ struct SPDXConverterTests {
         let dependency = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "primary-id"),
-            childrenID: [SBOMIdentifier(value: "lib1-id")]
+            childrenID: [SBOMIdentifier(value: "lib1-id")],
+            metadata: SBOMRelationship.Metadata(source: .all)
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),

@@ -18,7 +18,7 @@ import PackageGraph
 import PackageModel
 @testable import SBOMModel
 
-extension SBOMTestGraph {
+extension SBOMTestModulesGraph {
     static func createSwiftlyModulesGraph(rootPath: String = "/tmp/swiftly-mock") throws -> ModulesGraph {
         let swiftlyIdentity = PackageIdentity.plain("swiftly")
         let argParserIdentity = PackageIdentity.plain("swift-argument-parser")

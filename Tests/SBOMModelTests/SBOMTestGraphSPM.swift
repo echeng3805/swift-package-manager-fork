@@ -18,7 +18,7 @@ import PackageGraph
 import PackageModel
 @testable import SBOMModel
 
-extension SBOMTestGraph {
+extension SBOMTestModulesGraph {
     static func createSPMModulesGraph(rootPath: String = "/tmp/SwiftPM-mock") throws -> ModulesGraph {
         let swiftPMIdentity = PackageIdentity.plain("SwiftPM")
         let swiftLLBuildIdentity = PackageIdentity.plain("swift-llbuild")

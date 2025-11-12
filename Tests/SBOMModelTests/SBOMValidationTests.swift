@@ -35,28 +35,28 @@ struct SBOMValidationTests {
             ValidateGraphSBOMTestCase(
                 graphName: "SwiftPM",
                 inputSpec: SBOMSpec(type: .cyclonedx, version: "1.7"),
-                inputGraph: SBOMTestGraph.createSPMModulesGraph(),
+                inputGraph: SBOMTestModulesGraph.createSPMModulesGraph(),
                 inputStore: SBOMTestStore.createSPMResolvedPackagesStore(),
                 wantError: false
             ),
             ValidateGraphSBOMTestCase(
                 graphName: "SwiftPM",
                 inputSpec: SBOMSpec(type: .spdx, version: "3.0.1"),
-                inputGraph: SBOMTestGraph.createSPMModulesGraph(),
+                inputGraph: SBOMTestModulesGraph.createSPMModulesGraph(),
                 inputStore: SBOMTestStore.createSPMResolvedPackagesStore(),
                 wantError: false
             ),
             ValidateGraphSBOMTestCase(
                 graphName: "Swiftly",
                 inputSpec: SBOMSpec(type: .cyclonedx, version: "1.7"),
-                inputGraph: SBOMTestGraph.createSwiftlyModulesGraph(),
+                inputGraph: SBOMTestModulesGraph.createSwiftlyModulesGraph(),
                 inputStore: SBOMTestStore.createSwiftlyResolvedPackagesStore(),
                 wantError: false
             ),
             ValidateGraphSBOMTestCase(
                 graphName: "Swiftly",
                 inputSpec: SBOMSpec(type: .spdx, version: "3.0.1"),
-                inputGraph: SBOMTestGraph.createSwiftlyModulesGraph(),
+                inputGraph: SBOMTestModulesGraph.createSwiftlyModulesGraph(),
                 inputStore: SBOMTestStore.createSwiftlyResolvedPackagesStore(),
                 wantError: false
             ),

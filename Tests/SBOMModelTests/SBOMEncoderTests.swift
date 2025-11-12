@@ -50,7 +50,7 @@ struct SBOMEncoderTests {
         try localFileSystem.removeFileTree(outputDir)
         #expect(!localFileSystem.exists(outputDir), "Directory should not exist before test")
         
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let sbom = try await extractor.extractSBOM()
@@ -66,7 +66,7 @@ struct SBOMEncoderTests {
         let outputDir = try createTempOutputDir()
         defer { try? cleanupTempDir(outputDir) }
         
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let sbom = try await extractor.extractSBOM()
@@ -93,7 +93,7 @@ struct SBOMEncoderTests {
         let outputDir = try createTempOutputDir()
         defer { try? cleanupTempDir(outputDir) }
         
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let sbom = try await extractor.extractSBOM()
@@ -109,7 +109,7 @@ struct SBOMEncoderTests {
     func writeSBOMsCleansUpProperlyOnSuccess() async throws {
         let outputDir = try createTempOutputDir()
         
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let sbom = try await extractor.extractSBOM()
@@ -129,7 +129,7 @@ struct SBOMEncoderTests {
         let outputDir = try createTempOutputDir()
         defer { try? cleanupTempDir(outputDir) }
         
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let sbom = try await extractor.extractSBOM()
@@ -151,7 +151,7 @@ struct SBOMEncoderTests {
     
     @Test("encodeSBOM with nil outputDir does not write file")
     func encodeSBOMWithNilOutputDirDoesNotWriteFile() async throws {
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let sbom = try await extractor.extractSBOM()
@@ -170,7 +170,7 @@ struct SBOMEncoderTests {
         let outputDir = try createTempOutputDir()
         defer { try? cleanupTempDir(outputDir) }
         
-        let graph = try SBOMTestGraph.createSimpleModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let sbom = try await extractor.extractSBOM()
@@ -188,7 +188,7 @@ struct SBOMEncoderTests {
         let outputDir = try createTempOutputDir()
         defer { try? cleanupTempDir(outputDir) }
         
-        let graph = try SBOMTestGraph.createSPMModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let sbom = try await extractor.extractSBOM()
@@ -211,7 +211,7 @@ struct SBOMEncoderTests {
         let outputDir = try createTempOutputDir()
         defer { try? cleanupTempDir(outputDir) }
         
-        let graph = try SBOMTestGraph.createSwiftlyModulesGraph()
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
         let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let sbom = try await extractor.extractSBOM()

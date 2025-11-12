@@ -18,7 +18,7 @@ import PackageGraph
 import PackageModel
 @testable import SBOMModel
 
-extension SBOMTestGraph {
+extension SBOMTestModulesGraph {
     static func createSimpleModulesGraph(rootPath: String = "/tmp/simple-mock") throws -> ModulesGraph {
         // Package identities
         let appIdentity = PackageIdentity.plain("MyApp")

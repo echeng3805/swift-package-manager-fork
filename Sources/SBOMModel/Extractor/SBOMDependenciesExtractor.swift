@@ -68,7 +68,8 @@ extension SBOMExtractor {
                 dependencies.append(SBOMRelationship(
                     id: SBOMIdentifier(value: "\(parentID.value)-depends-on"),
                     parentID: parentID,
-                    childrenID: Array(childrenSet)
+                    childrenID: Array(childrenSet),
+                    metadata: SBOMRelationship.Metadata(source: .modules)
                 ))
             }
         }
