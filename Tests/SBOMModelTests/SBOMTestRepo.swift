@@ -33,7 +33,7 @@ enum SBOMTestRepo {
             "origin",
             SBOMTestStore.swiftPMURL
         )
-
+        
         return (GitRepository(path: path), path)
     }
 
@@ -64,3 +64,4 @@ enum SBOMTestRepo {
         }
     }
 }
+

@@ -21,7 +21,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-asn1 Package
     
-    static func createSPMSwiftASN1Package() -> (
+    static func createSPMSwiftASN1Package() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -36,7 +36,7 @@ extension SBOMTestModulesGraph {
         let swiftASN1Module = self.createSwiftModule(name: "SwiftASN1")
         
         // Products
-        let swiftASN1Product = try! Product(
+        let swiftASN1Product = try Product(
             package: identity,
             name: "SwiftASN1",
             type: .library(.automatic),
@@ -93,7 +93,7 @@ extension SBOMTestModulesGraph {
     
     static func createSPMSwiftCryptoPackage(
         swiftASN1Product: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -112,14 +112,14 @@ extension SBOMTestModulesGraph {
         let cryptoExtrasModule = self.createSwiftModule(name: "_CryptoExtras")
         
         // Products
-        let cryptoProduct = try! Product(
+        let cryptoProduct = try Product(
             package: identity,
             name: "Crypto",
             type: .library(.automatic),
             modules: [cryptoModule]
         )
         
-        let cryptoExtrasProduct = try! Product(
+        let cryptoExtrasProduct = try Product(
             package: identity,
             name: "_CryptoExtras",
             type: .library(.automatic),
@@ -236,7 +236,7 @@ extension SBOMTestModulesGraph {
         swiftASN1Product: ResolvedProduct,
         cryptoProduct: ResolvedProduct,
         cryptoExtrasProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -252,7 +252,7 @@ extension SBOMTestModulesGraph {
         let x509Module = self.createSwiftModule(name: "X509")
         
         // Products
-        let x509Product = try! Product(
+        let x509Product = try Product(
             package: identity,
             name: "X509",
             type: .library(.automatic),

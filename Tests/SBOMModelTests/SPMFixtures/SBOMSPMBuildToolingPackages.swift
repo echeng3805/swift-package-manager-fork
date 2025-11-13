@@ -23,7 +23,7 @@ extension SBOMTestModulesGraph {
     
     static func createSPMSwiftLLBuildPackage(
         swiftToolchainCSQLiteProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -48,35 +48,35 @@ extension SBOMTestModulesGraph {
         let llbuildExecModule = self.createSwiftModule(name: "llbuild", type: .executable)
         
         // Products
-        let libllbuildProduct = try! Product(
+        let libllbuildProduct = try Product(
             package: identity,
             name: "libllbuild",
             type: .library(.automatic),
             modules: [libllbuildModule]
         )
         
-        let llbuildProduct = try! Product(
+        let llbuildProduct = try Product(
             package: identity,
             name: "llbuild",
             type: .executable,
             modules: [llbuildExecModule]
         )
         
-        let llbuildAnalysisProduct = try! Product(
+        let llbuildAnalysisProduct = try Product(
             package: identity,
             name: "llbuildAnalysis",
             type: .library(.automatic),
             modules: [llbuildAnalysisModule]
         )
         
-        let llbuildSwiftProduct = try! Product(
+        let llbuildSwiftProduct = try Product(
             package: identity,
             name: "llbuildSwift",
             type: .library(.automatic),
             modules: [llbuildSwiftModule]
         )
         
-        let llbuildSwiftDynamicProduct = try! Product(
+        let llbuildSwiftDynamicProduct = try Product(
             package: identity,
             name: "llbuildSwiftDynamic",
             type: .library(.dynamic),
@@ -271,7 +271,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-tools-support-core Package
     
-    static func createSPMSwiftToolsSupportCorePackage() -> (
+    static func createSPMSwiftToolsSupportCorePackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -290,28 +290,28 @@ extension SBOMTestModulesGraph {
         let tscTestSupportModule = self.createSwiftModule(name: "TSCTestSupport")
         
         // Products
-        let tscBasicProduct = try! Product(
+        let tscBasicProduct = try Product(
             package: identity,
             name: "TSCBasic",
             type: .library(.automatic),
             modules: [tscBasicModule]
         )
         
-        let swiftToolsSupportProduct = try! Product(
+        let swiftToolsSupportProduct = try Product(
             package: identity,
             name: "SwiftToolsSupport",
             type: .library(.dynamic),
             modules: [tscBasicModule, tscUtilityModule]
         )
         
-        let swiftToolsSupportAutoProduct = try! Product(
+        let swiftToolsSupportAutoProduct = try Product(
             package: identity,
             name: "SwiftToolsSupport-auto",
             type: .library(.automatic),
             modules: [tscBasicModule, tscUtilityModule]
         )
         
-        let tscTestSupportProduct = try! Product(
+        let tscTestSupportProduct = try Product(
             package: identity,
             name: "TSCTestSupport",
             type: .library(.automatic),
@@ -432,7 +432,7 @@ extension SBOMTestModulesGraph {
         swiftToolsSupportAutoProduct: ResolvedProduct,
         llbuildSwiftProduct: ResolvedProduct,
         argumentParserProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -453,49 +453,49 @@ extension SBOMTestModulesGraph {
         let swiftBuildSDKInterfacesModule = self.createSwiftModule(name: "swift-build-sdk-interfaces", type: .executable)
         
         // Products
-        let swiftDriverProduct = try! Product(
+        let swiftDriverProduct = try Product(
             package: identity,
             name: "SwiftDriver",
             type: .library(.automatic),
             modules: [swiftDriverModule]
         )
         
-        let swiftDriverDynamicProduct = try! Product(
+        let swiftDriverDynamicProduct = try Product(
             package: identity,
             name: "SwiftDriverDynamic",
             type: .library(.dynamic),
             modules: [swiftDriverModule]
         )
         
-        let swiftDriverExecutionProduct = try! Product(
+        let swiftDriverExecutionProduct = try Product(
             package: identity,
             name: "SwiftDriverExecution",
             type: .library(.automatic),
             modules: [swiftDriverExecutionModule]
         )
         
-        let swiftOptionsProduct = try! Product(
+        let swiftOptionsProduct = try Product(
             package: identity,
             name: "SwiftOptions",
             type: .library(.automatic),
             modules: [swiftOptionsModule]
         )
         
-        let swiftDriverExecProduct = try! Product(
+        let swiftDriverExecProduct = try Product(
             package: identity,
             name: "swift-driver",
             type: .executable,
             modules: [swiftDriverExecModule]
         )
         
-        let swiftHelpProduct = try! Product(
+        let swiftHelpProduct = try Product(
             package: identity,
             name: "swift-help",
             type: .executable,
             modules: [swiftHelpModule]
         )
         
-        let swiftBuildSDKInterfacesProduct = try! Product(
+        let swiftBuildSDKInterfacesProduct = try Product(
             package: identity,
             name: "swift-build-sdk-interfaces",
             type: .executable,

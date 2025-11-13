@@ -21,7 +21,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-log Package
     
-    static func createSwiftLogPackage() -> (
+    static func createSwiftLogPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -36,7 +36,7 @@ extension SBOMTestModulesGraph {
         let loggingModule = self.createSwiftModule(name: "Logging")
         
         // Products
-        let loggingProduct = try! Product(
+        let loggingProduct = try Product(
             package: identity,
             name: "Logging",
             type: .library(.automatic),
@@ -91,7 +91,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-service-context Package
     
-    static func createSwiftServiceContextPackage() -> (
+    static func createSwiftServiceContextPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -106,7 +106,7 @@ extension SBOMTestModulesGraph {
         let serviceContextModule = self.createSwiftModule(name: "ServiceContextModule")
         
         // Products
-        let serviceContextProduct = try! Product(
+        let serviceContextProduct = try Product(
             package: identity,
             name: "ServiceContextModule",
             type: .library(.automatic),
@@ -163,7 +163,7 @@ extension SBOMTestModulesGraph {
     
     static func createSwiftDistributedTracingPackage(
         serviceContextProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -179,7 +179,7 @@ extension SBOMTestModulesGraph {
         let tracingModule = self.createSwiftModule(name: "Tracing")
         
         // Products
-        let tracingProduct = try! Product(
+        let tracingProduct = try Product(
             package: identity,
             name: "Tracing",
             type: .library(.automatic),
@@ -247,7 +247,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - yams Package
     
-    static func createYamsPackage() -> (
+    static func createYamsPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -263,7 +263,7 @@ extension SBOMTestModulesGraph {
         let yamsModule = self.createSwiftModule(name: "Yams")
         
         // Products
-        let yamsProduct = try! Product(
+        let yamsProduct = try Product(
             package: identity,
             name: "Yams",
             type: .library(.automatic),
@@ -326,7 +326,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - openapikit Package
     
-    static func createOpenAPIKitPackage() -> (
+    static func createOpenAPIKitPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -344,21 +344,21 @@ extension SBOMTestModulesGraph {
         let openAPIKitCompatModule = self.createSwiftModule(name: "OpenAPIKitCompat")
         
         // Products
-        let openAPIKitProduct = try! Product(
+        let openAPIKitProduct = try Product(
             package: identity,
             name: "OpenAPIKit",
             type: .library(.automatic),
             modules: [openAPIKitModule]
         )
         
-        let openAPIKit30Product = try! Product(
+        let openAPIKit30Product = try Product(
             package: identity,
             name: "OpenAPIKit30",
             type: .library(.automatic),
             modules: [openAPIKit30Module]
         )
         
-        let openAPIKitCompatProduct = try! Product(
+        let openAPIKitCompatProduct = try Product(
             package: identity,
             name: "OpenAPIKitCompat",
             type: .library(.automatic),
@@ -460,7 +460,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-http-types Package
     
-    static func createSwiftHTTPTypesPackage() -> (
+    static func createSwiftHTTPTypesPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -475,7 +475,7 @@ extension SBOMTestModulesGraph {
         let httpTypesModule = self.createSwiftModule(name: "HTTPTypes")
         
         // Products
-        let httpTypesProduct = try! Product(
+        let httpTypesProduct = try Product(
             package: identity,
             name: "HTTPTypes",
             type: .library(.automatic),

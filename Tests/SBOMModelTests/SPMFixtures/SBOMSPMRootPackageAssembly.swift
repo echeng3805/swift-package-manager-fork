@@ -21,6 +21,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - Root SPM Package - Part 4: Products & Assembly
     static func createSPMRootPackageComplete(
+        rootPath: String = "/swift-package-manager",
         systemPackageProduct: ResolvedProduct,
         dequeModuleProduct: ResolvedProduct,
         orderedCollectionsProduct: ResolvedProduct,
@@ -40,7 +41,7 @@ extension SBOMTestModulesGraph {
         swiftSyntaxProduct: ResolvedProduct,
         swiftBuildProduct: ResolvedProduct,
         swbBuildServiceProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -115,14 +116,14 @@ extension SBOMTestModulesGraph {
         // MARK: - Create Products
         
         // Dynamic library products
-        let appleProductTypesProduct = try! Product(
+        let appleProductTypesProduct = try Product(
             package: identity,
             name: "AppleProductTypes",
             type: .library(.dynamic),
             modules: [allModules.first { $0.name == "AppleProductTypes" }!]
         )
         
-        let packageDescriptionProduct = try! Product(
+        let packageDescriptionProduct = try Product(
             package: identity,
             name: "PackageDescription",
             type: .library(.dynamic),
@@ -132,14 +133,14 @@ extension SBOMTestModulesGraph {
             ]
         )
         
-        let packagePluginProduct = try! Product(
+        let packagePluginProduct = try Product(
             package: identity,
             name: "PackagePlugin",
             type: .library(.dynamic),
             modules: [allModules.first { $0.name == "PackagePlugin" }!]
         )
         
-        let swiftPMProduct = try! Product(
+        let swiftPMProduct = try Product(
             package: identity,
             name: "SwiftPM",
             type: .library(.dynamic),
@@ -160,7 +161,7 @@ extension SBOMTestModulesGraph {
         )
         
         // THE KEY PRODUCT: SwiftPMDataModel
-        let swiftPMDataModelProduct = try! Product(
+        let swiftPMDataModelProduct = try Product(
             package: identity,
             name: "SwiftPMDataModel",
             type: .library(.dynamic),
@@ -177,7 +178,7 @@ extension SBOMTestModulesGraph {
         )
         
         // Automatic library products
-        let swiftPMAutoProduct = try! Product(
+        let swiftPMAutoProduct = try Product(
             package: identity,
             name: "SwiftPM-auto",
             type: .library(.automatic),
@@ -197,7 +198,7 @@ extension SBOMTestModulesGraph {
             ]
         )
         
-        let swiftPMDataModelAutoProduct = try! Product(
+        let swiftPMDataModelAutoProduct = try Product(
             package: identity,
             name: "SwiftPMDataModel-auto",
             type: .library(.automatic),
@@ -213,14 +214,14 @@ extension SBOMTestModulesGraph {
             ]
         )
         
-        let packageCollectionsModelProduct = try! Product(
+        let packageCollectionsModelProduct = try Product(
             package: identity,
             name: "PackageCollectionsModel",
             type: .library(.automatic),
             modules: [allModules.first { $0.name == "PackageCollectionsModel" }!]
         )
         
-        let swiftPMPackageCollectionsProduct = try! Product(
+        let swiftPMPackageCollectionsProduct = try Product(
             package: identity,
             name: "SwiftPMPackageCollections",
             type: .library(.automatic),
@@ -232,7 +233,7 @@ extension SBOMTestModulesGraph {
             ]
         )
         
-        let xcBuildSupportProduct = try! Product(
+        let xcBuildSupportProduct = try Product(
             package: identity,
             name: "XCBuildSupport",
             type: .library(.automatic),
@@ -241,20 +242,20 @@ extension SBOMTestModulesGraph {
         
         // Executable products (simplified - just create them without listing all)
         let executableProducts = [
-            try! Product(package: identity, name: "dummy-swiftc", type: .executable, modules: [allModules.first { $0.name == "dummy-swiftc" }!]),
-            try! Product(package: identity, name: "package-info", type: .executable, modules: [allModules.first { $0.name == "package-info" }!]),
-            try! Product(package: identity, name: "swift-bootstrap", type: .executable, modules: [allModules.first { $0.name == "swift-bootstrap" }!]),
-            try! Product(package: identity, name: "swift-build", type: .executable, modules: [allModules.first { $0.name == "swift-build" }!]),
-            try! Product(package: identity, name: "swift-build-prebuilts", type: .executable, modules: [allModules.first { $0.name == "swift-build-prebuilts" }!]),
-            try! Product(package: identity, name: "swift-experimental-sdk", type: .executable, modules: [allModules.first { $0.name == "swift-experimental-sdk" }!]),
-            try! Product(package: identity, name: "swift-package", type: .executable, modules: [allModules.first { $0.name == "swift-package" }!]),
-            try! Product(package: identity, name: "swift-package-collection", type: .executable, modules: [allModules.first { $0.name == "swift-package-collection" }!]),
-            try! Product(package: identity, name: "swift-package-manager", type: .executable, modules: [allModules.first { $0.name == "swift-package-manager" }!]),
-            try! Product(package: identity, name: "swift-package-registry", type: .executable, modules: [allModules.first { $0.name == "swift-package-registry" }!]),
-            try! Product(package: identity, name: "swift-run", type: .executable, modules: [allModules.first { $0.name == "swift-run" }!]),
-            try! Product(package: identity, name: "swift-sdk", type: .executable, modules: [allModules.first { $0.name == "swift-sdk" }!]),
-            try! Product(package: identity, name: "swift-test", type: .executable, modules: [allModules.first { $0.name == "swift-test" }!]),
-            try! Product(package: identity, name: "swiftpm-testing-helper", type: .executable, modules: [allModules.first { $0.name == "swiftpm-testing-helper" }!])
+            try Product(package: identity, name: "dummy-swiftc", type: .executable, modules: [allModules.first { $0.name == "dummy-swiftc" }!]),
+            try Product(package: identity, name: "package-info", type: .executable, modules: [allModules.first { $0.name == "package-info" }!]),
+            try Product(package: identity, name: "swift-bootstrap", type: .executable, modules: [allModules.first { $0.name == "swift-bootstrap" }!]),
+            try Product(package: identity, name: "swift-build", type: .executable, modules: [allModules.first { $0.name == "swift-build" }!]),
+            try Product(package: identity, name: "swift-build-prebuilts", type: .executable, modules: [allModules.first { $0.name == "swift-build-prebuilts" }!]),
+            try Product(package: identity, name: "swift-experimental-sdk", type: .executable, modules: [allModules.first { $0.name == "swift-experimental-sdk" }!]),
+            try Product(package: identity, name: "swift-package", type: .executable, modules: [allModules.first { $0.name == "swift-package" }!]),
+            try Product(package: identity, name: "swift-package-collection", type: .executable, modules: [allModules.first { $0.name == "swift-package-collection" }!]),
+            try Product(package: identity, name: "swift-package-manager", type: .executable, modules: [allModules.first { $0.name == "swift-package-manager" }!]),
+            try Product(package: identity, name: "swift-package-registry", type: .executable, modules: [allModules.first { $0.name == "swift-package-registry" }!]),
+            try Product(package: identity, name: "swift-run", type: .executable, modules: [allModules.first { $0.name == "swift-run" }!]),
+            try Product(package: identity, name: "swift-sdk", type: .executable, modules: [allModules.first { $0.name == "swift-sdk" }!]),
+            try Product(package: identity, name: "swift-test", type: .executable, modules: [allModules.first { $0.name == "swift-test" }!]),
+            try Product(package: identity, name: "swiftpm-testing-helper", type: .executable, modules: [allModules.first { $0.name == "swiftpm-testing-helper" }!])
         ]
         
         let allProducts = [
@@ -268,7 +269,7 @@ extension SBOMTestModulesGraph {
         let package = self.createPackage(
             identity: identity,
             displayName: "SwiftPM",
-            path: "/swift-package-manager",
+            path: rootPath,
             modules: allModules,
             products: allProducts
         )
@@ -397,7 +398,7 @@ extension SBOMTestModulesGraph {
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
-            kind: .root(AbsolutePath("/swift-package-manager"))
+            kind: .root(AbsolutePath(rootPath))
         )
         
         return (

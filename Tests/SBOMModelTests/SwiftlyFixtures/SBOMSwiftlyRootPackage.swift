@@ -33,7 +33,7 @@ extension SBOMTestModulesGraph {
         subprocessProduct: ResolvedProduct,
         swiftToolsSupportProduct: ResolvedProduct,
         nioFileSystemProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -70,42 +70,42 @@ extension SBOMTestModulesGraph {
         let swiftlyTestsModule = self.createSwiftModule(name: "SwiftlyTests", type: .test)
         
         // Products
-        let swiftlyProduct = try! Product(
+        let swiftlyProduct = try Product(
             package: identity,
             name: "swiftly",
             type: .executable,
             modules: [swiftlyModule]
         )
         
-        let testSwiftlyProduct = try! Product(
+        let testSwiftlyProduct = try Product(
             package: identity,
             name: "test-swiftly",
             type: .executable,
             modules: [testSwiftlyModule]
         )
         
-        let generateDocsReferenceProduct = try! Product(
+        let generateDocsReferenceProduct = try Product(
             package: identity,
             name: "generate-docs-reference",
             type: .executable,
             modules: [generateDocsReferenceExecModule]
         )
         
-        let generateCommandModelsProduct = try! Product(
+        let generateCommandModelsProduct = try Product(
             package: identity,
             name: "generate-command-models",
             type: .executable,
             modules: [generateCommandModelsExecModule]
         )
         
-        let buildSwiftlyReleaseProduct = try! Product(
+        let buildSwiftlyReleaseProduct = try Product(
             package: identity,
             name: "build-swiftly-release",
             type: .executable,
             modules: [buildSwiftlyReleaseModule]
         )
         
-        let swiftlyTestsProduct = try! Product(
+        let swiftlyTestsProduct = try Product(
             package: identity,
             name: "SwiftlyTests",
             type: .test,

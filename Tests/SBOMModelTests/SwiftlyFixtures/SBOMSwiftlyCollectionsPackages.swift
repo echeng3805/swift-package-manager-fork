@@ -21,7 +21,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-collections Package
     
-    static func createSwiftCollectionsPackage() -> (
+    static func createSwiftCollectionsPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -38,14 +38,14 @@ extension SBOMTestModulesGraph {
         let orderedCollectionsModule = self.createSwiftModule(name: "OrderedCollections")
         
         // Products
-        let dequeProduct = try! Product(
+        let dequeProduct = try Product(
             package: identity,
             name: "DequeModule",
             type: .library(.automatic),
             modules: [dequeModule]
         )
         
-        let orderedCollectionsProduct = try! Product(
+        let orderedCollectionsProduct = try Product(
             package: identity,
             name: "OrderedCollections",
             type: .library(.automatic),
@@ -130,7 +130,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-numerics Package
     
-    static func createSwiftNumericsPackage() -> (
+    static func createSwiftNumericsPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -146,7 +146,7 @@ extension SBOMTestModulesGraph {
         let realModule = self.createSwiftModule(name: "RealModule")
         
         // Products
-        let realModuleProduct = try! Product(
+        let realModuleProduct = try Product(
             package: identity,
             name: "RealModule",
             type: .library(.automatic),
@@ -211,7 +211,7 @@ extension SBOMTestModulesGraph {
     
     static func createSwiftAlgorithmsPackage(
         realModuleProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -226,7 +226,7 @@ extension SBOMTestModulesGraph {
         let algorithmsModule = self.createSwiftModule(name: "Algorithms")
         
         // Products
-        let algorithmsProduct = try! Product(
+        let algorithmsProduct = try Product(
             package: identity,
             name: "Algorithms",
             type: .library(.automatic),
@@ -285,7 +285,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-atomics Package
     
-    static func createSwiftAtomicsPackage() -> (
+    static func createSwiftAtomicsPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -301,7 +301,7 @@ extension SBOMTestModulesGraph {
         let atomicsModule = self.createSwiftModule(name: "Atomics")
         
         // Products
-        let atomicsProduct = try! Product(
+        let atomicsProduct = try Product(
             package: identity,
             name: "Atomics",
             type: .library(.automatic),

@@ -21,7 +21,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-syntax Package (26 modules)
     
-    static func createSPMSwiftSyntaxPackage() -> (
+    static func createSPMSwiftSyntaxPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -73,24 +73,24 @@ extension SBOMTestModulesGraph {
         
         // MARK: - Create products (18 products)
         
-        let swiftSyntaxProduct = try! Product(package: identity, name: "SwiftSyntax", type: .library(.automatic), modules: [swiftSyntaxModule])
-        let swiftDiagnosticsProduct = try! Product(package: identity, name: "SwiftDiagnostics", type: .library(.automatic), modules: [swiftDiagnosticsModule])
-        let swiftParserProduct = try! Product(package: identity, name: "SwiftParser", type: .library(.automatic), modules: [swiftParserModule])
-        let swiftBasicFormatProduct = try! Product(package: identity, name: "SwiftBasicFormat", type: .library(.automatic), modules: [swiftBasicFormatModule])
-        let swiftOperatorsProduct = try! Product(package: identity, name: "SwiftOperators", type: .library(.automatic), modules: [swiftOperatorsModule])
-        let swiftParserDiagnosticsProduct = try! Product(package: identity, name: "SwiftParserDiagnostics", type: .library(.automatic), modules: [swiftParserDiagnosticsModule])
-        let swiftSyntaxBuilderProduct = try! Product(package: identity, name: "SwiftSyntaxBuilder", type: .library(.automatic), modules: [swiftSyntaxBuilderModule])
-        let swiftIDEUtilsProduct = try! Product(package: identity, name: "SwiftIDEUtils", type: .library(.automatic), modules: [swiftIDEUtilsModule])
-        let swiftIfConfigProduct = try! Product(package: identity, name: "SwiftIfConfig", type: .library(.automatic), modules: [swiftIfConfigModule])
-        let swiftLexicalLookupProduct = try! Product(package: identity, name: "SwiftLexicalLookup", type: .library(.automatic), modules: [swiftLexicalLookupModule])
-        let swiftRefactorProduct = try! Product(package: identity, name: "SwiftRefactor", type: .library(.automatic), modules: [swiftRefactorModule])
-        let swiftSyntaxMacrosProduct = try! Product(package: identity, name: "SwiftSyntaxMacros", type: .library(.automatic), modules: [swiftSyntaxMacrosModule])
-        let swiftSyntaxMacroExpansionProduct = try! Product(package: identity, name: "SwiftSyntaxMacroExpansion", type: .library(.automatic), modules: [swiftSyntaxMacroExpansionModule])
-        let swiftCompilerPluginProduct = try! Product(package: identity, name: "SwiftCompilerPlugin", type: .library(.automatic), modules: [swiftCompilerPluginModule])
-        let swiftCompilerPluginMessageHandlingProduct = try! Product(package: identity, name: "_SwiftCompilerPluginMessageHandling", type: .library(.automatic), modules: [swiftCompilerPluginMessageHandlingModule])
-        let swiftLibraryPluginProviderProduct = try! Product(package: identity, name: "_SwiftLibraryPluginProvider", type: .library(.automatic), modules: [swiftLibraryPluginProviderModule])
-        let swiftSyntaxMacrosGenericTestSupportProduct = try! Product(package: identity, name: "SwiftSyntaxMacrosGenericTestSupport", type: .library(.automatic), modules: [swiftSyntaxMacrosGenericTestSupportModule])
-        let swiftSyntaxMacrosTestSupportProduct = try! Product(package: identity, name: "SwiftSyntaxMacrosTestSupport", type: .library(.automatic), modules: [swiftSyntaxMacrosTestSupportModule])
+        let swiftSyntaxProduct = try Product(package: identity, name: "SwiftSyntax", type: .library(.automatic), modules: [swiftSyntaxModule])
+        let swiftDiagnosticsProduct = try Product(package: identity, name: "SwiftDiagnostics", type: .library(.automatic), modules: [swiftDiagnosticsModule])
+        let swiftParserProduct = try Product(package: identity, name: "SwiftParser", type: .library(.automatic), modules: [swiftParserModule])
+        let swiftBasicFormatProduct = try Product(package: identity, name: "SwiftBasicFormat", type: .library(.automatic), modules: [swiftBasicFormatModule])
+        let swiftOperatorsProduct = try Product(package: identity, name: "SwiftOperators", type: .library(.automatic), modules: [swiftOperatorsModule])
+        let swiftParserDiagnosticsProduct = try Product(package: identity, name: "SwiftParserDiagnostics", type: .library(.automatic), modules: [swiftParserDiagnosticsModule])
+        let swiftSyntaxBuilderProduct = try Product(package: identity, name: "SwiftSyntaxBuilder", type: .library(.automatic), modules: [swiftSyntaxBuilderModule])
+        let swiftIDEUtilsProduct = try Product(package: identity, name: "SwiftIDEUtils", type: .library(.automatic), modules: [swiftIDEUtilsModule])
+        let swiftIfConfigProduct = try Product(package: identity, name: "SwiftIfConfig", type: .library(.automatic), modules: [swiftIfConfigModule])
+        let swiftLexicalLookupProduct = try Product(package: identity, name: "SwiftLexicalLookup", type: .library(.automatic), modules: [swiftLexicalLookupModule])
+        let swiftRefactorProduct = try Product(package: identity, name: "SwiftRefactor", type: .library(.automatic), modules: [swiftRefactorModule])
+        let swiftSyntaxMacrosProduct = try Product(package: identity, name: "SwiftSyntaxMacros", type: .library(.automatic), modules: [swiftSyntaxMacrosModule])
+        let swiftSyntaxMacroExpansionProduct = try Product(package: identity, name: "SwiftSyntaxMacroExpansion", type: .library(.automatic), modules: [swiftSyntaxMacroExpansionModule])
+        let swiftCompilerPluginProduct = try Product(package: identity, name: "SwiftCompilerPlugin", type: .library(.automatic), modules: [swiftCompilerPluginModule])
+        let swiftCompilerPluginMessageHandlingProduct = try Product(package: identity, name: "_SwiftCompilerPluginMessageHandling", type: .library(.automatic), modules: [swiftCompilerPluginMessageHandlingModule])
+        let swiftLibraryPluginProviderProduct = try Product(package: identity, name: "_SwiftLibraryPluginProvider", type: .library(.automatic), modules: [swiftLibraryPluginProviderModule])
+        let swiftSyntaxMacrosGenericTestSupportProduct = try Product(package: identity, name: "SwiftSyntaxMacrosGenericTestSupport", type: .library(.automatic), modules: [swiftSyntaxMacrosGenericTestSupportModule])
+        let swiftSyntaxMacrosTestSupportProduct = try Product(package: identity, name: "SwiftSyntaxMacrosTestSupport", type: .library(.automatic), modules: [swiftSyntaxMacrosTestSupportModule])
         
         // MARK: - Create package
         

@@ -40,7 +40,7 @@ struct SBOMExtractScopeTests {
         #expect(scope == SBOMComponent.Scope.test)
     }
 
-    @Test("extractScopeFromProduct with library product containing test module returns test")
+    @Test("extractScopeFromProduct with library product containing only test module returns test")
     func extractScopeFromLibraryProductWithTestModule() throws {
         let resolvedProduct = try SBOMTestModulesGraph.createProduct(name: "MyLibraryProduct", type: .library(.automatic), moduleType: .test)
         let scope = try SBOMExtractor.extractScope(from: resolvedProduct)
@@ -71,13 +71,13 @@ struct SBOMExtractScopeTests {
         #expect(scope == SBOMComponent.Scope.test)
     }
 
-    @Test("extractScopeFromPackage with mixed products containing test returns test")
+    @Test("extractScopeFromPackage with mixed products containing test returns runtime")
     func extractScopeFromPackageWithMixedProductsIncludingTest() throws {
         let executableProduct = try SBOMTestModulesGraph.createProduct(name: "MyExecutableProduct", type: .executable, moduleType: .executable)
         let testProduct = try SBOMTestModulesGraph.createProduct(name: "MyTestProduct", type: .test, moduleType: .test)
         let resolvedPackage = try SBOMTestModulesGraph.createPackage(name: "MixedPackage", products: [executableProduct, testProduct])
         let scope = try SBOMExtractor.extractScope(from: resolvedPackage)
-        #expect(scope == SBOMComponent.Scope.test)
+        #expect(scope == SBOMComponent.Scope.runtime)
     }
 
     @Test("extractScopeFromPackage with test module but no test product returns test")
@@ -86,7 +86,7 @@ struct SBOMExtractScopeTests {
         let testModule = SBOMTestModulesGraph.createSwiftModule(name: "TestModule", type: .test)
         let resolvedPackage = try SBOMTestModulesGraph.createPackage(name: "PackageWithTests", products: [libraryProduct], modules: [testModule])
         let scope = try SBOMExtractor.extractScope(from: resolvedPackage)
-        #expect(scope == SBOMComponent.Scope.test)
+        #expect(scope == SBOMComponent.Scope.runtime)
     }
 
     @Test("extractScopeFromPackage with only runtime products and modules returns runtime")

@@ -135,24 +135,31 @@ package struct SBOMExtractor {
     }
 
     package static func extractScope(from product: ResolvedProduct) throws -> SBOMComponent.Scope {
-        if product.isLinkingXCTest {
+        // A product is only .test scope if it's a test product type OR all its modules are test modules
+        if product.type == .test {
             return .test
         }
-        return .runtime
+        
+        // For non-test products, check if ALL modules are test modules
+        guard !product.modules.isEmpty else {
+            return .runtime
+        }
+        
+        let allModulesAreTests = product.modules.allSatisfy { $0.type == .test }
+        return allModulesAreTests ? .test : .runtime
     }
 
     package static func extractScope(from package: ResolvedPackage) throws -> SBOMComponent.Scope {
-        for product in package.products {
-            if product.isLinkingXCTest {
-                return .test
-            }
+        // A package is only .test scope if ALL products are test products
+        guard !package.products.isEmpty else {
+            return .runtime
         }
-        for module in package.modules {
-            if module.type == .test {
-                return .test
-            }
+        
+        let allProductsAreTests = package.products.allSatisfy { product in
+            product.isLinkingXCTest || product.type == .test
         }
-        return .runtime
+        
+        return allProductsAreTests ? .test : .runtime
     }
     
     private func extractComponentInfoFromGit(packagePath: AbsolutePath) async throws -> SBOMGitInfo {

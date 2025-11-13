@@ -23,7 +23,7 @@ extension SBOMTestModulesGraph {
     
     static func createSwiftOpenAPIRuntimePackage(
         httpTypesProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -38,7 +38,7 @@ extension SBOMTestModulesGraph {
         let openAPIRuntimeModule = self.createSwiftModule(name: "OpenAPIRuntime")
         
         // Products
-        let openAPIRuntimeProduct = try! Product(
+        let openAPIRuntimeProduct = try Product(
             package: identity,
             name: "OpenAPIRuntime",
             type: .library(.automatic),
@@ -105,7 +105,7 @@ extension SBOMTestModulesGraph {
         orderedCollectionsProduct: ResolvedProduct,
         yamsProduct: ResolvedProduct,
         argumentParserProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -122,14 +122,14 @@ extension SBOMTestModulesGraph {
         let swiftOpenAPIGeneratorModule = self.createSwiftModule(name: "swift-openapi-generator", type: .executable)
         
         // Products
-        let openAPIGeneratorProduct = try! Product(
+        let openAPIGeneratorProduct = try Product(
             package: identity,
             name: "OpenAPIGenerator",
             type: .plugin,
             modules: [openAPIGeneratorModule]
         )
         
-        let swiftOpenAPIGeneratorProduct = try! Product(
+        let swiftOpenAPIGeneratorProduct = try Product(
             package: identity,
             name: "swift-openapi-generator",
             type: .executable,
@@ -246,7 +246,7 @@ extension SBOMTestModulesGraph {
         algorithmsProduct: ResolvedProduct,
         loggingProduct: ResolvedProduct,
         tracingProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -262,7 +262,7 @@ extension SBOMTestModulesGraph {
         let asyncHTTPClientModule = self.createSwiftModule(name: "AsyncHTTPClient")
         
         // Products
-        let asyncHTTPClientProduct = try! Product(
+        let asyncHTTPClientProduct = try Product(
             package: identity,
             name: "AsyncHTTPClient",
             type: .library(.automatic),
@@ -356,7 +356,7 @@ extension SBOMTestModulesGraph {
         httpTypesProduct: ResolvedProduct,
         asyncHTTPClientProduct: ResolvedProduct,
         nioFoundationCompatProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -371,7 +371,7 @@ extension SBOMTestModulesGraph {
         let openAPIAsyncHTTPClientModule = self.createSwiftModule(name: "OpenAPIAsyncHTTPClient")
         
         // Products
-        let openAPIAsyncHTTPClientProduct = try! Product(
+        let openAPIAsyncHTTPClientProduct = try Product(
             package: identity,
             name: "OpenAPIAsyncHTTPClient",
             type: .library(.automatic),

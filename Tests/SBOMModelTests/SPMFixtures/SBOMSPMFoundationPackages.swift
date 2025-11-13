@@ -21,7 +21,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-system Package
     
-    static func createSPMSwiftSystemPackage() -> (
+    static func createSPMSwiftSystemPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -37,7 +37,7 @@ extension SBOMTestModulesGraph {
         let systemPackageModule = self.createSwiftModule(name: "SystemPackage")
         
         // Products
-        let systemPackageProduct = try! Product(
+        let systemPackageProduct = try Product(
             package: identity,
             name: "SystemPackage",
             type: .library(.automatic),
@@ -100,7 +100,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-collections Package
     
-    static func createSPMSwiftCollectionsPackage() -> (
+    static func createSPMSwiftCollectionsPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -122,49 +122,49 @@ extension SBOMTestModulesGraph {
         let collectionsModule = self.createSwiftModule(name: "Collections")
         
         // Products
-        let bitCollectionsProduct = try! Product(
+        let bitCollectionsProduct = try Product(
             package: identity,
             name: "BitCollections",
             type: .library(.automatic),
             modules: [bitCollectionsModule]
         )
         
-        let dequeModuleProduct = try! Product(
+        let dequeModuleProduct = try Product(
             package: identity,
             name: "DequeModule",
             type: .library(.automatic),
             modules: [dequeModuleModule]
         )
         
-        let hashTreeCollectionsProduct = try! Product(
+        let hashTreeCollectionsProduct = try Product(
             package: identity,
             name: "HashTreeCollections",
             type: .library(.automatic),
             modules: [hashTreeCollectionsModule]
         )
         
-        let heapModuleProduct = try! Product(
+        let heapModuleProduct = try Product(
             package: identity,
             name: "HeapModule",
             type: .library(.automatic),
             modules: [heapModuleModule]
         )
         
-        let orderedCollectionsProduct = try! Product(
+        let orderedCollectionsProduct = try Product(
             package: identity,
             name: "OrderedCollections",
             type: .library(.automatic),
             modules: [orderedCollectionsModule]
         )
         
-        let ropeModuleProduct = try! Product(
+        let ropeModuleProduct = try Product(
             package: identity,
             name: "_RopeModule",
             type: .library(.automatic),
             modules: [ropeModuleModule]
         )
         
-        let collectionsProduct = try! Product(
+        let collectionsProduct = try Product(
             package: identity,
             name: "Collections",
             type: .library(.automatic),
@@ -346,7 +346,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-argument-parser Package
     
-    static func createSPMSwiftArgumentParserPackage() -> (
+    static func createSPMSwiftArgumentParserPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -366,35 +366,35 @@ extension SBOMTestModulesGraph {
         let generateManualExecModule = self.createSwiftModule(name: "generate-manual", type: .executable)
         
         // Products
-        let argumentParserProduct = try! Product(
+        let argumentParserProduct = try Product(
             package: identity,
             name: "ArgumentParser",
             type: .library(.automatic),
             modules: [argumentParserModule]
         )
         
-        let generateDoccReferenceProduct = try! Product(
+        let generateDoccReferenceProduct = try Product(
             package: identity,
             name: "GenerateDoccReference",
             type: .plugin,
             modules: [generateDoccReferenceModule]
         )
         
-        let generateManualProduct = try! Product(
+        let generateManualProduct = try Product(
             package: identity,
             name: "GenerateManual",
             type: .plugin,
             modules: [generateManualModule]
         )
         
-        let generateDoccReferenceExecProduct = try! Product(
+        let generateDoccReferenceExecProduct = try Product(
             package: identity,
             name: "generate-docc-reference",
             type: .executable,
             modules: [generateDoccReferenceExecModule]
         )
         
-        let generateManualExecProduct = try! Product(
+        let generateManualExecProduct = try Product(
             package: identity,
             name: "generate-manual",
             type: .executable,
@@ -543,7 +543,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-toolchain-sqlite Package
     
-    static func createSPMSwiftToolchainSQLitePackage() -> (
+    static func createSPMSwiftToolchainSQLitePackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -559,14 +559,14 @@ extension SBOMTestModulesGraph {
         let sqliteModule = self.createSwiftModule(name: "sqlite", type: .executable)
         
         // Products
-        let swiftToolchainCSQLiteProduct = try! Product(
+        let swiftToolchainCSQLiteProduct = try Product(
             package: identity,
             name: "SwiftToolchainCSQLite",
             type: .library(.automatic),
             modules: [swiftToolchainCSQLiteModule]
         )
         
-        let sqliteProduct = try! Product(
+        let sqliteProduct = try Product(
             package: identity,
             name: "sqlite",
             type: .executable,

@@ -77,7 +77,7 @@ enum SBOMTestStore {
 
     package static func createSPMResolvedPackagesStore() throws -> ResolvedPackagesStore {
         try self.createResolvedPackagesStore(
-            name: "SwiftPM",
+            name: "swift-package-manager",
             url: self.swiftPMURL,
             revision: self.swiftPMRevision,
             dependencies: self.spmDependencies

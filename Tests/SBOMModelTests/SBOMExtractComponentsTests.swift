@@ -30,7 +30,7 @@ struct SBOMExtractComponentsTests {
     }
 
     private static let spmExpectations = TestExpectations(
-        totalComponentCount: 69,
+        totalComponentCount: 57,
         expectedPackageIds: Set([
             "swift-build", "swift-llbuild", "swift-driver", "swift-certificates", "swift-syntax", "swift-tools-support-core", "swift-crypto", "swift-argument-parser", "swift-asn1", "swift-collections", "swift-system", "swift-package-manager", "swift-toolchain-sqlite"
         ]),

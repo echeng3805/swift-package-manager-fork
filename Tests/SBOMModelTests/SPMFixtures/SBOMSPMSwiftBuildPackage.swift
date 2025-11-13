@@ -32,7 +32,7 @@ extension SBOMTestModulesGraph {
         systemPackageProduct: ResolvedProduct,
         cryptoProduct: ResolvedProduct,
         x509Product: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -89,23 +89,23 @@ extension SBOMTestModulesGraph {
         
         // MARK: - Create products
         
-        let basicsProduct = try! Product(package: identity, name: "SwiftPMPackageModel", type: .library(.automatic), modules: [basicsModule, packageModelModule])
-        let packageLoadingProduct = try! Product(package: identity, name: "PackageLoading", type: .library(.automatic), modules: [packageLoadingModule])
-        let packageGraphProduct = try! Product(package: identity, name: "PackageGraph", type: .library(.automatic), modules: [packageGraphModule])
-        let sourceControlProduct = try! Product(package: identity, name: "SourceControl", type: .library(.automatic), modules: [sourceControlModule])
-        let workspaceProduct = try! Product(package: identity, name: "Workspace", type: .library(.automatic), modules: [workspaceModule])
-        let buildProduct = try! Product(package: identity, name: "Build", type: .library(.automatic), modules: [buildModule])
-        let packageRegistryProduct = try! Product(package: identity, name: "PackageRegistry", type: .library(.automatic), modules: [packageRegistryModule])
-        let packageSigningProduct = try! Product(package: identity, name: "PackageSigning", type: .library(.automatic), modules: [packageSigningModule])
-        let commandsProduct = try! Product(package: identity, name: "Commands", type: .library(.automatic), modules: [commandsModule])
-        let sbomModelProduct = try! Product(package: identity, name: "SBOMModel", type: .library(.automatic), modules: [sbomModelModule])
+        let basicsProduct = try Product(package: identity, name: "SwiftPMPackageModel", type: .library(.automatic), modules: [basicsModule, packageModelModule])
+        let packageLoadingProduct = try Product(package: identity, name: "PackageLoading", type: .library(.automatic), modules: [packageLoadingModule])
+        let packageGraphProduct = try Product(package: identity, name: "PackageGraph", type: .library(.automatic), modules: [packageGraphModule])
+        let sourceControlProduct = try Product(package: identity, name: "SourceControl", type: .library(.automatic), modules: [sourceControlModule])
+        let workspaceProduct = try Product(package: identity, name: "Workspace", type: .library(.automatic), modules: [workspaceModule])
+        let buildProduct = try Product(package: identity, name: "Build", type: .library(.automatic), modules: [buildModule])
+        let packageRegistryProduct = try Product(package: identity, name: "PackageRegistry", type: .library(.automatic), modules: [packageRegistryModule])
+        let packageSigningProduct = try Product(package: identity, name: "PackageSigning", type: .library(.automatic), modules: [packageSigningModule])
+        let commandsProduct = try Product(package: identity, name: "Commands", type: .library(.automatic), modules: [commandsModule])
+        let sbomModelProduct = try Product(package: identity, name: "SBOMModel", type: .library(.automatic), modules: [sbomModelModule])
         
-        let swiftBuildProduct = try! Product(package: identity, name: "swift-build", type: .executable, modules: [swiftBuildModule])
-        let swiftPackageProduct = try! Product(package: identity, name: "swift-package", type: .executable, modules: [swiftPackageModule])
-        let swiftRunProduct = try! Product(package: identity, name: "swift-run", type: .executable, modules: [swiftRunModule])
-        let swiftTestProduct = try! Product(package: identity, name: "swift-test", type: .executable, modules: [swiftTestModule])
-        let swiftPackageRegistryProduct = try! Product(package: identity, name: "swift-package-registry", type: .executable, modules: [swiftPackageRegistryModule])
-        let swiftPackageCollectionProduct = try! Product(package: identity, name: "swift-package-collection", type: .executable, modules: [swiftPackageCollectionModule])
+        let swiftBuildProduct = try Product(package: identity, name: "swift-build", type: .executable, modules: [swiftBuildModule])
+        let swiftPackageProduct = try Product(package: identity, name: "swift-package", type: .executable, modules: [swiftPackageModule])
+        let swiftRunProduct = try Product(package: identity, name: "swift-run", type: .executable, modules: [swiftRunModule])
+        let swiftTestProduct = try Product(package: identity, name: "swift-test", type: .executable, modules: [swiftTestModule])
+        let swiftPackageRegistryProduct = try Product(package: identity, name: "swift-package-registry", type: .executable, modules: [swiftPackageRegistryModule])
+        let swiftPackageCollectionProduct = try Product(package: identity, name: "swift-package-collection", type: .executable, modules: [swiftPackageCollectionModule])
         
         // MARK: - Create package
         

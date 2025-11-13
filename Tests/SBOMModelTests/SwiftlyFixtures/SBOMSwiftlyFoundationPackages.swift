@@ -21,7 +21,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-system Package
     
-    static func createSwiftSystemPackage() -> (
+    static func createSwiftSystemPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -37,7 +37,7 @@ extension SBOMTestModulesGraph {
         let systemPackageModule = self.createSwiftModule(name: "SystemPackage")
         
         // Products
-        let systemPackageProduct = try! Product(
+        let systemPackageProduct = try Product(
             package: identity,
             name: "SystemPackage",
             type: .library(.automatic),
@@ -102,7 +102,7 @@ extension SBOMTestModulesGraph {
     
     static func createSwiftSubprocessPackage(
         systemPackageProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -118,7 +118,7 @@ extension SBOMTestModulesGraph {
         let subprocessModule = self.createSwiftModule(name: "Subprocess")
         
         // Products
-        let subprocessProduct = try! Product(
+        let subprocessProduct = try Product(
             package: identity,
             name: "Subprocess",
             type: .library(.automatic),
@@ -183,7 +183,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-argument-parser Package
     
-    static func createSwiftArgumentParserPackage() -> (
+    static func createSwiftArgumentParserPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -199,7 +199,7 @@ extension SBOMTestModulesGraph {
         let argumentParserModule = self.createSwiftModule(name: "ArgumentParser")
         
         // Products
-        let argumentParserProduct = try! Product(
+        let argumentParserProduct = try Product(
             package: identity,
             name: "ArgumentParser",
             type: .library(.automatic),
@@ -262,7 +262,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-tools-support-core Package
     
-    static func createSwiftToolsSupportCorePackage() -> (
+    static func createSwiftToolsSupportCorePackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -280,7 +280,7 @@ extension SBOMTestModulesGraph {
         let tscUtilityModule = self.createSwiftModule(name: "TSCUtility")
         
         // Products
-        let swiftToolsSupportAutoProduct = try! Product(
+        let swiftToolsSupportAutoProduct = try Product(
             package: identity,
             name: "SwiftToolsSupport-auto",
             type: .library(.automatic),

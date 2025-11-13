@@ -21,7 +21,7 @@ extension SBOMTestModulesGraph {
     
     // MARK: - swift-docc-symbolkit Package
     
-    static func createSPMSwiftDoccSymbolKitPackage() -> (
+    static func createSPMSwiftDoccSymbolKitPackage() throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -36,7 +36,7 @@ extension SBOMTestModulesGraph {
         let symbolKitModule = self.createSwiftModule(name: "SymbolKit")
         
         // Products
-        let symbolKitProduct = try! Product(
+        let symbolKitProduct = try Product(
             package: identity,
             name: "SymbolKit",
             type: .library(.automatic),
@@ -93,7 +93,7 @@ extension SBOMTestModulesGraph {
     
     static func createSPMSwiftDoccPluginPackage(
         symbolKitProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -111,21 +111,21 @@ extension SBOMTestModulesGraph {
         let swiftDoccPreviewModule = self.createSwiftModule(name: "Swift-DocC Preview", type: .plugin)
         
         // Products
-        let snippetExtractProduct = try! Product(
+        let snippetExtractProduct = try Product(
             package: identity,
             name: "snippet-extract",
             type: .executable,
             modules: [snippetExtractModule]
         )
         
-        let swiftDoccProduct = try! Product(
+        let swiftDoccProduct = try Product(
             package: identity,
             name: "Swift-DocC",
             type: .plugin,
             modules: [swiftDoccModule]
         )
         
-        let swiftDoccPreviewProduct = try! Product(
+        let swiftDoccPreviewProduct = try Product(
             package: identity,
             name: "Swift-DocC Preview",
             type: .plugin,

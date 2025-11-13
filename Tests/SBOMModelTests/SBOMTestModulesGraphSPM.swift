@@ -26,20 +26,20 @@ extension SBOMTestModulesGraph {
         
         // MARK: - Create all foundation packages
         
-        let systemPackage = createSPMSwiftSystemPackage()
-        let collectionsPackage = createSPMSwiftCollectionsPackage()
-        let argumentParserPackage = createSPMSwiftArgumentParserPackage()
-        let sqlitePackage = createSPMSwiftToolchainSQLitePackage()
+        let systemPackage = try createSPMSwiftSystemPackage()
+        let collectionsPackage = try createSPMSwiftCollectionsPackage()
+        let argumentParserPackage = try createSPMSwiftArgumentParserPackage()
+        let sqlitePackage = try createSPMSwiftToolchainSQLitePackage()
         
         // MARK: - Create build tooling packages
         
-        let llbuildPackage = createSPMSwiftLLBuildPackage(
+        let llbuildPackage = try createSPMSwiftLLBuildPackage(
             swiftToolchainCSQLiteProduct: sqlitePackage.resolvedProducts[0]
         )
         
-        let toolsSupportPackage = createSPMSwiftToolsSupportCorePackage()
+        let toolsSupportPackage = try createSPMSwiftToolsSupportCorePackage()
         
-        let driverPackage = createSPMSwiftDriverPackage(
+        let driverPackage = try createSPMSwiftDriverPackage(
             swiftToolsSupportAutoProduct: toolsSupportPackage.resolvedProducts[2],
             llbuildSwiftProduct: llbuildPackage.resolvedProducts[3],
             argumentParserProduct: argumentParserPackage.resolvedProducts[0]
@@ -47,13 +47,13 @@ extension SBOMTestModulesGraph {
         
         // MARK: - Create security packages
         
-        let asn1Package = createSPMSwiftASN1Package()
+        let asn1Package = try createSPMSwiftASN1Package()
         
-        let cryptoPackage = createSPMSwiftCryptoPackage(
+        let cryptoPackage = try createSPMSwiftCryptoPackage(
             swiftASN1Product: asn1Package.resolvedProducts[0]
         )
         
-        let certificatesPackage = createSPMSwiftCertificatesPackage(
+        let certificatesPackage = try createSPMSwiftCertificatesPackage(
             swiftASN1Product: asn1Package.resolvedProducts[0],
             cryptoProduct: cryptoPackage.resolvedProducts[0],
             cryptoExtrasProduct: cryptoPackage.resolvedProducts[1]
@@ -61,19 +61,19 @@ extension SBOMTestModulesGraph {
         
         // MARK: - Create documentation packages
         
-        let symbolKitPackage = createSPMSwiftDoccSymbolKitPackage()
+        let symbolKitPackage = try createSPMSwiftDoccSymbolKitPackage()
         
-        let doccPluginPackage = createSPMSwiftDoccPluginPackage(
+        let doccPluginPackage = try createSPMSwiftDoccPluginPackage(
             symbolKitProduct: symbolKitPackage.resolvedProducts[0]
         )
         
         // MARK: - Create swift-syntax package
         
-        let syntaxPackage = createSPMSwiftSyntaxPackage()
+        let syntaxPackage = try createSPMSwiftSyntaxPackage()
         
         // MARK: - Create swift-build package
         
-        let buildPackage = createSPMSwiftBuildPackage(
+        let buildPackage = try createSPMSwiftBuildPackage(
             swiftSyntaxProduct: syntaxPackage.resolvedProducts[0],
             swiftParserProduct: syntaxPackage.resolvedProducts[2],
             swiftDriverProduct: driverPackage.resolvedProducts[0],
@@ -88,7 +88,8 @@ extension SBOMTestModulesGraph {
         
         // MARK: - Create ROOT SwiftPM package (with SwiftPMDataModel product)
         
-        let rootPackage = createSPMRootPackageComplete(
+        let rootPackage = try createSPMRootPackageComplete(
+            rootPath: rootPath,
             systemPackageProduct: systemPackage.resolvedProducts[0],
             dequeModuleProduct: collectionsPackage.resolvedProducts[0],
             orderedCollectionsProduct: collectionsPackage.resolvedProducts[6],

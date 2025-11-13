@@ -25,7 +25,7 @@ extension SBOMTestModulesGraph {
         atomicsProduct: ResolvedProduct,
         dequeProduct: ResolvedProduct,
         systemPackageProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -62,56 +62,56 @@ extension SBOMTestModulesGraph {
         let nioFileSystemPublicModule = self.createSwiftModule(name: "NIOFileSystem")
         
         // Products
-        let nioConcurrencyHelpersProduct = try! Product(
+        let nioConcurrencyHelpersProduct = try Product(
             package: identity,
             name: "NIOConcurrencyHelpers",
             type: .library(.automatic),
             modules: [nioConcurrencyHelpersModule]
         )
         
-        let nioCoreProduct = try! Product(
+        let nioCoreProduct = try Product(
             package: identity,
             name: "NIOCore",
             type: .library(.automatic),
             modules: [nioCoreModule]
         )
         
-        let nioProduct = try! Product(
+        let nioProduct = try Product(
             package: identity,
             name: "NIO",
             type: .library(.automatic),
             modules: [nioModule]
         )
         
-        let nioPosixProduct = try! Product(
+        let nioPosixProduct = try Product(
             package: identity,
             name: "NIOPosix",
             type: .library(.automatic),
             modules: [nioPosixModule]
         )
         
-        let nioTLSProduct = try! Product(
+        let nioTLSProduct = try Product(
             package: identity,
             name: "NIOTLS",
             type: .library(.automatic),
             modules: [nioTLSModule]
         )
         
-        let nioHTTP1Product = try! Product(
+        let nioHTTP1Product = try Product(
             package: identity,
             name: "NIOHTTP1",
             type: .library(.automatic),
             modules: [nioHTTP1Module]
         )
         
-        let nioFoundationCompatProduct = try! Product(
+        let nioFoundationCompatProduct = try Product(
             package: identity,
             name: "NIOFoundationCompat",
             type: .library(.automatic),
             modules: [nioFoundationCompatModule]
         )
         
-        let nioFileSystemProduct = try! Product(
+        let nioFileSystemProduct = try Product(
             package: identity,
             name: "_NIOFileSystem",
             type: .library(.automatic),
@@ -419,7 +419,7 @@ extension SBOMTestModulesGraph {
         nioCoreProduct: ResolvedProduct,
         nioConcurrencyHelpersProduct: ResolvedProduct,
         nioTLSProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -436,7 +436,7 @@ extension SBOMTestModulesGraph {
         let nioSSLModule = self.createSwiftModule(name: "NIOSSL")
         
         // Products
-        let nioSSLProduct = try! Product(
+        let nioSSLProduct = try Product(
             package: identity,
             name: "NIOSSL",
             type: .library(.automatic),
@@ -528,7 +528,7 @@ extension SBOMTestModulesGraph {
         nioHTTP1Product: ResolvedProduct,
         nioTLSProduct: ResolvedProduct,
         atomicsProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -544,7 +544,7 @@ extension SBOMTestModulesGraph {
         let niohttp2Module = self.createSwiftModule(name: "NIOHTTP2")
         
         // Products
-        let niohttp2Product = try! Product(
+        let niohttp2Product = try Product(
             package: identity,
             name: "NIOHTTP2",
             type: .library(.automatic),
@@ -627,7 +627,7 @@ extension SBOMTestModulesGraph {
         nioProduct: ResolvedProduct,
         nioCoreProduct: ResolvedProduct,
         nioHTTP1Product: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -644,14 +644,14 @@ extension SBOMTestModulesGraph {
         let nioSOCKSModule = self.createSwiftModule(name: "NIOSOCKS")
         
         // Products
-        let nioHTTPCompressionProduct = try! Product(
+        let nioHTTPCompressionProduct = try Product(
             package: identity,
             name: "NIOHTTPCompression",
             type: .library(.automatic),
             modules: [nioHTTPCompressionModule]
         )
         
-        let nioSOCKSProduct = try! Product(
+        let nioSOCKSProduct = try Product(
             package: identity,
             name: "NIOSOCKS",
             type: .library(.automatic),
@@ -747,7 +747,7 @@ extension SBOMTestModulesGraph {
         nioFoundationCompatProduct: ResolvedProduct,
         nioTLSProduct: ResolvedProduct,
         atomicsProduct: ResolvedProduct
-    ) -> (
+    ) throws -> (
         package: Package,
         modules: [Module],
         products: [Product],
@@ -762,7 +762,7 @@ extension SBOMTestModulesGraph {
         let nioTransportServicesModule = self.createSwiftModule(name: "NIOTransportServices")
         
         // Products
-        let nioTransportServicesProduct = try! Product(
+        let nioTransportServicesProduct = try Product(
             package: identity,
             name: "NIOTransportServices",
             type: .library(.automatic),
