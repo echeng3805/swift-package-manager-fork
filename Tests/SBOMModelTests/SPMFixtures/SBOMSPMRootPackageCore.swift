@@ -305,6 +305,11 @@ extension SBOMTestModulesGraph {
             ]
         )
         
+        let resolvedSPMSQLite3Module = self.createResolvedModule(
+            packageIdentity: identity,
+            module: spmSQLite3Module
+        )
+        
         return (
             modules: [
                 asyncFileSystemModule, basicsModule, binarySymbolsModule, packageModelModule,
@@ -322,7 +327,7 @@ extension SBOMTestModulesGraph {
                 resolvedPackageSigningModule, resolvedPackageRegistryModule, resolvedSPMBuildCoreModule,
                 resolvedWorkspaceModule, resolvedLLBuildManifestModule, resolvedSPMLLBuildModule,
                 resolvedDriverSupportModule, resolvedBuildModule, resolvedSourceKitLSPAPIModule,
-                resolvedQueryEngineModule, resolvedSBOMModelModule
+                resolvedQueryEngineModule, resolvedSBOMModelModule, resolvedSPMSQLite3Module
             ]
         )
     }

@@ -33,28 +33,45 @@ extension SBOMExtractor {
         }
         return String(name.dropLast("-product".count))
     }
-    
-    /// Converts a ModulesGraph module name to a dependency graph target name.
-    /// Module names remain unchanged in the dependency graph.
-    package static func getTargetName(fromModule moduleName: String) -> String {
-        return moduleName
-    }
-    
-    /// Converts a dependency graph target name back to a ModulesGraph module name.
-    /// Returns the target name if it's not a product (doesn't have "-product" suffix).
-    package static func getModuleName(fromTarget name: String) -> String? {
+
+    /// Converts a dependency graph target name back to a ModulesGraph module package and name.
+    package static func getPackageAndModuleNames(fromTarget name: String) -> (packageName: String?, moduleName: String)? {
         guard !name.hasSuffix("-product") else {
             return nil
         }
-        return name
+
+        // Handles cases like: swift-nio_NIOPosix, swift-nio-ssl_NIOSSL, swift-crypto_Crypto, swift-crypto__CryptoExtras
+        if let firstUnderscoreIndex = name.firstIndex(of: "_") {
+            // Handles cases like _CryptoExtras, _AsyncFileSystem
+            if firstUnderscoreIndex == name.startIndex {
+                return (nil, name)
+            }
+            let packageName = String(name[..<firstUnderscoreIndex])
+            let moduleName = String(name[name.index(after: firstUnderscoreIndex)...])
+            guard !packageName.isEmpty, !moduleName.isEmpty else {
+                return nil
+            }
+            return (packageName, moduleName)
+        }
+
+        return (nil, name)
     }
 
-    private func toProduct(fromTarget name: String) -> ResolvedProduct? {
+    internal func toProduct(fromTarget name: String) -> ResolvedProduct? {
         Self.getProductName(fromTarget: name).flatMap { modulesGraph.product(for: $0) }
     }
 
-    private func toModule(fromTarget name: String) -> ResolvedModule? {
-        Self.getModuleName(fromTarget: name).flatMap { modulesGraph.module(for: $0) }
+    internal func toModule(fromTarget name: String) -> ResolvedModule? {
+        guard let (packageName, moduleName) = Self.getPackageAndModuleNames(fromTarget: name) else {
+            return nil
+        }
+        if let packageName = packageName {
+            return modulesGraph.allModules.first { module in
+                module.name == moduleName && module.packageIdentity.description == packageName
+            }
+        }
+        // Search through all modules instead of using module(for:) to find modules with leading underscores
+        return modulesGraph.module(for: moduleName)
     }
 
     private static func processRelationships(from dict: [SBOMIdentifier: Set<SBOMIdentifier>]) -> [SBOMRelationship] {
@@ -81,13 +98,10 @@ extension SBOMExtractor {
         } else {
             targetProducts = rootPackage.products
         }
-        
         return try await extractDependenciesForProducts(targetProducts: targetProducts)
     }
 
     private func extractDependenciesForProducts(targetProducts: [ResolvedProduct]) async throws -> SBOMDependencies {        
-        
-
         guard let rootPackage = modulesGraph.rootPackages.first else {
             throw SBOMExtractorError.noRootPackage(context: "extract dependencies for the following products: \(targetProducts)")
         }
@@ -208,7 +222,7 @@ extension SBOMExtractor {
                         }
                         // else it's not in the modules graph
                         else {
-                            print("==== warning: remove me ev_cheng \(targetDep)")
+                            print("==== warning: target: \(targetDep)")
                         }
                         
                     }

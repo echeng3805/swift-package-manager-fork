@@ -29,6 +29,20 @@ extension SBOMTestModulesGraph {
         let toolsSupportPackage = try createSwiftToolsSupportCorePackage()
         let httpTypesPackage = try createSwiftHTTPTypesPackage()
         
+        // MARK: - Create Security Packages
+        
+        let asn1Package = try createSwiftlySwiftASN1Package()
+        
+        let cryptoPackage = try createSwiftlySwiftCryptoPackage(
+            swiftASN1Product: asn1Package.resolvedProducts[0]
+        )
+        
+        let certificatesPackage = try createSwiftlySwiftCertificatesPackage(
+            swiftASN1Product: asn1Package.resolvedProducts[0],
+            cryptoProduct: cryptoPackage.resolvedProducts[0],
+            cryptoExtrasProduct: cryptoPackage.resolvedProducts[1]
+        )
+        
         // MARK: - Create Packages with Foundation Dependencies
         
         let subprocessPackage = try createSwiftSubprocessPackage(
@@ -156,6 +170,9 @@ extension SBOMTestModulesGraph {
             argumentParserPackage.resolvedPackage,
             toolsSupportPackage.resolvedPackage,
             httpTypesPackage.resolvedPackage,
+            asn1Package.resolvedPackage,
+            cryptoPackage.resolvedPackage,
+            certificatesPackage.resolvedPackage,
             collectionsPackage.resolvedPackage,
             numericsPackage.resolvedPackage,
             algorithmsPackage.resolvedPackage,
@@ -182,6 +199,9 @@ extension SBOMTestModulesGraph {
             argumentParserPackage.resolvedPackage,
             toolsSupportPackage.resolvedPackage,
             httpTypesPackage.resolvedPackage,
+            asn1Package.resolvedPackage,
+            cryptoPackage.resolvedPackage,
+            certificatesPackage.resolvedPackage,
             collectionsPackage.resolvedPackage,
             numericsPackage.resolvedPackage,
             algorithmsPackage.resolvedPackage,
@@ -209,6 +229,9 @@ extension SBOMTestModulesGraph {
             argumentParserPackage.packageRef,
             toolsSupportPackage.packageRef,
             httpTypesPackage.packageRef,
+            asn1Package.packageRef,
+            cryptoPackage.packageRef,
+            certificatesPackage.packageRef,
             collectionsPackage.packageRef,
             numericsPackage.packageRef,
             algorithmsPackage.packageRef,

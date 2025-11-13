@@ -37,6 +37,7 @@ extension SwiftPackageCommand {
         
         func run(_ swiftCommandState: SwiftCommandState) async throws {
 
+            // TODO ev_cheng: remove?
             guard swiftCommandState.options.build.buildSystem == .swiftbuild else {
                 throw StringError("SBOM generation requires the SwiftBuild build system. Please use '--build-system swiftbuild'.")
             }

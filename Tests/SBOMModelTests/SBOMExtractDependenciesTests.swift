@@ -220,7 +220,9 @@ struct SBOMExtractDependenciesTests {
         #expect(SBOMExtractor.getProductName(fromTarget: "AsyncHTTPClient-product") == "AsyncHTTPClient")
         #expect(SBOMExtractor.getProductName(fromTarget: "OpenAPIRuntime-product") == "OpenAPIRuntime")
         #expect(SBOMExtractor.getProductName(fromTarget: "SystemPackage-product") == "SystemPackage")
+        #expect(SBOMExtractor.getProductName(fromTarget: "SwiftBuild-product") == "SwiftBuild")
         
+
         #expect(SBOMExtractor.getProductName(fromTarget: "Swiftly") == nil)
         #expect(SBOMExtractor.getProductName(fromTarget: "TestSwiftly") == nil)
         #expect(SBOMExtractor.getProductName(fromTarget: "ArgumentParser") == nil)
@@ -233,48 +235,77 @@ struct SBOMExtractDependenciesTests {
         #expect(SBOMExtractor.getProductName(fromTarget: "my-product-product") == "my-product")
     }
     
-    @Test("getTargetName(fromModule:) preserves module names")
-    func testGetTargetNameFromModule() {
-        #expect(SBOMExtractor.getTargetName(fromModule: "Swiftly") == "Swiftly")
-        #expect(SBOMExtractor.getTargetName(fromModule: "TestSwiftly") == "TestSwiftly")
-        #expect(SBOMExtractor.getTargetName(fromModule: "ArgumentParser") == "ArgumentParser")
-        #expect(SBOMExtractor.getTargetName(fromModule: "SwiftlyCore") == "SwiftlyCore")
-        #expect(SBOMExtractor.getTargetName(fromModule: "MacOSPlatform") == "MacOSPlatform")
-        #expect(SBOMExtractor.getTargetName(fromModule: "LinuxPlatform") == "LinuxPlatform")
-        #expect(SBOMExtractor.getTargetName(fromModule: "SwiftlyWebsiteAPI") == "SwiftlyWebsiteAPI")
-        #expect(SBOMExtractor.getTargetName(fromModule: "SwiftlyDownloadAPI") == "SwiftlyDownloadAPI")
-        #expect(SBOMExtractor.getTargetName(fromModule: "AsyncHTTPClient") == "AsyncHTTPClient")
-        #expect(SBOMExtractor.getTargetName(fromModule: "OpenAPIRuntime") == "OpenAPIRuntime")
+    @Test("getPackageAndModuleNames(fromTarget:) converts target names correctly")
+    func testGetPackageAndModuleNamesFromTarget() {
+        // Test simple module names (no package prefix)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "Swiftly")?.moduleName == "Swiftly")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "Swiftly")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "TestSwiftly")?.moduleName == "TestSwiftly")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "TestSwiftly")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "ArgumentParser")?.moduleName == "ArgumentParser")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "ArgumentParser")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "SwiftlyCore")?.moduleName == "SwiftlyCore")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "SwiftlyCore")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "MacOSPlatform")?.moduleName == "MacOSPlatform")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "MacOSPlatform")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "LinuxPlatform")?.moduleName == "LinuxPlatform")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "LinuxPlatform")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "SwiftlyWebsiteAPI")?.moduleName == "SwiftlyWebsiteAPI")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "SwiftlyWebsiteAPI")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "SwiftlyDownloadAPI")?.moduleName == "SwiftlyDownloadAPI")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "SwiftlyDownloadAPI")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "AsyncHTTPClient")?.moduleName == "AsyncHTTPClient")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "AsyncHTTPClient")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "OpenAPIRuntime")?.moduleName == "OpenAPIRuntime")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "OpenAPIRuntime")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "SPMSQLite3")?.moduleName == "SPMSQLite3")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "SPMSQLite3")?.packageName == nil)
         
-        #expect(SBOMExtractor.getTargetName(fromModule: "") == "")
-        #expect(SBOMExtractor.getTargetName(fromModule: "A") == "A")
-        #expect(SBOMExtractor.getTargetName(fromModule: "module-with-dashes") == "module-with-dashes")
-    }
-    
-    @Test("getModuleName(fromTarget:) converts target names correctly")
-    func testGetModuleNameFromTarget() {
-        #expect(SBOMExtractor.getModuleName(fromTarget: "Swiftly") == "Swiftly")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "TestSwiftly") == "TestSwiftly")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "ArgumentParser") == "ArgumentParser")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "SwiftlyCore") == "SwiftlyCore")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "MacOSPlatform") == "MacOSPlatform")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "LinuxPlatform") == "LinuxPlatform")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "SwiftlyWebsiteAPI") == "SwiftlyWebsiteAPI")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "SwiftlyDownloadAPI") == "SwiftlyDownloadAPI")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "AsyncHTTPClient") == "AsyncHTTPClient")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "OpenAPIRuntime") == "OpenAPIRuntime")
+        // Modules that start with underscores
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "_CryptoExtras")?.moduleName == "_CryptoExtras")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "_CryptoExtras")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "_AsyncFileSystem")?.moduleName == "_AsyncFileSystem")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "_AsyncFileSystem")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "_CertificateInternals")?.moduleName == "_CertificateInternals")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "_CertificateInternals")?.packageName == nil)
+
+        // Test product names (should return nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swiftly-product") == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "test-swiftly-product") == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "ArgumentParser-product") == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "AsyncHTTPClient-product") == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "OpenAPIRuntime-product") == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "SystemPackage-product") == nil)
         
-        #expect(SBOMExtractor.getModuleName(fromTarget: "swiftly-product") == nil)
-        #expect(SBOMExtractor.getModuleName(fromTarget: "test-swiftly-product") == nil)
-        #expect(SBOMExtractor.getModuleName(fromTarget: "ArgumentParser-product") == nil)
-        #expect(SBOMExtractor.getModuleName(fromTarget: "AsyncHTTPClient-product") == nil)
-        #expect(SBOMExtractor.getModuleName(fromTarget: "OpenAPIRuntime-product") == nil)
-        #expect(SBOMExtractor.getModuleName(fromTarget: "SystemPackage-product") == nil)
+        // Test edge cases
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "")?.moduleName == "")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "A")?.moduleName == "A")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "A")?.packageName == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "-product") == nil)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "my-product-product") == nil)
         
-        #expect(SBOMExtractor.getModuleName(fromTarget: "") == "")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "A") == "A")
-        #expect(SBOMExtractor.getModuleName(fromTarget: "-product") == nil)
-        #expect(SBOMExtractor.getModuleName(fromTarget: "my-product-product") == nil)
+        // Test package_module format (with underscores)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-nio_NIOPosix")?.packageName == "swift-nio")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-nio_NIOPosix")?.moduleName == "NIOPosix")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-nio-ssl_NIOSSL")?.packageName == "swift-nio-ssl")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-nio-ssl_NIOSSL")?.moduleName == "NIOSSL")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-crypto_Crypto")?.packageName == "swift-crypto")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-crypto_Crypto")?.moduleName == "Crypto")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-crypto__CryptoExtras")?.packageName == "swift-crypto")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-crypto__CryptoExtras")?.moduleName == "_CryptoExtras")
+
+        
+
+        // Test modules with leading underscores (like _NIOBase64, _NIODataStructures)
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-nio__NIOBase64")?.packageName == "swift-nio")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-nio__NIOBase64")?.moduleName == "_NIOBase64")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-nio__NIODataStructures")?.packageName == "swift-nio")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "swift-nio__NIODataStructures")?.moduleName == "_NIODataStructures")
+        
+        // Test modules with multiple leading underscores
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "package___ModuleName")?.packageName == "package")
+        #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: "package___ModuleName")?.moduleName == "__ModuleName")
     }
     
     @Test("name mapping functions are inverses for products")
@@ -288,23 +319,12 @@ struct SBOMExtractDependenciesTests {
         }
     }
     
-    @Test("name mapping functions are inverses for modules")
-    func testModuleNameMappingRoundTrip() {
-        let moduleNames = ["Swiftly", "TestSwiftly", "SwiftlyCore", "MacOSPlatform", "ArgumentParser"]
-        
-        for moduleName in moduleNames {
-            let targetName = SBOMExtractor.getTargetName(fromModule: moduleName)
-            let recoveredName = SBOMExtractor.getModuleName(fromTarget: targetName)
-            #expect(recoveredName == moduleName, "Round trip failed for module '\(moduleName)'")
-        }
-    }
-    
     @Test("product and module mapping functions are mutually exclusive")
     func testProductAndModuleMappingExclusivity() {
         // Product target names should not be recognized as modules
         let productTargetNames = ["swiftly-product", "ArgumentParser-product", "AsyncHTTPClient-product"]
         for targetName in productTargetNames {
-            #expect(SBOMExtractor.getModuleName(fromTarget: targetName) == nil,
+            #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: targetName) == nil,
                    "Product target '\(targetName)' should not be recognized as a module")
             #expect(SBOMExtractor.getProductName(fromTarget: targetName) != nil,
                    "Product target '\(targetName)' should be recognized as a product")
@@ -315,8 +335,176 @@ struct SBOMExtractDependenciesTests {
         for targetName in moduleTargetNames {
             #expect(SBOMExtractor.getProductName(fromTarget: targetName) == nil,
                    "Module target '\(targetName)' should not be recognized as a product")
-            #expect(SBOMExtractor.getModuleName(fromTarget: targetName) != nil,
+            #expect(SBOMExtractor.getPackageAndModuleNames(fromTarget: targetName) != nil,
                    "Module target '\(targetName)' should be recognized as a module")
+        }
+    }
+    
+    // MARK: - toProduct and toModule Tests
+    
+    @Test("toProduct(fromTarget:) returns correct product for valid product targets")
+    func testToProductWithValidTargets() async throws {
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        let swiftlyProduct = extractor.toProduct(fromTarget: "swiftly-product")
+        #expect(swiftlyProduct?.name == "swiftly", "Product name should be 'swiftly'")
+        
+        let testSwiftlyProduct = extractor.toProduct(fromTarget: "test-swiftly-product")
+        #expect(testSwiftlyProduct?.name == "test-swiftly", "Product name should be 'test-swiftly'")
+    }
+    
+    @Test("toProduct(fromTarget:) returns nil for non-product targets")
+    func testToProductWithNonProductTargets() async throws {
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        #expect(extractor.toProduct(fromTarget: "Swiftly") == nil, "Module name should not be recognized as product")
+        #expect(extractor.toProduct(fromTarget: "SwiftlyCore") == nil, "Module name should not be recognized as product")
+        #expect(extractor.toProduct(fromTarget: "_AsyncFileSystem") == nil, "Module with underscore should not be recognized as product")
+        #expect(extractor.toProduct(fromTarget: "SPMSQLite3") == nil, "Module name should not be recognized as product")
+        
+        #expect(extractor.toProduct(fromTarget: "swift-nio_NIOPosix") == nil, "Package_module format should not be recognized as product")
+        #expect(extractor.toProduct(fromTarget: "swift-nio__NIOBase64") == nil, "Package_module with underscore should not be recognized as product")
+    }
+    
+    @Test("toProduct(fromTarget:) handles edge cases for product targets")
+    func testToProductEdgeCases() async throws {
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        let swiftBuildProduct = extractor.toProduct(fromTarget: "SwiftBuild-product")
+        #expect(swiftBuildProduct != nil, "SwiftBuild-product should exist in modules graph")
+        
+        let swbBuildServiceProduct = extractor.toProduct(fromTarget: "SWBBuildService-product")
+        #expect(swbBuildServiceProduct != nil, "SWBBuildService-product should exist in modules graph")
+    }
+    
+    @Test("toModule(fromTarget:) returns correct module for simple module names")
+    func testToModuleWithSimpleNames() async throws {
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        let swiftlyModule = extractor.toModule(fromTarget: "Swiftly")
+        #expect(swiftlyModule?.name == "Swiftly", "Module name should be 'Swiftly'")
+        
+        let swiftlyCoreModule = extractor.toModule(fromTarget: "SwiftlyCore")
+        #expect(swiftlyCoreModule?.name == "SwiftlyCore", "Module name should be 'SwiftlyCore'")
+    }
+
+            
+    @Test("toModule(fromTarget:) returns correct module for system module")
+    func testToModuleWithSystemModules() async throws {
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        let spmSQLite3Module = extractor.toModule(fromTarget: "SPMSQLite3")
+        #expect(spmSQLite3Module?.name == "SPMSQLite3", "Module name should be 'SPMSQLite3'")
+    }
+    
+    @Test("toModule(fromTarget:) returns correct module for modules with leading underscores")
+    func testToModuleWithLeadingUnderscores() async throws {
+
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        let asyncFileSystemModule = extractor.toModule(fromTarget: "_AsyncFileSystem")
+        #expect(asyncFileSystemModule?.name == "_AsyncFileSystem", "Module name should be '_AsyncFileSystem'")
+
+        let certificateInternalsModule = extractor.toModule(fromTarget: "_CertificateInternals")
+        #expect(certificateInternalsModule?.name == "_CertificateInternals", "Module name should be '_CertificateInternals'")
+        
+        let cryptoExtrasModule = extractor.toModule(fromTarget: "_CryptoExtras")
+        #expect(cryptoExtrasModule?.name == "_CryptoExtras", "Module name should be '_CryptoExtras'")
+        
+        let swiftSyntaxCShimsModule = extractor.toModule(fromTarget: "_SwiftSyntaxCShims")
+        #expect(swiftSyntaxCShimsModule?.name == "_SwiftSyntaxCShims", "Module name should be '_SwiftSyntaxCShims'")
+        
+        let swiftlyGraph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
+        let swiftlyStore = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let swiftlyExtractor = SBOMExtractor(modulesGraph: swiftlyGraph, dependencyGraph: nil, store: swiftlyStore)
+        
+        let subprocessCShimsModule = swiftlyExtractor.toModule(fromTarget: "_SubprocessCShims")
+        #expect(subprocessCShimsModule?.name == "_SubprocessCShims", "Module name should be '_SubprocessCShims'")
+    }
+    
+    @Test("toModule(fromTarget:) returns correct module for package_module format")
+    func testToModuleWithPackageModuleFormat() async throws {
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        let nioPosixModule = extractor.toModule(fromTarget: "swift-nio_NIOPosix")
+        #expect(nioPosixModule?.name == "NIOPosix", "Module name should be 'NIOPosix'")
+        #expect(nioPosixModule?.packageIdentity.description == "swift-nio", "Package identity should be 'swift-nio'")
+        
+        let nioSSLModule = extractor.toModule(fromTarget: "swift-nio-ssl_NIOSSL")
+        #expect(nioSSLModule?.name == "NIOSSL", "Module name should be 'NIOSSL'")
+        #expect(nioSSLModule?.packageIdentity.description == "swift-nio-ssl", "Package identity should be 'swift-nio-ssl'")
+        
+        // Test modules with leading underscores in package_module format
+        let nioBase64Module = extractor.toModule(fromTarget: "swift-nio__NIOBase64")
+        #expect(nioBase64Module?.name == "_NIOBase64", "Module name should be '_NIOBase64'")
+        #expect(nioBase64Module?.packageIdentity.description == "swift-nio", "Package identity should be 'swift-nio'")
+        
+        let nioDataStructuresModule = extractor.toModule(fromTarget: "swift-nio__NIODataStructures")
+        #expect(nioDataStructuresModule?.name == "_NIODataStructures", "Module name should be '_NIODataStructures'")
+        #expect(nioDataStructuresModule?.packageIdentity.description == "swift-nio", "Package identity should be 'swift-nio'")
+        
+        let cryptoExtrasModule = extractor.toModule(fromTarget: "swift-crypto__CryptoExtras")
+        #expect(cryptoExtrasModule?.name == "_CryptoExtras", "Module name should be '_CryptoExtras'")
+        #expect(cryptoExtrasModule?.packageIdentity.description == "swift-crypto", "Package identity should be 'swift-crypto'")
+    }
+    
+    @Test("toModule(fromTarget:) returns nil for product targets")
+    func testToModuleWithProductTargets() async throws {
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        #expect(extractor.toModule(fromTarget: "swiftly-product") == nil, "Product target should not be recognized as module")
+        #expect(extractor.toModule(fromTarget: "test-swiftly-product") == nil, "Product target should not be recognized as module")
+        #expect(extractor.toModule(fromTarget: "SwiftBuild-product") == nil, "Product target should not be recognized as module")
+        #expect(extractor.toModule(fromTarget: "SWBBuildService-product") == nil, "Product target should not be recognized as module")
+    }
+    
+    @Test("toModule(fromTarget:) handles non-existent modules gracefully")
+    func testToModuleWithNonExistentModules() async throws {
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        #expect(extractor.toModule(fromTarget: "NonExistentModule") == nil, "Non-existent module should return nil")
+        #expect(extractor.toModule(fromTarget: "_NonExistentModule") == nil, "Non-existent module with underscore should return nil")
+        #expect(extractor.toModule(fromTarget: "package_NonExistentModule") == nil, "Non-existent package_module should return nil")
+    }
+    
+    @Test("toProduct and toModule are mutually exclusive")
+    func testToProductAndToModuleMutualExclusivity() async throws {
+        let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
+        let store = try SBOMTestStore.createSwiftlyResolvedPackagesStore()
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
+        
+        // Product targets should only work with toProduct
+        let productTarget = "swiftly-product"
+        #expect(extractor.toProduct(fromTarget: productTarget) != nil, "Product target should work with toProduct")
+        #expect(extractor.toModule(fromTarget: productTarget) == nil, "Product target should not work with toModule")
+        
+        // Module targets should only work with toModule
+        let moduleTarget = "Swiftly"
+        #expect(extractor.toModule(fromTarget: moduleTarget) != nil, "Module target should work with toModule")
+        #expect(extractor.toProduct(fromTarget: moduleTarget) == nil, "Module target should not work with toProduct")
+        
+        // Package_module format should only work with toModule
+        let packageModuleTarget = "swift-nio_NIOPosix"
+        if extractor.toModule(fromTarget: packageModuleTarget) != nil {
+            #expect(extractor.toProduct(fromTarget: packageModuleTarget) == nil, "Package_module format should not work with toProduct")
         }
     }
     

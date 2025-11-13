@@ -107,8 +107,8 @@ extension SBOMTestModulesGraph {
             swiftDiagnosticsProduct: syntaxPackage.resolvedProducts[3],
             swiftParserProduct: syntaxPackage.resolvedProducts[2],
             swiftSyntaxProduct: syntaxPackage.resolvedProducts[0],
-            swiftBuildProduct: buildPackage.resolvedProducts[0],
-            swbBuildServiceProduct: buildPackage.resolvedProducts[1]
+            swiftBuildProduct: buildPackage.resolvedProducts[5],
+            swbBuildServiceProduct: buildPackage.resolvedProducts[0]
         )
         
         // MARK: - Assemble all packages

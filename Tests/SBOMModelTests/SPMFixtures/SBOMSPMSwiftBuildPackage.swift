@@ -19,7 +19,7 @@ import PackageModel
 
 extension SBOMTestModulesGraph {
     
-    // MARK: - swift-build Package (26 modules)
+    // MARK: - swift-build Package (24 modules, 7 products)
     
     static func createSPMSwiftBuildPackage(
         swiftSyntaxProduct: ResolvedProduct,
@@ -43,470 +43,368 @@ extension SBOMTestModulesGraph {
     ) {
         let identity = PackageIdentity.plain("swift-build")
         
-        // MARK: - Create all 26 modules
+        // MARK: - Create all 24 modules from spm-debug-output.txt
+        
+        // Platform modules
+        let swbAndroidPlatformModule = self.createSwiftModule(name: "SWBAndroidPlatform")
+        let swbApplePlatformModule = self.createSwiftModule(name: "SWBApplePlatform")
+        let swbGenericUnixPlatformModule = self.createSwiftModule(name: "SWBGenericUnixPlatform")
+        let swbQNXPlatformModule = self.createSwiftModule(name: "SWBQNXPlatform")
+        let swbUniversalPlatformModule = self.createSwiftModule(name: "SWBUniversalPlatform")
+        let swbWebAssemblyPlatformModule = self.createSwiftModule(name: "SWBWebAssemblyPlatform")
+        let swbWindowsPlatformModule = self.createSwiftModule(name: "SWBWindowsPlatform")
         
         // Core modules
-        let basicsModule = self.createSwiftModule(name: "Basics")
-        let packageModelModule = self.createSwiftModule(name: "PackageModel")
-        let packageLoadingModule = self.createSwiftModule(name: "PackageLoading")
-        let packageGraphModule = self.createSwiftModule(name: "PackageGraph")
-        let sourceControlModule = self.createSwiftModule(name: "SourceControl")
-        let workspaceModule = self.createSwiftModule(name: "Workspace")
+        let swbBuildServiceModule = self.createSwiftModule(name: "SWBBuildService")
+        let swbBuildSystemModule = self.createSwiftModule(name: "SWBBuildSystem")
+        let swbCASModule = self.createSwiftModule(name: "SWBCAS")
+        let swbCLibcModule = self.createSwiftModule(name: "SWBCLibc")
+        let swbCSupportModule = self.createSwiftModule(name: "SWBCSupport")
+        let swbCoreModule = self.createSwiftModule(name: "SWBCore")
+        let swbLLBuildModule = self.createSwiftModule(name: "SWBLLBuild")
+        let swbLibcModule = self.createSwiftModule(name: "SWBLibc")
+        let swbMacroModule = self.createSwiftModule(name: "SWBMacro")
+        let swbProjectModelModule = self.createSwiftModule(name: "SWBProjectModel")
+        let swbProtocolModule = self.createSwiftModule(name: "SWBProtocol")
+        let swbServiceCoreModule = self.createSwiftModule(name: "SWBServiceCore")
+        let swbTaskConstructionModule = self.createSwiftModule(name: "SWBTaskConstruction")
+        let swbTaskExecutionModule = self.createSwiftModule(name: "SWBTaskExecution")
+        let swbUtilModule = self.createSwiftModule(name: "SWBUtil")
         
-        // Build system modules
-        let buildModule = self.createSwiftModule(name: "Build")
-        let llbuildManifestModule = self.createSwiftModule(name: "LLBuildManifest")
-        let spmlLLBuildModule = self.createSwiftModule(name: "SPMLLBuild")
-        
-        // Package registry modules
-        let packageRegistryModule = self.createSwiftModule(name: "PackageRegistry")
-        let packageSigningModule = self.createSwiftModule(name: "PackageSigning")
-        let packageFingerprintModule = self.createSwiftModule(name: "PackageFingerprint")
-        let packageMetadataModule = self.createSwiftModule(name: "PackageMetadata")
-        
-        // Commands modules
-        let commandsModule = self.createSwiftModule(name: "Commands")
-        let packageCollectionsModule = self.createSwiftModule(name: "PackageCollections")
-        let packageCollectionsSigningModule = self.createSwiftModule(name: "PackageCollectionsSigning")
-        
-        // Plugin modules
-        let packagePluginModule = self.createSwiftModule(name: "PackagePlugin")
-        
-        // SBOM modules
-        let sbomModelModule = self.createSwiftModule(name: "SBOMModel")
+        // SwiftBuild library module
+        let swiftBuildLibraryModule = self.createSwiftModule(name: "SwiftBuild")
         
         // Executable modules
-        let swiftBuildModule = self.createSwiftModule(name: "swift-build", type: .executable)
-        let swiftPackageModule = self.createSwiftModule(name: "swift-package", type: .executable)
-        let swiftRunModule = self.createSwiftModule(name: "swift-run", type: .executable)
-        let swiftTestModule = self.createSwiftModule(name: "swift-test", type: .executable)
-        let swiftPackageRegistryModule = self.createSwiftModule(name: "swift-package-registry", type: .executable)
-        let swiftPackageCollectionModule = self.createSwiftModule(name: "swift-package-collection", type: .executable)
+        let swbBuildServiceBundleModule = self.createSwiftModule(name: "SWBBuildServiceBundle", type: .executable)
+        let swbuildModule = self.createSwiftModule(name: "swbuild", type: .executable)
         
-        // Test support modules
-        let internalTestSupportModule = self.createSwiftModule(name: "_InternalTestSupport")
-        let workspaceTestSupportModule = self.createSwiftModule(name: "WorkspaceTestSupport")
+        // MARK: - Create products (7 products from spm-debug-output.txt)
         
-        // MARK: - Create products
-        
-        let basicsProduct = try Product(package: identity, name: "SwiftPMPackageModel", type: .library(.automatic), modules: [basicsModule, packageModelModule])
-        let packageLoadingProduct = try Product(package: identity, name: "PackageLoading", type: .library(.automatic), modules: [packageLoadingModule])
-        let packageGraphProduct = try Product(package: identity, name: "PackageGraph", type: .library(.automatic), modules: [packageGraphModule])
-        let sourceControlProduct = try Product(package: identity, name: "SourceControl", type: .library(.automatic), modules: [sourceControlModule])
-        let workspaceProduct = try Product(package: identity, name: "Workspace", type: .library(.automatic), modules: [workspaceModule])
-        let buildProduct = try Product(package: identity, name: "Build", type: .library(.automatic), modules: [buildModule])
-        let packageRegistryProduct = try Product(package: identity, name: "PackageRegistry", type: .library(.automatic), modules: [packageRegistryModule])
-        let packageSigningProduct = try Product(package: identity, name: "PackageSigning", type: .library(.automatic), modules: [packageSigningModule])
-        let commandsProduct = try Product(package: identity, name: "Commands", type: .library(.automatic), modules: [commandsModule])
-        let sbomModelProduct = try Product(package: identity, name: "SBOMModel", type: .library(.automatic), modules: [sbomModelModule])
-        
-        let swiftBuildProduct = try Product(package: identity, name: "swift-build", type: .executable, modules: [swiftBuildModule])
-        let swiftPackageProduct = try Product(package: identity, name: "swift-package", type: .executable, modules: [swiftPackageModule])
-        let swiftRunProduct = try Product(package: identity, name: "swift-run", type: .executable, modules: [swiftRunModule])
-        let swiftTestProduct = try Product(package: identity, name: "swift-test", type: .executable, modules: [swiftTestModule])
-        let swiftPackageRegistryProduct = try Product(package: identity, name: "swift-package-registry", type: .executable, modules: [swiftPackageRegistryModule])
-        let swiftPackageCollectionProduct = try Product(package: identity, name: "swift-package-collection", type: .executable, modules: [swiftPackageCollectionModule])
+        let swbBuildServiceProduct = try Product(package: identity, name: "SWBBuildService", type: .library(.automatic), modules: [swbBuildServiceModule])
+        let swbBuildServiceBundleProduct = try Product(package: identity, name: "SWBBuildServiceBundle", type: .executable, modules: [swbBuildServiceBundleModule])
+        let swbProjectModelProduct = try Product(package: identity, name: "SWBProjectModel", type: .library(.automatic), modules: [swbProjectModelModule])
+        let swbProtocolProduct = try Product(package: identity, name: "SWBProtocol", type: .library(.automatic), modules: [swbProtocolModule])
+        let swbUtilProduct = try Product(package: identity, name: "SWBUtil", type: .library(.automatic), modules: [swbUtilModule])
+        let swiftBuildLibraryProduct = try Product(package: identity, name: "SwiftBuild", type: .library(.automatic), modules: [swiftBuildLibraryModule])
+        let swbuildProduct = try Product(package: identity, name: "swbuild", type: .executable, modules: [swbuildModule])
         
         // MARK: - Create package
         
         let package = self.createPackage(
             identity: identity,
-            displayName: "swift-package-manager",
-            path: "/swift-package-manager",
+            displayName: "SwiftBuild",
+            path: "/swift-build",
             modules: [
-                basicsModule, packageModelModule, packageLoadingModule, packageGraphModule,
-                sourceControlModule, workspaceModule, buildModule, llbuildManifestModule,
-                spmlLLBuildModule, packageRegistryModule, packageSigningModule, packageFingerprintModule,
-                packageMetadataModule, commandsModule, packageCollectionsModule, packageCollectionsSigningModule,
-                packagePluginModule, sbomModelModule, swiftBuildModule, swiftPackageModule,
-                swiftRunModule, swiftTestModule, swiftPackageRegistryModule, swiftPackageCollectionModule,
-                internalTestSupportModule, workspaceTestSupportModule
+                swbAndroidPlatformModule, swbApplePlatformModule, swbBuildServiceModule,
+                swbBuildServiceBundleModule, swbBuildSystemModule, swbCASModule, swbCLibcModule,
+                swbCSupportModule, swbCoreModule, swbGenericUnixPlatformModule, swbLLBuildModule,
+                swbLibcModule, swbMacroModule, swbProjectModelModule, swbProtocolModule,
+                swbQNXPlatformModule, swbServiceCoreModule, swbTaskConstructionModule,
+                swbTaskExecutionModule, swbUniversalPlatformModule, swbUtilModule,
+                swbWebAssemblyPlatformModule, swbWindowsPlatformModule, swiftBuildLibraryModule,
+                swbuildModule
             ],
             products: [
-                basicsProduct, packageLoadingProduct, packageGraphProduct, sourceControlProduct,
-                workspaceProduct, buildProduct, packageRegistryProduct, packageSigningProduct,
-                commandsProduct, sbomModelProduct, swiftBuildProduct, swiftPackageProduct,
-                swiftRunProduct, swiftTestProduct, swiftPackageRegistryProduct, swiftPackageCollectionProduct
+                swbBuildServiceProduct, swbBuildServiceBundleProduct, swbProjectModelProduct,
+                swbProtocolProduct, swbUtilProduct, swiftBuildLibraryProduct, swbuildProduct
             ]
         )
         
-        // MARK: - Create resolved modules with dependencies
+        // MARK: - Create resolved modules with dependencies (based on spm-debug-output.txt lines 462-586)
         
-        let resolvedBasicsModule = self.createResolvedModule(
+        let resolvedSWBCLibcModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: basicsModule,
+            module: swbCLibcModule,
+            dependencies: []
+        )
+        
+        let resolvedSWBCSupportModule = self.createResolvedModule(
+            packageIdentity: identity,
+            module: swbCSupportModule,
+            dependencies: []
+        )
+        
+        let resolvedSWBLibcModule = self.createResolvedModule(
+            packageIdentity: identity,
+            module: swbLibcModule,
             dependencies: [
-                .product(swiftToolsSupportAutoProduct, conditions: []),
+                .module(resolvedSWBCLibcModule, conditions: [])
+            ]
+        )
+        
+        let resolvedSWBUtilModule = self.createResolvedModule(
+            packageIdentity: identity,
+            module: swbUtilModule,
+            dependencies: [
+                .module(resolvedSWBCSupportModule, conditions: []),
+                .module(resolvedSWBLibcModule, conditions: []),
+                .product(argumentParserProduct, conditions: []),
                 .product(systemPackageProduct, conditions: [])
             ]
         )
         
-        let resolvedPackageModelModule = self.createResolvedModule(
+        let resolvedSWBCASModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packageModelModule,
+            module: swbCASModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBUtilModule, conditions: []),
+                .module(resolvedSWBCSupportModule, conditions: [])
             ]
         )
         
-        let resolvedPackageLoadingModule = self.createResolvedModule(
+        let resolvedSWBLLBuildModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packageLoadingModule,
+            module: swbLLBuildModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .product(swiftSyntaxProduct, conditions: []),
-                .product(swiftParserProduct, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBUtilModule, conditions: []),
+                .product(llbuildSwiftProduct, conditions: [])
             ]
         )
         
-        let resolvedSourceControlModule = self.createResolvedModule(
+        let resolvedSWBProtocolModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: sourceControlModule,
+            module: swbProtocolModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBUtilModule, conditions: [])
             ]
         )
         
-        let resolvedPackageGraphModule = self.createResolvedModule(
+        let resolvedSWBServiceCoreModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packageGraphModule,
+            module: swbServiceCoreModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedPackageLoadingModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBProtocolModule, conditions: [])
             ]
         )
         
-        let resolvedPackageRegistryModule = self.createResolvedModule(
+        let resolvedSWBMacroModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packageRegistryModule,
+            module: swbMacroModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBUtilModule, conditions: []),
+                .product(swiftDriverProduct, conditions: [])
             ]
         )
         
-        let resolvedPackageSigningModule = self.createResolvedModule(
+        let resolvedSWBCoreModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packageSigningModule,
+            module: swbCoreModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .product(cryptoProduct, conditions: []),
-                .product(x509Product, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBMacroModule, conditions: []),
+                .module(resolvedSWBProtocolModule, conditions: []),
+                .module(resolvedSWBServiceCoreModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: []),
+                .module(resolvedSWBCASModule, conditions: []),
+                .module(resolvedSWBLLBuildModule, conditions: []),
+                .product(swiftDriverProduct, conditions: [])
             ]
         )
         
-        let resolvedPackageFingerprintModule = self.createResolvedModule(
+        let resolvedSWBTaskConstructionModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packageFingerprintModule,
+            module: swbTaskConstructionModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: [])
             ]
         )
         
-        let resolvedPackageMetadataModule = self.createResolvedModule(
+        let resolvedSWBTaskExecutionModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packageMetadataModule,
+            module: swbTaskExecutionModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: []),
+                .module(resolvedSWBCASModule, conditions: []),
+                .module(resolvedSWBLLBuildModule, conditions: []),
+                .module(resolvedSWBTaskConstructionModule, conditions: [])
             ]
         )
         
-        let resolvedPackageCollectionsModule = self.createResolvedModule(
+        let resolvedSWBBuildSystemModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packageCollectionsModule,
+            module: swbBuildSystemModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBTaskConstructionModule, conditions: []),
+                .module(resolvedSWBTaskExecutionModule, conditions: [])
             ]
         )
         
-        let resolvedPackageCollectionsSigningModule = self.createResolvedModule(
+        let resolvedSWBAndroidPlatformModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packageCollectionsSigningModule,
+            module: swbAndroidPlatformModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageCollectionsModule, conditions: []),
-                .product(cryptoProduct, conditions: []),
-                .product(x509Product, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBMacroModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: [])
             ]
         )
         
-        let resolvedWorkspaceModule = self.createResolvedModule(
+        let resolvedSWBApplePlatformModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: workspaceModule,
+            module: swbApplePlatformModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedPackageLoadingModule, conditions: []),
-                .module(resolvedPackageGraphModule, conditions: []),
-                .module(resolvedSourceControlModule, conditions: []),
-                .module(resolvedPackageRegistryModule, conditions: []),
-                .module(resolvedPackageFingerprintModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBMacroModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: []),
+                .module(resolvedSWBTaskConstructionModule, conditions: [])
             ]
         )
         
-        let resolvedLLBuildManifestModule = self.createResolvedModule(
+        let resolvedSWBGenericUnixPlatformModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: llbuildManifestModule,
+            module: swbGenericUnixPlatformModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: [])
             ]
         )
         
-        let resolvedSPMLLBuildModule = self.createResolvedModule(
+        let resolvedSWBQNXPlatformModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: spmlLLBuildModule,
+            module: swbQNXPlatformModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedPackageGraphModule, conditions: []),
-                .product(llbuildSwiftProduct, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBMacroModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: [])
             ]
         )
         
-        let resolvedBuildModule = self.createResolvedModule(
+        let resolvedSWBUniversalPlatformModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: buildModule,
+            module: swbUniversalPlatformModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedPackageGraphModule, conditions: []),
-                .module(resolvedLLBuildManifestModule, conditions: []),
-                .module(resolvedSPMLLBuildModule, conditions: []),
-                .product(swiftDriverProduct, conditions: []),
-                .product(swiftDriverExecutionProduct, conditions: []),
-                .product(llbuildSwiftProduct, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBMacroModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: []),
+                .module(resolvedSWBTaskConstructionModule, conditions: []),
+                .module(resolvedSWBTaskExecutionModule, conditions: []),
+                .product(argumentParserProduct, conditions: [])
             ]
         )
         
-        let resolvedPackagePluginModule = self.createResolvedModule(
+        let resolvedSWBWebAssemblyPlatformModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: packagePluginModule,
+            module: swbWebAssemblyPlatformModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBMacroModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: [])
             ]
         )
         
-        let resolvedSBOMModelModule = self.createResolvedModule(
+        let resolvedSWBWindowsPlatformModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: sbomModelModule,
+            module: swbWindowsPlatformModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedPackageGraphModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBMacroModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: [])
             ]
         )
         
-        let resolvedCommandsModule = self.createResolvedModule(
+        let resolvedSWBBuildServiceModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: commandsModule,
+            module: swbBuildServiceModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedPackageLoadingModule, conditions: []),
-                .module(resolvedPackageGraphModule, conditions: []),
-                .module(resolvedSourceControlModule, conditions: []),
-                .module(resolvedWorkspaceModule, conditions: []),
-                .module(resolvedBuildModule, conditions: []),
-                .module(resolvedPackageRegistryModule, conditions: []),
-                .module(resolvedPackageSigningModule, conditions: []),
-                .module(resolvedPackageCollectionsModule, conditions: []),
-                .module(resolvedPackagePluginModule, conditions: []),
-                .module(resolvedSBOMModelModule, conditions: []),
-                .product(argumentParserProduct, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBBuildSystemModule, conditions: []),
+                .module(resolvedSWBServiceCoreModule, conditions: []),
+                .module(resolvedSWBTaskExecutionModule, conditions: []),
+                .module(resolvedSWBAndroidPlatformModule, conditions: []),
+                .module(resolvedSWBApplePlatformModule, conditions: []),
+                .module(resolvedSWBGenericUnixPlatformModule, conditions: []),
+                .module(resolvedSWBQNXPlatformModule, conditions: []),
+                .module(resolvedSWBUniversalPlatformModule, conditions: []),
+                .module(resolvedSWBWebAssemblyPlatformModule, conditions: []),
+                .module(resolvedSWBWindowsPlatformModule, conditions: []),
+                .product(systemPackageProduct, conditions: [])
             ]
         )
         
-        let resolvedInternalTestSupportModule = self.createResolvedModule(
+        let resolvedSWBProjectModelModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: internalTestSupportModule,
+            module: swbProjectModelModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBProtocolModule, conditions: [])
             ]
         )
         
-        let resolvedWorkspaceTestSupportModule = self.createResolvedModule(
+        let resolvedSwiftBuildLibraryModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: workspaceTestSupportModule,
+            module: swiftBuildLibraryModule,
             dependencies: [
-                .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedPackageGraphModule, conditions: []),
-                .module(resolvedWorkspaceModule, conditions: []),
-                .module(resolvedInternalTestSupportModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .module(resolvedSWBCSupportModule, conditions: []),
+                .module(resolvedSWBCoreModule, conditions: []),
+                .module(resolvedSWBProtocolModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: []),
+                .module(resolvedSWBProjectModelModule, conditions: [])
             ]
         )
         
-        let resolvedSwiftBuildModule = self.createResolvedModule(
+        let resolvedSWBBuildServiceBundleModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: swiftBuildModule,
+            module: swbBuildServiceBundleModule,
             dependencies: [
-                .module(resolvedCommandsModule, conditions: [])
+                .module(resolvedSWBBuildServiceModule, conditions: []),
+                .module(resolvedSWBBuildSystemModule, conditions: []),
+                .module(resolvedSWBServiceCoreModule, conditions: []),
+                .module(resolvedSWBUtilModule, conditions: []),
+                .module(resolvedSWBCoreModule, conditions: [])
             ]
         )
         
-        let resolvedSwiftPackageModule = self.createResolvedModule(
+        let resolvedSwbuildModule = self.createResolvedModule(
             packageIdentity: identity,
-            module: swiftPackageModule,
+            module: swbuildModule,
             dependencies: [
-                .module(resolvedCommandsModule, conditions: [])
-            ]
-        )
-        
-        let resolvedSwiftRunModule = self.createResolvedModule(
-            packageIdentity: identity,
-            module: swiftRunModule,
-            dependencies: [
-                .module(resolvedCommandsModule, conditions: [])
-            ]
-        )
-        
-        let resolvedSwiftTestModule = self.createResolvedModule(
-            packageIdentity: identity,
-            module: swiftTestModule,
-            dependencies: [
-                .module(resolvedCommandsModule, conditions: [])
-            ]
-        )
-        
-        let resolvedSwiftPackageRegistryModule = self.createResolvedModule(
-            packageIdentity: identity,
-            module: swiftPackageRegistryModule,
-            dependencies: [
-                .module(resolvedCommandsModule, conditions: [])
-            ]
-        )
-        
-        let resolvedSwiftPackageCollectionModule = self.createResolvedModule(
-            packageIdentity: identity,
-            module: swiftPackageCollectionModule,
-            dependencies: [
-                .module(resolvedCommandsModule, conditions: [])
+                .module(resolvedSwiftBuildLibraryModule, conditions: []),
+                .module(resolvedSWBBuildServiceBundleModule, conditions: [])
             ]
         )
         
         // MARK: - Create resolved products
         
-        let resolvedBasicsProduct = self.createResolvedProduct(
+        let resolvedSWBBuildServiceProduct = self.createResolvedProduct(
             packageIdentity: identity,
-            product: basicsProduct,
-            modules: IdentifiableSet([resolvedBasicsModule, resolvedPackageModelModule])
+            product: swbBuildServiceProduct,
+            modules: IdentifiableSet([resolvedSWBBuildServiceModule])
         )
         
-        let resolvedPackageLoadingProduct = self.createResolvedProduct(
+        let resolvedSWBBuildServiceBundleProduct = self.createResolvedProduct(
             packageIdentity: identity,
-            product: packageLoadingProduct,
-            modules: IdentifiableSet([resolvedPackageLoadingModule])
+            product: swbBuildServiceBundleProduct,
+            modules: IdentifiableSet([resolvedSWBBuildServiceBundleModule])
         )
         
-        let resolvedPackageGraphProduct = self.createResolvedProduct(
+        let resolvedSWBProjectModelProduct = self.createResolvedProduct(
             packageIdentity: identity,
-            product: packageGraphProduct,
-            modules: IdentifiableSet([resolvedPackageGraphModule])
+            product: swbProjectModelProduct,
+            modules: IdentifiableSet([resolvedSWBProjectModelModule])
         )
         
-        let resolvedSourceControlProduct = self.createResolvedProduct(
+        let resolvedSWBProtocolProduct = self.createResolvedProduct(
             packageIdentity: identity,
-            product: sourceControlProduct,
-            modules: IdentifiableSet([resolvedSourceControlModule])
+            product: swbProtocolProduct,
+            modules: IdentifiableSet([resolvedSWBProtocolModule])
         )
         
-        let resolvedWorkspaceProduct = self.createResolvedProduct(
+        let resolvedSWBUtilProduct = self.createResolvedProduct(
             packageIdentity: identity,
-            product: workspaceProduct,
-            modules: IdentifiableSet([resolvedWorkspaceModule])
+            product: swbUtilProduct,
+            modules: IdentifiableSet([resolvedSWBUtilModule])
         )
         
-        let resolvedBuildProduct = self.createResolvedProduct(
+        let resolvedSwiftBuildLibraryProduct = self.createResolvedProduct(
             packageIdentity: identity,
-            product: buildProduct,
-            modules: IdentifiableSet([resolvedBuildModule])
+            product: swiftBuildLibraryProduct,
+            modules: IdentifiableSet([resolvedSwiftBuildLibraryModule])
         )
         
-        let resolvedPackageRegistryProduct = self.createResolvedProduct(
+        let resolvedSwbuildProduct = self.createResolvedProduct(
             packageIdentity: identity,
-            product: packageRegistryProduct,
-            modules: IdentifiableSet([resolvedPackageRegistryModule])
-        )
-        
-        let resolvedPackageSigningProduct = self.createResolvedProduct(
-            packageIdentity: identity,
-            product: packageSigningProduct,
-            modules: IdentifiableSet([resolvedPackageSigningModule])
-        )
-        
-        let resolvedCommandsProduct = self.createResolvedProduct(
-            packageIdentity: identity,
-            product: commandsProduct,
-            modules: IdentifiableSet([resolvedCommandsModule])
-        )
-        
-        let resolvedSBOMModelProduct = self.createResolvedProduct(
-            packageIdentity: identity,
-            product: sbomModelProduct,
-            modules: IdentifiableSet([resolvedSBOMModelModule])
-        )
-        
-        let resolvedSwiftBuildProduct = self.createResolvedProduct(
-            packageIdentity: identity,
-            product: swiftBuildProduct,
-            modules: IdentifiableSet([resolvedSwiftBuildModule])
-        )
-        
-        let resolvedSwiftPackageProduct = self.createResolvedProduct(
-            packageIdentity: identity,
-            product: swiftPackageProduct,
-            modules: IdentifiableSet([resolvedSwiftPackageModule])
-        )
-        
-        let resolvedSwiftRunProduct = self.createResolvedProduct(
-            packageIdentity: identity,
-            product: swiftRunProduct,
-            modules: IdentifiableSet([resolvedSwiftRunModule])
-        )
-        
-        let resolvedSwiftTestProduct = self.createResolvedProduct(
-            packageIdentity: identity,
-            product: swiftTestProduct,
-            modules: IdentifiableSet([resolvedSwiftTestModule])
-        )
-        
-        let resolvedSwiftPackageRegistryProduct = self.createResolvedProduct(
-            packageIdentity: identity,
-            product: swiftPackageRegistryProduct,
-            modules: IdentifiableSet([resolvedSwiftPackageRegistryModule])
-        )
-        
-        let resolvedSwiftPackageCollectionProduct = self.createResolvedProduct(
-            packageIdentity: identity,
-            product: swiftPackageCollectionProduct,
-            modules: IdentifiableSet([resolvedSwiftPackageCollectionModule])
+            product: swbuildProduct,
+            modules: IdentifiableSet([resolvedSwbuildModule])
         )
         
         // MARK: - Create resolved package
@@ -514,78 +412,67 @@ extension SBOMTestModulesGraph {
         let resolvedPackage = self.createResolvedPackage(
             package: package,
             modules: IdentifiableSet([
-                resolvedBasicsModule, resolvedPackageModelModule, resolvedPackageLoadingModule,
-                resolvedPackageGraphModule, resolvedSourceControlModule, resolvedWorkspaceModule,
-                resolvedBuildModule, resolvedLLBuildManifestModule, resolvedSPMLLBuildModule,
-                resolvedPackageRegistryModule, resolvedPackageSigningModule, resolvedPackageFingerprintModule,
-                resolvedPackageMetadataModule, resolvedCommandsModule, resolvedPackageCollectionsModule,
-                resolvedPackageCollectionsSigningModule, resolvedPackagePluginModule, resolvedSBOMModelModule,
-                resolvedSwiftBuildModule, resolvedSwiftPackageModule, resolvedSwiftRunModule,
-                resolvedSwiftTestModule, resolvedSwiftPackageRegistryModule, resolvedSwiftPackageCollectionModule,
-                resolvedInternalTestSupportModule, resolvedWorkspaceTestSupportModule
+                resolvedSWBAndroidPlatformModule, resolvedSWBApplePlatformModule, resolvedSWBBuildServiceModule,
+                resolvedSWBBuildServiceBundleModule, resolvedSWBBuildSystemModule, resolvedSWBCASModule,
+                resolvedSWBCLibcModule, resolvedSWBCSupportModule, resolvedSWBCoreModule,
+                resolvedSWBGenericUnixPlatformModule, resolvedSWBLLBuildModule, resolvedSWBLibcModule,
+                resolvedSWBMacroModule, resolvedSWBProjectModelModule, resolvedSWBProtocolModule,
+                resolvedSWBQNXPlatformModule, resolvedSWBServiceCoreModule, resolvedSWBTaskConstructionModule,
+                resolvedSWBTaskExecutionModule, resolvedSWBUniversalPlatformModule, resolvedSWBUtilModule,
+                resolvedSWBWebAssemblyPlatformModule, resolvedSWBWindowsPlatformModule,
+                resolvedSwiftBuildLibraryModule, resolvedSwbuildModule
             ]),
             products: [
-                resolvedBasicsProduct, resolvedPackageLoadingProduct, resolvedPackageGraphProduct,
-                resolvedSourceControlProduct, resolvedWorkspaceProduct, resolvedBuildProduct,
-                resolvedPackageRegistryProduct, resolvedPackageSigningProduct, resolvedCommandsProduct,
-                resolvedSBOMModelProduct, resolvedSwiftBuildProduct, resolvedSwiftPackageProduct,
-                resolvedSwiftRunProduct, resolvedSwiftTestProduct, resolvedSwiftPackageRegistryProduct,
-                resolvedSwiftPackageCollectionProduct
+                resolvedSWBBuildServiceProduct, resolvedSWBBuildServiceBundleProduct,
+                resolvedSWBProjectModelProduct, resolvedSWBProtocolProduct, resolvedSWBUtilProduct,
+                resolvedSwiftBuildLibraryProduct, resolvedSwbuildProduct
             ],
             dependencies: [
-                PackageIdentity.plain("swift-syntax"),
+                PackageIdentity.plain("swift-argument-parser"),
                 PackageIdentity.plain("swift-driver"),
                 PackageIdentity.plain("swift-llbuild"),
-                PackageIdentity.plain("swift-tools-support-core"),
-                PackageIdentity.plain("swift-argument-parser"),
-                PackageIdentity.plain("swift-system"),
-                PackageIdentity.plain("swift-crypto"),
-                PackageIdentity.plain("swift-certificates")
+                PackageIdentity.plain("swift-system")
             ]
         )
         
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
-            kind: .root(AbsolutePath("/swift-package-manager"))
+            kind: .remoteSourceControl(SourceControlURL("https://github.com/swiftlang/swift-build.git"))
         )
         
         return (
             package: package,
             modules: [
-                basicsModule, packageModelModule, packageLoadingModule, packageGraphModule,
-                sourceControlModule, workspaceModule, buildModule, llbuildManifestModule,
-                spmlLLBuildModule, packageRegistryModule, packageSigningModule, packageFingerprintModule,
-                packageMetadataModule, commandsModule, packageCollectionsModule, packageCollectionsSigningModule,
-                packagePluginModule, sbomModelModule, swiftBuildModule, swiftPackageModule,
-                swiftRunModule, swiftTestModule, swiftPackageRegistryModule, swiftPackageCollectionModule,
-                internalTestSupportModule, workspaceTestSupportModule
+                swbAndroidPlatformModule, swbApplePlatformModule, swbBuildServiceModule,
+                swbBuildServiceBundleModule, swbBuildSystemModule, swbCASModule, swbCLibcModule,
+                swbCSupportModule, swbCoreModule, swbGenericUnixPlatformModule, swbLLBuildModule,
+                swbLibcModule, swbMacroModule, swbProjectModelModule, swbProtocolModule,
+                swbQNXPlatformModule, swbServiceCoreModule, swbTaskConstructionModule,
+                swbTaskExecutionModule, swbUniversalPlatformModule, swbUtilModule,
+                swbWebAssemblyPlatformModule, swbWindowsPlatformModule, swiftBuildLibraryModule,
+                swbuildModule
             ],
             products: [
-                basicsProduct, packageLoadingProduct, packageGraphProduct, sourceControlProduct,
-                workspaceProduct, buildProduct, packageRegistryProduct, packageSigningProduct,
-                commandsProduct, sbomModelProduct, swiftBuildProduct, swiftPackageProduct,
-                swiftRunProduct, swiftTestProduct, swiftPackageRegistryProduct, swiftPackageCollectionProduct
+                swbBuildServiceProduct, swbBuildServiceBundleProduct, swbProjectModelProduct,
+                swbProtocolProduct, swbUtilProduct, swiftBuildLibraryProduct, swbuildProduct
             ],
             resolvedPackage: resolvedPackage,
             resolvedModules: [
-                resolvedBasicsModule, resolvedPackageModelModule, resolvedPackageLoadingModule,
-                resolvedPackageGraphModule, resolvedSourceControlModule, resolvedWorkspaceModule,
-                resolvedBuildModule, resolvedLLBuildManifestModule, resolvedSPMLLBuildModule,
-                resolvedPackageRegistryModule, resolvedPackageSigningModule, resolvedPackageFingerprintModule,
-                resolvedPackageMetadataModule, resolvedCommandsModule, resolvedPackageCollectionsModule,
-                resolvedPackageCollectionsSigningModule, resolvedPackagePluginModule, resolvedSBOMModelModule,
-                resolvedSwiftBuildModule, resolvedSwiftPackageModule, resolvedSwiftRunModule,
-                resolvedSwiftTestModule, resolvedSwiftPackageRegistryModule, resolvedSwiftPackageCollectionModule,
-                resolvedInternalTestSupportModule, resolvedWorkspaceTestSupportModule
+                resolvedSWBAndroidPlatformModule, resolvedSWBApplePlatformModule, resolvedSWBBuildServiceModule,
+                resolvedSWBBuildServiceBundleModule, resolvedSWBBuildSystemModule, resolvedSWBCASModule,
+                resolvedSWBCLibcModule, resolvedSWBCSupportModule, resolvedSWBCoreModule,
+                resolvedSWBGenericUnixPlatformModule, resolvedSWBLLBuildModule, resolvedSWBLibcModule,
+                resolvedSWBMacroModule, resolvedSWBProjectModelModule, resolvedSWBProtocolModule,
+                resolvedSWBQNXPlatformModule, resolvedSWBServiceCoreModule, resolvedSWBTaskConstructionModule,
+                resolvedSWBTaskExecutionModule, resolvedSWBUniversalPlatformModule, resolvedSWBUtilModule,
+                resolvedSWBWebAssemblyPlatformModule, resolvedSWBWindowsPlatformModule,
+                resolvedSwiftBuildLibraryModule, resolvedSwbuildModule
             ],
             resolvedProducts: [
-                resolvedBasicsProduct, resolvedPackageLoadingProduct, resolvedPackageGraphProduct,
-                resolvedSourceControlProduct, resolvedWorkspaceProduct, resolvedBuildProduct,
-                resolvedPackageRegistryProduct, resolvedPackageSigningProduct, resolvedCommandsProduct,
-                resolvedSBOMModelProduct, resolvedSwiftBuildProduct, resolvedSwiftPackageProduct,
-                resolvedSwiftRunProduct, resolvedSwiftTestProduct, resolvedSwiftPackageRegistryProduct,
-                resolvedSwiftPackageCollectionProduct
+                resolvedSWBBuildServiceProduct, resolvedSWBBuildServiceBundleProduct,
+                resolvedSWBProjectModelProduct, resolvedSWBProtocolProduct, resolvedSWBUtilProduct,
+                resolvedSwiftBuildLibraryProduct, resolvedSwbuildProduct
             ],
             packageRef: packageRef
         )
