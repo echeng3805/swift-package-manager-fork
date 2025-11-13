@@ -160,8 +160,9 @@ struct SBOMExtractPrimaryComponentTests {
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
         let gitCache = SBOMGitCache()
         let componentCache = SBOMComponentCache()
+        let targetNameCache = SBOMTargetNameCache()
 
-        let component1 = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store, gitCache: gitCache, componentCache: componentCache); return try await extractor.extractPrimaryComponent() }()
+        let component1 = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store, gitCache: gitCache, componentCache: componentCache, targetNameCache: targetNameCache); return try await extractor.extractPrimaryComponent() }()
         #expect(component1.version.revision == expectedRevision)
 
         let cachedVersion = await gitCache.get(rootPackage.identity)
@@ -172,7 +173,7 @@ struct SBOMExtractPrimaryComponentTests {
         try localFileSystem.removeFileTree(gitPath)
         #expect(!localFileSystem.exists(gitPath), "Git directory should be removed")
 
-        let component2 = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store, gitCache: gitCache, componentCache: componentCache); return try await extractor.extractPrimaryComponent() }()
+        let component2 = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store, gitCache: gitCache, componentCache: componentCache, targetNameCache: targetNameCache); return try await extractor.extractPrimaryComponent() }()
         #expect(component2.version.revision == expectedRevision, "Should return cached version even without Git")
         #expect(
             component2.version.revision == component1.version.revision,
@@ -180,7 +181,7 @@ struct SBOMExtractPrimaryComponentTests {
         )
 
         let resolvedProduct = try #require(rootPackage.products.first { $0.name == "SwiftPMDataModel" })
-        let productComponent = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store, gitCache: gitCache, componentCache: componentCache); return try await extractor.extractComponent(product: resolvedProduct) }()
+        let productComponent = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store, gitCache: gitCache, componentCache: componentCache, targetNameCache: targetNameCache); return try await extractor.extractComponent(product: resolvedProduct) }()
         #expect(
             productComponent.version.revision == expectedRevision,
             "Product should use cached version from root package"

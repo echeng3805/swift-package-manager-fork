@@ -39,7 +39,6 @@ extension SBOMExtractor {
         guard !name.hasSuffix("-product") else {
             return nil
         }
-
         // Handles cases like: swift-nio_NIOPosix, swift-nio-ssl_NIOSSL, swift-crypto_Crypto, swift-crypto__CryptoExtras
         if let firstUnderscoreIndex = name.firstIndex(of: "_") {
             // Handles cases like _CryptoExtras, _AsyncFileSystem
@@ -53,7 +52,6 @@ extension SBOMExtractor {
             }
             return (packageName, moduleName)
         }
-
         return (nil, name)
     }
 
@@ -70,7 +68,6 @@ extension SBOMExtractor {
                 module.name == moduleName && module.packageIdentity.description == packageName
             }
         }
-        // Search through all modules instead of using module(for:) to find modules with leading underscores
         return modulesGraph.module(for: moduleName)
     }
 
@@ -88,7 +85,6 @@ extension SBOMExtractor {
         guard let rootPackage = modulesGraph.rootPackages.first else {
             throw SBOMExtractorError.noRootPackage(context: "extract dependencies")
         }
-        
         let targetProducts: [ResolvedProduct]
         if let name = product {
             guard let targetProduct = rootPackage.products.first(where: { $0.name == name }) else {
@@ -101,11 +97,24 @@ extension SBOMExtractor {
         return try await extractDependenciesForProducts(targetProducts: targetProducts)
     }
 
+    private func populateTargetNameCache() async {
+        if let buildGraph = dependencyGraph {
+            for targetName in buildGraph.keys {
+                if let module = toModule(fromTarget: targetName) {
+                    await targetNameCache.set(module.id, targetName: targetName)
+                }
+            }
+        }
+    }
+
     private func extractDependenciesForProducts(targetProducts: [ResolvedProduct]) async throws -> SBOMDependencies {        
         guard let rootPackage = modulesGraph.rootPackages.first else {
             throw SBOMExtractorError.noRootPackage(context: "extract dependencies for the following products: \(targetProducts)")
         }
         let rootPackageID = SBOMExtractor.extractComponentID(from: rootPackage)
+
+        // This is to avoid trying to remap modules back to targets
+        await populateTargetNameCache()
 
         var components: Set<SBOMComponent> = []
         func addComponent(_ component: SBOMComponent) {
@@ -121,7 +130,48 @@ extension SBOMExtractor {
         }
 
         // Processes modules recursively and returns a list of products to process
+        // Only looks at the modules graph
         func processModuleDependency(
+            from product: ResolvedProduct,
+            dependentModule: ResolvedModule
+        ) async throws -> [ResolvedProduct] {
+            var result: [ResolvedProduct] = []
+            var modulesToProcess: [ResolvedModule] = [dependentModule]
+            var processedModules = Set<ResolvedModule.ID>()
+            
+            while !modulesToProcess.isEmpty {
+                let currentModule = modulesToProcess.removeFirst()
+                guard !processedModules.contains(currentModule.id) else {
+                    continue
+                }
+                processedModules.insert(currentModule.id)
+
+                if let buildGraph = dependencyGraph {
+                    if let targetName = await targetNameCache.get(currentModule.id),
+                      let targetDeps = buildGraph[targetName] {
+                        for targetDep in targetDeps {
+                            if let dependentProduct = toProduct(fromTarget: targetDep) {
+                                if let toProcess = try await processProductDependency(from: product, dependentProduct: dependentProduct) {
+                                    result.append(toProcess)
+                                }
+                            }
+                            else if let dependentModule = toModule(fromTarget: targetDep) {
+                                if !processedModules.contains(dependentModule.id) {
+                                    modulesToProcess.append(dependentModule)
+                                }
+                            }
+                            // else it's not in the modules graph
+                            // TODO ev_cheng, print a warning?
+                        }
+                    } 
+                }    
+            }
+            return result
+        }
+
+        // Processes modules recursively and returns a list of products to process
+        // Only looks at the modules graph
+        func processModuleDependencyUsingModulesGraph(
             from product: ResolvedProduct,
             dependentModule: ResolvedModule
         ) async throws -> [ResolvedProduct] {
@@ -136,7 +186,11 @@ extension SBOMExtractor {
                     continue
                 }
                 processedModules.insert(currentModule.id)
-                
+
+                // Find the module in the build graph
+                // Look at the module's dependency in the build graph
+                // Try to convert the dep to a product, if it's a product, process it
+                // Else convert the dep to a product and add it to the modulesToProcess list
                 for dependency in currentModule.dependencies {
                     switch dependency {
                     case .product(let dependentProduct, _):
@@ -148,17 +202,17 @@ extension SBOMExtractor {
                             modulesToProcess.append(nestedModule)
                         }
                     }
-                }
+                }    
             }
             return results
         }
-
+        
+        // Takes a product and a dependent product, processes the relationships, and then returns the dependent product.
         func processProductDependency(
             from product: ResolvedProduct,
             dependentProduct: ResolvedProduct
         ) async throws -> ResolvedProduct? {
-
-            // if this relationship was already seen, return dependentProduct for further processing
+            // if this relationship was already seen, return early
             let productID = SBOMExtractor.extractComponentID(from: product)
             let dependentProductID = SBOMExtractor.extractComponentID(from: dependentProduct)
             if let productRelationships = relationships[productID],
@@ -175,13 +229,11 @@ extension SBOMExtractor {
             let bothInRootPackage = product.packageIdentity == rootPackage.identity &&
                                     dependentProduct.packageIdentity == rootPackage.identity
 
-            
             // only track dependency if not both in root package (skip internal-to-internal relationships)
             if !bothInRootPackage {
                 // add product -> dependentProduct dependency
                 trackRelationship(parentID: processedProductComponent.id, childID: dependentProductComponent.id)
             }
-            
             if let dependentProductPackage = modulesGraph.packages.first(where: { $0.identity == dependentProduct.packageIdentity }) {
                 let dependentProductPackageComponent = try await extractComponent(package: dependentProductPackage)
                 addComponent(dependentProductPackageComponent)
@@ -200,12 +252,13 @@ extension SBOMExtractor {
                     }
                 }
             }
-            
             return dependentProduct
         }
 
         func processDependencies(for product: ResolvedProduct) async throws -> [ResolvedProduct] {
             var result = IdentifiableSet<ResolvedProduct>()
+            // Use the build graph with the modules graph
+            // TODO: ev_cheng, optimize so this if let isn't being run a million times
             if let buildGraph = dependencyGraph {
                 if let targetDeps = buildGraph[Self.getTargetName(fromProduct: product.name)] {
                     for targetDep in targetDeps {
@@ -221,13 +274,12 @@ extension SBOMExtractor {
                             }
                         }
                         // else it's not in the modules graph
-                        else {
-                            print("==== warning: target: \(targetDep)")
-                        }
-                        
+                        // TODO ev_cheng, print a warning?
                     }
                 }
             } else {
+                // Fall back to using the modules graph only
+                // TODO: ev_cheng, remove?
                 for module in product.modules {
                     for dependency in module.dependencies {
                         switch dependency {
@@ -236,7 +288,7 @@ extension SBOMExtractor {
                                 result.insert(toProcess)
                             }
                         case .module(let dependentModule, _): // dependencies within the same package
-                            let toProcess = try await processModuleDependency(from: product, dependentModule: dependentModule)
+                            let toProcess = try await processModuleDependencyUsingModulesGraph(from: product, dependentModule: dependentModule)
                             for productToProcess in toProcess {
                                 result.insert(productToProcess)
                             }
@@ -249,7 +301,6 @@ extension SBOMExtractor {
 
         // Add rootPackage component and create dependencies to all its products
         try await addComponent(extractComponent(package: rootPackage))
-        
         for targetProduct in targetProducts {
             let targetComponent = try await extractComponent(product: targetProduct)
             addComponent(targetComponent)
@@ -272,8 +323,8 @@ extension SBOMExtractor {
 
         return SBOMDependencies(
             components: Array(components),
-            relationships: SBOMExtractor.processRelationships(from: relationships
-        ))
+            relationships: SBOMExtractor.processRelationships(from: relationships)
+        )
     }
 }
 

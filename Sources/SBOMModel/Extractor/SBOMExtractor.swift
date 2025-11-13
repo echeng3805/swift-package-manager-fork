@@ -18,52 +18,6 @@ import PackageModel
 import SourceControl
 import TSCUtility
 
-/// Cache for storing root package Git info (to minimize calls to Git)
-package actor SBOMGitCache {
-    private var cache: [PackageIdentity: SBOMGitInfo] = [:]
-    package func get(_ identity: PackageIdentity) -> SBOMGitInfo? {
-        self.cache[identity]
-    }
-
-    package func set(_ identity: PackageIdentity, gitInfo: SBOMGitInfo) {
-        self.cache[identity] = gitInfo
-    }
-}
-
-/// Cache for storing extracted components (to avoid redundant extraction)
-package actor SBOMComponentCache {
-    private var packageCache: [PackageIdentity: SBOMComponent] = [:]
-    private var productCache: [String: SBOMComponent] = [:] // key: "packageIdentity:productName"
-    
-    package func getPackage(_ identity: PackageIdentity) -> SBOMComponent? {
-        self.packageCache[identity]
-    }
-    
-    package func setPackage(_ identity: PackageIdentity, component: SBOMComponent) {
-        self.packageCache[identity] = component
-    }
-    
-    package func getProduct(_ packageIdentity: PackageIdentity, productName: String) -> SBOMComponent? {
-        let key = "\(packageIdentity):\(productName)"
-        return self.productCache[key]
-    }
-    
-    package func setProduct(_ packageIdentity: PackageIdentity, productName: String, component: SBOMComponent) {
-        let key = "\(packageIdentity):\(productName)"
-        self.productCache[key] = component
-    }
-}
-
-package struct SBOMGitInfo {
-    package let version: SBOMComponent.Version
-    package let originator: SBOMOriginator
-    
-    package init(version: SBOMComponent.Version, originator: SBOMOriginator) {
-        self.version = version
-        self.originator = originator
-    }
-}
-
 /// Extractor for generating SBOM documents
 package struct SBOMExtractor {
     let modulesGraph: ModulesGraph
@@ -71,6 +25,7 @@ package struct SBOMExtractor {
     let store: ResolvedPackagesStore
     let gitCache: SBOMGitCache
     let componentCache: SBOMComponentCache
+    let targetNameCache: SBOMTargetNameCache
     
     package init(
         modulesGraph: ModulesGraph,
@@ -82,6 +37,7 @@ package struct SBOMExtractor {
         self.store = store
         self.gitCache = SBOMGitCache()
         self.componentCache = SBOMComponentCache()
+        self.targetNameCache = SBOMTargetNameCache()
     }
     
     package init(
@@ -89,13 +45,15 @@ package struct SBOMExtractor {
         dependencyGraph: [String: [String]]? = nil,
         store: ResolvedPackagesStore,
         gitCache: SBOMGitCache,
-        componentCache: SBOMComponentCache
+        componentCache: SBOMComponentCache,
+        targetNameCache: SBOMTargetNameCache
     ) {
         self.modulesGraph = modulesGraph
         self.dependencyGraph = dependencyGraph
         self.store = store
         self.gitCache = gitCache
         self.componentCache = componentCache
+        self.targetNameCache = targetNameCache
     }
     
     package func extractMetadata() async throws -> SBOMMetadata {
