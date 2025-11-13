@@ -493,9 +493,9 @@ struct PURLTests {
         #expect(purl.scheme == "pkg")
         #expect(purl.type == "swift")
         #expect(purl.namespace == nil)
-        #expect(purl.name == "SwiftPM")
+        #expect(purl.name == "swift-package-manager")
         #expect(purl.version == "1.0.0")
-        #expect(purl.description == "pkg:swift/SwiftPM@1.0.0")
+        #expect(purl.description == "pkg:swift/swift-package-manager@1.0.0")
     }
 
     @Test("Create PURL from ResolvedProduct with package location")
@@ -514,9 +514,9 @@ struct PURLTests {
         #expect(purl.scheme == "pkg")
         #expect(purl.type == "swift")
         #expect(purl.namespace == "github.com/swiftlang")
-        #expect(purl.name == "SwiftPM:SwiftPMDataModel")
+        #expect(purl.name == "swift-package-manager:SwiftPMDataModel")
         #expect(purl.version == "1.0.0")
-        #expect(purl.description == "pkg:swift/github.com/swiftlang/SwiftPM:SwiftPMDataModel@1.0.0")
+        #expect(purl.description == "pkg:swift/github.com/swiftlang/swift-package-manager:SwiftPMDataModel@1.0.0")
     }
 
     @Test("Create PURL from ResolvedProduct with local package")
@@ -532,11 +532,11 @@ struct PURLTests {
 
         #expect(purl.scheme == "pkg")
         #expect(purl.type == "swift")
-        #expect(purl.name == "SwiftPM:SwiftPMDataModel")
+        #expect(purl.name == "swift-package-manager:SwiftPMDataModel")
         #expect(purl.namespace == nil) // No namespace for local paths
         #expect(purl.version == "1.0.0")
         #expect(purl.qualifiers == ["path": localPath])
-        #expect(purl.description == "pkg:swift/SwiftPM:SwiftPMDataModel@1.0.0?path=/Users/someuser/myCode/SwiftPM/")
+        #expect(purl.description == "pkg:swift/swift-package-manager:SwiftPMDataModel@1.0.0?path=/Users/someuser/myCode/SwiftPM/")
     }
 
     @Test("Create PURL from ResolvedProduct with SSH URL")

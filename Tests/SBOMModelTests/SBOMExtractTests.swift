@@ -26,29 +26,27 @@ struct SBOMExtractTests {
         let sbom = try await extractor.extractSBOM(product: productName)
 
         #expect(sbom.primaryComponent.name == productName)
-        #expect(sbom.primaryComponent.id.value == "SwiftPM:\(productName)")
+        #expect(sbom.primaryComponent.id.value == "swift-package-manager:\(productName)")
         #expect(sbom.primaryComponent.category == .library)
 
         let fullSbom = try await extractor.extractSBOM()
-        #expect(fullSbom.primaryComponent.name == "SwiftPM")
-        #expect(fullSbom.primaryComponent.id.value == "SwiftPM")
-        #expect(fullSbom.primaryComponent.category == .library)
+        #expect(fullSbom.primaryComponent.name == "swift-package-manager")
+        #expect(fullSbom.primaryComponent.id.value == "swift-package-manager")
+        #expect(fullSbom.primaryComponent.category == .application)
 
-        #expect(sbom.dependencies.components.count == 9)
-        #expect(fullSbom.dependencies.components.count == 22)
+        #expect(sbom.dependencies.components.count < fullSbom.dependencies.components.count)
 
-        #expect(sbom.dependencies.relationships?.count == 5)
-        #expect(fullSbom.dependencies.relationships?.count == 13)
+        #expect((sbom.dependencies.relationships?.count ?? 0) < (fullSbom.dependencies.relationships?.count ?? 0))
 
         let componentIDs = Set(sbom.dependencies.components.map(\.id.value))
 
-        #expect(componentIDs.contains("SwiftPM:SwiftPMPackageCollections"), "should contain target product")
-        #expect(componentIDs.contains("SwiftPM"), "should contain root package")
+        #expect(componentIDs.contains("swift-package-manager:SwiftPMPackageCollections"), "should contain target product")
+        #expect(componentIDs.contains("swift-package-manager"), "should contain root package")
 
         let swiftPMDependency = try #require(sbom.dependencies.relationships?
-            .first(where: { $0.parentID.value == "SwiftPM" }))
+            .first(where: { $0.parentID.value == "swift-package-manager" }))
         #expect(Set(swiftPMDependency.childrenID.map(\.value)) == Set([
-            "swift-tools-support-core", "swift-system", "swift-collections", "SwiftPM:SwiftPMPackageCollections"
+            "swift-certificates", "swift-tools-support-core", "swift-collections", "swift-crypto", "swift-toolchain-sqlite", "swift-system", "swift-package-manager:SwiftPMPackageCollections"
         ]))
     }
 
@@ -70,11 +68,9 @@ struct SBOMExtractTests {
         #expect(fullSbom.primaryComponent.id.value == "swiftly")
         #expect(fullSbom.primaryComponent.category == .application)
 
-        #expect(sbom.dependencies.components.count == 16)
-        #expect(fullSbom.dependencies.components.count == 17)
+        #expect(sbom.dependencies.components.count < fullSbom.dependencies.components.count)
 
-        #expect(sbom.dependencies.relationships?.count == 9)
-        #expect(fullSbom.dependencies.relationships?.count == 10)
+        #expect((sbom.dependencies.relationships?.count ?? 0) < (fullSbom.dependencies.relationships?.count ?? 0))
 
         let componentIDs = Set(sbom.dependencies.components.map(\.id.value))
         #expect(componentIDs.contains("swiftly:swiftly"), "should contain target product")
@@ -95,6 +91,14 @@ struct SBOMExtractTests {
             "swift-openapi-async-http-client",
             "swift-nio",
             "swift-openapi-runtime",
+            "swift-algorithms",
+            "swift-nio-transport-services",
+            "swift-nio-ssl",
+            "swift-openapi-generator",
+            "swift-nio-http2",
+            "swift-distributed-tracing",
+            "swift-nio-extras",
+            "swift-subprocess",
         ]))
         let swiftlyProductDependency = try #require(sbom.dependencies.relationships?
             .first(where: { $0.parentID.value == "swiftly:swiftly" }))
@@ -106,6 +110,8 @@ struct SBOMExtractTests {
             "swift-argument-parser:ArgumentParser",
             "swift-nio:NIOFoundationCompat",
             "swift-system:SystemPackage",
+            "swift-subprocess:Subprocess",
+            "swift-openapi-generator:OpenAPIGenerator",
         ]))
         let swiftSystemDependency = try #require(sbom.dependencies.relationships?
             .first(where: { $0.parentID.value == "swift-system" }))

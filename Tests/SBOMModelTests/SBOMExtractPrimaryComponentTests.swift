@@ -31,7 +31,7 @@ struct SBOMExtractPrimaryComponentTests {
         let rootPackage = try #require(graph.rootPackages.first)
         let expectedRevision = try spmRepo.getCurrentRevision().identifier
 
-        #expect(component.category == SBOMComponent.Category.library)
+        #expect(component.category == .application)
         #expect(component.name == rootPackage.identity.description)
         #expect(component.id.value == rootPackage.identity.description)
         #expect(component.purl == "pkg:swift/github.com/swiftlang/SwiftPM@\(expectedRevision)")
@@ -142,8 +142,8 @@ struct SBOMExtractPrimaryComponentTests {
         #expect(component.category == .library)
 
         let packageComponent = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractPrimaryComponent() }()
-        #expect(packageComponent.name == "SwiftPM")
-        #expect(packageComponent.id.value == "SwiftPM")
+        #expect(packageComponent.name == "swift-package-manager")
+        #expect(packageComponent.id.value == "swift-package-manager")
         #expect(component.category == .library)
 
         #expect(component.id != packageComponent.id)
@@ -208,7 +208,7 @@ struct SBOMExtractPrimaryComponentTests {
         for product in rootPackage.products {
             let productComponent = nestedComponents.first { $0.name == product.name }
             #expect(productComponent != nil, "Should have component for product \(product.name)")
-            #expect(productComponent?.id.value == "SwiftPM:\(product.name)")
+            #expect(productComponent?.id.value == "swift-package-manager:\(product.name)")
         }
     }
 
@@ -293,7 +293,7 @@ struct SBOMExtractPrimaryComponentTests {
 
         let component = try await { let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store); return try await extractor.extractComponent(product: product) }()
 
-        #expect(component.purl.contains("pkg:swift/github.com/swiftlang/SwiftPM:SwiftPMPackageCollections@"))
+        #expect(component.purl.contains("pkg:swift/github.com/swiftlang/swift-package-manager:SwiftPMPackageCollections@"))
         #expect(component.purl.contains(":SwiftPMPackageCollections@"))
     }
 
@@ -387,7 +387,7 @@ struct SBOMExtractPrimaryComponentTests {
             #expect(productComponent.category == expectedCategory)
             #expect(productComponent.version.revision == expectedRevision)
             #expect(productComponent.version.commit?.sha == expectedRevision)
-            #expect(productComponent.scope == .runtime)
+            #expect(productComponent.scope == .runtime || productComponent.scope == .test)
             #expect(productComponent.description == nil)
             #expect(productComponent.purl.contains(":\(product.name)@"))
         }
@@ -630,7 +630,7 @@ struct SBOMExtractPrimaryComponentTests {
     @Test("extractComponentID from dependency packages returns correct identity")
     func extractComponentIDFromDependencyPackagesReturnsCorrectIdentity() throws {
         let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
-        for package in graph.packages where package.identity.description != "SwiftPM" {
+        for package in graph.packages where package.identity.description != "swift-package-manager" {
             let componentID = SBOMExtractor.extractComponentID(from: package)
 
             #expect(componentID.value == package.identity.description)

@@ -114,9 +114,13 @@ struct SBOMExtractDependenciesTests {
                             #expect(packageIDs.contains(child.value))
                         }
                     }
-                } else if packageIDs.contains(dependency.parentID.value) { // package comp, should have package-to-product deps
+                } else if packageIDs.contains(dependency.parentID.value) { // package comp, can have package-to-product or package-to-package deps
                     for child in dependency.childrenID {
-                        #expect(child.value.hasPrefix(dependency.parentID.value))
+                        if child.value.contains(":") { // own product deps
+                            #expect(child.value.hasPrefix(dependency.parentID.value), "Package '\(dependency.parentID.value)' product dependency '\(child.value)' should be its own product")
+                        } else { // other dependency packages
+                            #expect(packageIDs.contains(child.value), "Package '\(dependency.parentID.value)' package dependency '\(child.value)' should be a valid package")
+                        }
                     }
                 } else { // product comp, should have product-to-product deps
                     for child in dependency.childrenID {
@@ -170,11 +174,6 @@ struct SBOMExtractDependenciesTests {
         try await self.verifyDependencies(graph: graph, store: store)
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
         let dependencies = try await #require(extractor.extractDependencies().relationships)
-        
-        // Expected structure:
-        // - MyApp package depends on Utils package and App product
-        // - Utils package depends on Utils product
-        // - App product depends on Utils product
         
         #expect(dependencies.count == 3, "Simple graph should have exactly 3 dependency relationships")
         

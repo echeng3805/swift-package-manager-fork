@@ -30,15 +30,24 @@ enum SBOMTestStore {
         ("swift-system", "https://github.com/apple/swift-system.git", "1.3.2"),
         ("swift-collections", "https://github.com/apple/swift-collections.git", "1.1.4"),
         ("swift-argument-parser", "https://github.com/apple/swift-argument-parser.git", "1.5.1"),
+        ("swift-toolchain-sqlite", "https://github.com/swiftlang/swift-toolchain-sqlite.git", "1.0.0"),
         ("swift-llbuild", "https://github.com/swiftlang/swift-llbuild.git", "swift-6.0-branch"),
         ("swift-tools-support-core", "https://github.com/swiftlang/swift-tools-support-core.git", "main"),
         ("swift-driver", "https://github.com/swiftlang/swift-driver.git", "main"),
+        ("swift-asn1", "https://github.com/apple/swift-asn1.git", "1.2.0"),
         ("swift-crypto", "https://github.com/apple/swift-crypto.git", "3.0.0"),
         ("swift-certificates", "https://github.com/apple/swift-certificates.git", "1.5.0"),
     ]
 
     private static let swiftlyDependencies = [
+        ("swift-system", "https://github.com/apple/swift-system.git", "1.4.2"),
+        ("swift-subprocess", "https://github.com/swiftlang/swift-subprocess.git", "1.0.0"),
         ("swift-argument-parser", "https://github.com/apple/swift-argument-parser.git", "1.3.0"),
+        ("swift-tools-support-core", "https://github.com/swiftlang/swift-tools-support-core.git", "0.7.2"),
+        ("swift-collections", "https://github.com/apple/swift-collections.git", "1.1.4"),
+        ("swift-numerics", "https://github.com/apple/swift-numerics.git", "1.0.2"),
+        ("swift-algorithms", "https://github.com/apple/swift-algorithms.git", "1.2.0"),
+        ("swift-atomics", "https://github.com/apple/swift-atomics.git", "1.2.0"),
         ("async-http-client", "https://github.com/swift-server/async-http-client.git", "1.24.0"),
         (
             "swift-openapi-async-http-client",
@@ -46,9 +55,7 @@ enum SBOMTestStore {
             "1.1.0"
         ),
         ("swift-nio", "https://github.com/apple/swift-nio.git", "2.80.0"),
-        ("swift-tools-support-core", "https://github.com/swiftlang/swift-tools-support-core.git", "0.7.2"),
         ("swift-openapi-runtime", "https://github.com/apple/swift-openapi-runtime.git", "1.8.2"),
-        ("swift-system", "https://github.com/apple/swift-system.git", "1.4.2"),
     ]
 
     private static func createResolvedPackagesStore(

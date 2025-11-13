@@ -30,34 +30,33 @@ struct SBOMExtractComponentsTests {
     }
 
     private static let spmExpectations = TestExpectations(
-        totalComponentCount: 22,
+        totalComponentCount: 69,
         expectedPackageIds: Set([
-            "swift-system", "swift-driver", "swift-tools-support-core", "SwiftPM", "swift-collections", "swift-llbuild"
+            "swift-build", "swift-llbuild", "swift-driver", "swift-certificates", "swift-syntax", "swift-tools-support-core", "swift-crypto", "swift-argument-parser", "swift-asn1", "swift-collections", "swift-system", "swift-package-manager", "swift-toolchain-sqlite"
         ]),
-        rootPackagePrefix: "SwiftPM:",
-        expectedRootProductCount: 10,
+        rootPackagePrefix: "swift-package-manager:",
+        expectedRootProductCount: 24,
         expectedRootProductNames: Set([
-            "PackageCollectionsModel", "SwiftPM-auto", "PackageDescription",
-            "PackagePlugin", "XCBuildSupport", "SwiftPMDataModel-auto", "SwiftPMPackageCollections",
-            "AppleProductTypes", "SwiftPM", "SwiftPMDataModel",
+            "swift-package-registry", "PackageDescription", "PackageCollectionsModel", "swift-test", "swift-package-collection", "swift-sdk", "SwiftPMPackageCollections", "swift-experimental-sdk", "swift-package", "swift-run", "PackagePlugin", "swift-build-prebuilts", "SwiftPMDataModel", "swift-build", "package-info", "dummy-swiftc", "SwiftPMDataModel-auto", "XCBuildSupport", "swift-package-manager", "SwiftPM-auto", "AppleProductTypes", "swift-bootstrap", "swiftpm-testing-helper", "SwiftPM"
         ]),
-        expectedDependencyProductCount: 12
+        expectedDependencyProductCount: 33
     )
 
     private static let swiftlyExpectations = TestExpectations(
-        totalComponentCount: 17,
-        expectedPackageIds: Set([
-            "swift-openapi-runtime",
-            "swift-openapi-async-http-client",
-            "swift-system", "swiftly",
-            "swift-argument-parser", "swift-tools-support-core",
-            "async-http-client", "swift-nio"
-            
+        totalComponentCount: 64,
+        expectedPackageIds: Set(["swift-nio-http2", "swift-tools-support-core",
+            "swift-nio-transport-services", "swiftly",
+            "swift-distributed-tracing", "swift-service-context", "swift-nio-ssl",
+            "swift-nio", "swift-collections", "swift-system", "swift-algorithms",
+            "swift-openapi-generator", "swift-openapi-async-http-client",
+            "swift-argument-parser", "openapikit", "yams", "swift-subprocess",
+            "async-http-client", "swift-log", "swift-atomics", "swift-numerics",
+            "swift-openapi-runtime", "swift-http-types", "swift-nio-extras"
         ]),
         rootPackagePrefix: "swiftly:",
-        expectedRootProductCount: 2,
-        expectedRootProductNames: Set(["swiftly", "test-swiftly"]),
-        expectedDependencyProductCount: 15
+        expectedRootProductCount: 6,
+        expectedRootProductNames: Set(["test-swiftly", "swiftly", "generate-command-models", "SwiftlyTests", "build-swiftly-release", "generate-docs-reference"]),
+        expectedDependencyProductCount: 58
     )
 
     private func verifyComponents(
@@ -212,10 +211,14 @@ struct SBOMExtractComponentsTests {
         #expect(components.count < allComponents.count)
 
         let expectedComponentIDs: Set<String> = [
-            "swift-system:SystemPackage", "swift-system",
-            "swift-collections:DequeModule", "SwiftPM:SwiftPMDataModel",
-            "swift-collections:OrderedCollections", "swift-tools-support-core",
-            "swift-collections", "swift-tools-support-core:SwiftToolsSupport-auto", "SwiftPM"
+            "swift-toolchain-sqlite", "swift-certificates:X509", "swift-crypto",
+            "swift-tools-support-core", "swift-collections:Collections",
+            "swift-system", "swift-certificates", "swift-package-manager", 
+            "swift-collections", "swift-system:SystemPackage",
+            "swift-collections:BitCollections", "swift-crypto:Crypto",
+            "swift-tools-support-core:SwiftToolsSupport-auto", "swift-asn1",
+            "swift-package-manager:SwiftPMDataModel", "swift-asn1:SwiftASN1",
+            "swift-toolchain-sqlite:SwiftToolchainCSQLite", "swift-crypto:_CryptoExtras"
         ]
         #expect(componentIDs == expectedComponentIDs)
 
@@ -260,7 +263,7 @@ struct SBOMExtractComponentsTests {
 
     @Test("Root package components should include only origin remote in originator")
     func rootPackageComponentsShouldIncludeAllRemotesInOriginator() async throws {
-        let (spmRepo, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
+        let (_, spmPath) = try SBOMTestRepo.setupSPMTestRepo()
         defer { try? SBOMTestRepo.cleanup(spmPath) }
 
         // Add a second remote to test multiple remotes
@@ -281,8 +284,6 @@ struct SBOMExtractComponentsTests {
 
         let rootPackage = try #require(graph.rootPackages.first)
         let rootPackageID = rootPackage.identity.description
-
-        let actualRevision = try spmRepo.getCurrentRevision().identifier
 
         let rootComponents = components.filter { component in
             component.id.value == rootPackageID || component.id.value.hasPrefix("\(rootPackageID):")

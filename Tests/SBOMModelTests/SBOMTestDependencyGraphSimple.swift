@@ -16,10 +16,10 @@ import Foundation
 extension SBOMTestDependencyGraph {
     static func createSimpleDependencyGraph() -> [String: [String]] {
         [
-            "MyApp": ["Utils", "MyApp:App"],
-            "Utils": ["Utils:Utils"],
-            "MyApp:App": ["Utils:Utils"],
-            "Utils:Utils": []
+            "MyApp": ["Utils", "App-product"],
+            "Utils": ["Utils-product"],
+            "App-product": ["Utils-product"],
+            "Utils-product": []
         ]
     }
 }
