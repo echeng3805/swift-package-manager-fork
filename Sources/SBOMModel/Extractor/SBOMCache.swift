@@ -76,3 +76,26 @@ package actor SBOMTargetNameCache {
         self.cache[moduleID] = targetName
     }
 }
+
+/// Consolidated container for all SBOM extraction caches
+package struct SBOMCaches {
+    package let git: SBOMGitCache
+    package let component: SBOMComponentCache
+    package let targetName: SBOMTargetNameCache
+    
+    package init() {
+        self.git = SBOMGitCache()
+        self.component = SBOMComponentCache()
+        self.targetName = SBOMTargetNameCache()
+    }
+    
+    package init(
+        git: SBOMGitCache,
+        component: SBOMComponentCache,
+        targetName: SBOMTargetNameCache
+    ) {
+        self.git = git
+        self.component = component
+        self.targetName = targetName
+    }
+}

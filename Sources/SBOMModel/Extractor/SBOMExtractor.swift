@@ -23,9 +23,7 @@ package struct SBOMExtractor {
     let modulesGraph: ModulesGraph
     let dependencyGraph: [String: [String]]?
     let store: ResolvedPackagesStore
-    let gitCache: SBOMGitCache
-    let componentCache: SBOMComponentCache
-    let targetNameCache: SBOMTargetNameCache
+    let caches: SBOMCaches
     
     package init(
         modulesGraph: ModulesGraph,
@@ -35,25 +33,19 @@ package struct SBOMExtractor {
         self.modulesGraph = modulesGraph
         self.dependencyGraph = dependencyGraph
         self.store = store
-        self.gitCache = SBOMGitCache()
-        self.componentCache = SBOMComponentCache()
-        self.targetNameCache = SBOMTargetNameCache()
+        self.caches = SBOMCaches()
     }
     
     package init(
         modulesGraph: ModulesGraph,
         dependencyGraph: [String: [String]]? = nil,
         store: ResolvedPackagesStore,
-        gitCache: SBOMGitCache,
-        componentCache: SBOMComponentCache,
-        targetNameCache: SBOMTargetNameCache
+        caches: SBOMCaches
     ) {
         self.modulesGraph = modulesGraph
         self.dependencyGraph = dependencyGraph
         self.store = store
-        self.gitCache = gitCache
-        self.componentCache = componentCache
-        self.targetNameCache = targetNameCache
+        self.caches = caches
     }
     
     package func extractMetadata() async throws -> SBOMMetadata {
@@ -169,13 +161,13 @@ package struct SBOMExtractor {
     }
 
     private func extractComponentVersionAndCommits(from packageIdentity: PackageIdentity) async throws -> SBOMGitInfo {
-        if let cachedGitInfo = await gitCache.get(packageIdentity) {
+        if let cachedGitInfo = await caches.git.get(packageIdentity) {
             return cachedGitInfo
         }
         // root package (try to get version and commits from git)
         if let rootPackage = modulesGraph.rootPackages.first(where: { $0.identity == packageIdentity }) {
             let gitInfo = try await extractComponentInfoFromGit(packagePath: rootPackage.path)
-            await gitCache.set(packageIdentity, gitInfo: gitInfo)
+            await caches.git.set(packageIdentity, gitInfo: gitInfo)
             return gitInfo
         }
         guard let resolvedPackage = store.resolvedPackages[packageIdentity] else {
@@ -227,7 +219,7 @@ package struct SBOMExtractor {
     }
 
     package func extractComponent(package: ResolvedPackage) async throws -> SBOMComponent {
-        if let cached = await componentCache.getPackage(package.identity) {
+        if let cached = await caches.component.getPackage(package.identity) {
             return cached
         }
         
@@ -245,13 +237,13 @@ package struct SBOMExtractor {
             components: products
         )
         
-        await componentCache.setPackage(package.identity, component: component)
+        await caches.component.setPackage(package.identity, component: component)
         
         return component
     }
 
     package func extractComponent(product: ResolvedProduct) async throws -> SBOMComponent {
-        if let cached = await componentCache.getProduct(product.packageIdentity, productName: product.name) {
+        if let cached = await caches.component.getProduct(product.packageIdentity, productName: product.name) {
             return cached
         }
         
@@ -267,7 +259,7 @@ package struct SBOMExtractor {
             scope: Self.extractScope(from: product)
         )
         
-        await componentCache.setProduct(product.packageIdentity, productName: product.name, component: component)
+        await caches.component.setProduct(product.packageIdentity, productName: product.name, component: component)
         
         return component
     }

@@ -101,7 +101,7 @@ extension SBOMExtractor {
         if let buildGraph = dependencyGraph {
             for targetName in buildGraph.keys {
                 if let module = toModule(fromTarget: targetName) {
-                    await targetNameCache.set(module.id, targetName: targetName)
+                    await caches.targetName.set(module.id, targetName: targetName)
                 }
             }
         }
@@ -147,7 +147,7 @@ extension SBOMExtractor {
                 processedModules.insert(currentModule.id)
 
                 if let buildGraph = dependencyGraph {
-                    if let targetName = await targetNameCache.get(currentModule.id),
+                    if let targetName = await caches.targetName.get(currentModule.id),
                       let targetDeps = buildGraph[targetName] {
                         for targetDep in targetDeps {
                             if let dependentProduct = toProduct(fromTarget: targetDep) {
