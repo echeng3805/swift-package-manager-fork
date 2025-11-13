@@ -18,9 +18,8 @@ import PackageModel
 @testable import SBOMModel
 
 extension SBOMTestModulesGraph {
-    
     // MARK: - Root SPM Package - Part 1: Core Library Modules
-    
+
     /// Creates the core library modules for the root SwiftPM package
     /// These are the fundamental building blocks: Basics, PackageModel, PackageGraph, etc.
     static func createSPMRootCoreModules(
@@ -39,9 +38,9 @@ extension SBOMTestModulesGraph {
         resolvedModules: [ResolvedModule]
     ) {
         let identity = PackageIdentity.plain("swift-package-manager")
-        
+
         // MARK: - Create Core Modules
-        
+
         let asyncFileSystemModule = self.createSwiftModule(name: "_AsyncFileSystem")
         let basicsModule = self.createSwiftModule(name: "Basics")
         let binarySymbolsModule = self.createSwiftModule(name: "BinarySymbols")
@@ -66,15 +65,15 @@ extension SBOMTestModulesGraph {
         let queryEngineModule = self.createSwiftModule(name: "QueryEngine")
         let sbomModelModule = self.createSwiftModule(name: "SBOMModel")
         let spmSQLite3Module = self.createSwiftModule(name: "SPMSQLite3", type: .systemModule)
-        
+
         // MARK: - Create Resolved Modules with Dependencies
-        
+
         let resolvedAsyncFileSystemModule = self.createResolvedModule(
             packageIdentity: identity,
             module: asyncFileSystemModule,
             dependencies: [.product(systemPackageProduct, conditions: [])]
         )
-        
+
         let resolvedBasicsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: basicsModule,
@@ -84,44 +83,44 @@ extension SBOMTestModulesGraph {
                 .product(dequeModuleProduct, conditions: []),
                 .product(orderedCollectionsProduct, conditions: []),
                 .product(systemPackageProduct, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .product(swiftToolsSupportAutoProduct, conditions: []),
             ]
         )
-        
+
         let resolvedBinarySymbolsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: binarySymbolsModule,
             dependencies: [
                 .module(resolvedBasicsModule, conditions: []),
-                .product(tscBasicProduct, conditions: [])
+                .product(tscBasicProduct, conditions: []),
             ]
         )
-        
+
         let resolvedPackageModelModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageModelModule,
             dependencies: [.module(resolvedBasicsModule, conditions: [])]
         )
-        
+
         let resolvedSourceControlModule = self.createResolvedModule(
             packageIdentity: identity,
             module: sourceControlModule,
             dependencies: [
                 .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: [])
+                .module(resolvedPackageModelModule, conditions: []),
             ]
         )
-        
+
         let resolvedPackageLoadingModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageLoadingModule,
             dependencies: [
                 .module(resolvedBasicsModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedSourceControlModule, conditions: [])
+                .module(resolvedSourceControlModule, conditions: []),
             ]
         )
-        
+
         let resolvedPackageGraphModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageGraphModule,
@@ -129,16 +128,16 @@ extension SBOMTestModulesGraph {
                 .module(resolvedBasicsModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
                 .module(resolvedPackageLoadingModule, conditions: []),
-                .product(orderedCollectionsProduct, conditions: [])
+                .product(orderedCollectionsProduct, conditions: []),
             ]
         )
-        
+
         let resolvedPackageCollectionsModelModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageCollectionsModelModule,
             dependencies: [.module(resolvedBasicsModule, conditions: [])]
         )
-        
+
         let resolvedPackageCollectionsSigningModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageCollectionsSigningModule,
@@ -146,10 +145,10 @@ extension SBOMTestModulesGraph {
                 .module(resolvedBasicsModule, conditions: []),
                 .module(resolvedPackageCollectionsModelModule, conditions: []),
                 .product(cryptoProduct, conditions: []),
-                .product(x509Product, conditions: [])
+                .product(x509Product, conditions: []),
             ]
         )
-        
+
         let resolvedPackageCollectionsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageCollectionsModule,
@@ -158,29 +157,29 @@ extension SBOMTestModulesGraph {
                 .module(resolvedPackageCollectionsModelModule, conditions: []),
                 .module(resolvedPackageCollectionsSigningModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedSourceControlModule, conditions: [])
+                .module(resolvedSourceControlModule, conditions: []),
             ]
         )
-        
+
         let resolvedPackageMetadataModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageMetadataModule,
             dependencies: [
                 .module(resolvedBasicsModule, conditions: []),
                 .module(resolvedPackageCollectionsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: [])
+                .module(resolvedPackageModelModule, conditions: []),
             ]
         )
-        
+
         let resolvedPackageFingerprintModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageFingerprintModule,
             dependencies: [
                 .module(resolvedBasicsModule, conditions: []),
-                .module(resolvedPackageModelModule, conditions: [])
+                .module(resolvedPackageModelModule, conditions: []),
             ]
         )
-        
+
         let resolvedPackageSigningModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageSigningModule,
@@ -188,10 +187,10 @@ extension SBOMTestModulesGraph {
                 .module(resolvedBasicsModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
                 .product(cryptoProduct, conditions: []),
-                .product(x509Product, conditions: [])
+                .product(x509Product, conditions: []),
             ]
         )
-        
+
         let resolvedPackageRegistryModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageRegistryModule,
@@ -200,20 +199,20 @@ extension SBOMTestModulesGraph {
                 .module(resolvedPackageFingerprintModule, conditions: []),
                 .module(resolvedPackageLoadingModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedPackageSigningModule, conditions: [])
+                .module(resolvedPackageSigningModule, conditions: []),
             ]
         )
-        
+
         let resolvedSPMBuildCoreModule = self.createResolvedModule(
             packageIdentity: identity,
             module: spmBuildCoreModule,
             dependencies: [
                 .module(resolvedBasicsModule, conditions: []),
                 .module(resolvedPackageGraphModule, conditions: []),
-                .product(orderedCollectionsProduct, conditions: [])
+                .product(orderedCollectionsProduct, conditions: []),
             ]
         )
-        
+
         let resolvedWorkspaceModule = self.createResolvedModule(
             packageIdentity: identity,
             module: workspaceModule,
@@ -226,35 +225,35 @@ extension SBOMTestModulesGraph {
                 .module(resolvedPackageSigningModule, conditions: []),
                 .module(resolvedSourceControlModule, conditions: []),
                 .module(resolvedSPMBuildCoreModule, conditions: []),
-                .product(orderedCollectionsProduct, conditions: [])
+                .product(orderedCollectionsProduct, conditions: []),
             ]
         )
-        
+
         let resolvedLLBuildManifestModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llbuildManifestModule,
             dependencies: [.module(resolvedBasicsModule, conditions: [])]
         )
-        
+
         let resolvedSPMLLBuildModule = self.createResolvedModule(
             packageIdentity: identity,
             module: spmLLBuildModule,
             dependencies: [
                 .module(resolvedBasicsModule, conditions: []),
-                .product(llbuildSwiftProduct, conditions: [])
+                .product(llbuildSwiftProduct, conditions: []),
             ]
         )
-        
+
         let resolvedDriverSupportModule = self.createResolvedModule(
             packageIdentity: identity,
             module: driverSupportModule,
             dependencies: [
                 .module(resolvedBasicsModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
-                .product(swiftDriverProduct, conditions: [])
+                .product(swiftDriverProduct, conditions: []),
             ]
         )
-        
+
         let resolvedBuildModule = self.createResolvedModule(
             packageIdentity: identity,
             module: buildModule,
@@ -266,10 +265,10 @@ extension SBOMTestModulesGraph {
                 .module(resolvedSPMLLBuildModule, conditions: []),
                 .module(resolvedDriverSupportModule, conditions: []),
                 .product(orderedCollectionsProduct, conditions: []),
-                .product(swiftDriverProduct, conditions: [])
+                .product(swiftDriverProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSourceKitLSPAPIModule = self.createResolvedModule(
             packageIdentity: identity,
             module: sourceKitLSPAPIModule,
@@ -279,20 +278,20 @@ extension SBOMTestModulesGraph {
                 .module(resolvedPackageGraphModule, conditions: []),
                 .module(resolvedPackageLoadingModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedSPMBuildCoreModule, conditions: [])
+                .module(resolvedSPMBuildCoreModule, conditions: []),
             ]
         )
-        
+
         let resolvedQueryEngineModule = self.createResolvedModule(
             packageIdentity: identity,
             module: queryEngineModule,
             dependencies: [
                 .module(resolvedAsyncFileSystemModule, conditions: []),
                 .module(resolvedBasicsModule, conditions: []),
-                .product(cryptoProduct, conditions: [])
+                .product(cryptoProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSBOMModelModule = self.createResolvedModule(
             packageIdentity: identity,
             module: sbomModelModule,
@@ -301,15 +300,15 @@ extension SBOMTestModulesGraph {
                 .module(resolvedPackageCollectionsModule, conditions: []),
                 .module(resolvedPackageGraphModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
-                .module(resolvedSourceControlModule, conditions: [])
+                .module(resolvedSourceControlModule, conditions: []),
             ]
         )
-        
+
         let resolvedSPMSQLite3Module = self.createResolvedModule(
             packageIdentity: identity,
             module: spmSQLite3Module
         )
-        
+
         return (
             modules: [
                 asyncFileSystemModule, basicsModule, binarySymbolsModule, packageModelModule,
@@ -317,17 +316,18 @@ extension SBOMTestModulesGraph {
                 packageCollectionsSigningModule, packageCollectionsModule, packageMetadataModule,
                 packageFingerprintModule, packageSigningModule, packageRegistryModule, spmBuildCoreModule,
                 workspaceModule, llbuildManifestModule, spmLLBuildModule, driverSupportModule,
-                buildModule, sourceKitLSPAPIModule, queryEngineModule, sbomModelModule, spmSQLite3Module
+                buildModule, sourceKitLSPAPIModule, queryEngineModule, sbomModelModule, spmSQLite3Module,
             ],
             resolvedModules: [
                 resolvedAsyncFileSystemModule, resolvedBasicsModule, resolvedBinarySymbolsModule,
                 resolvedPackageModelModule, resolvedSourceControlModule, resolvedPackageLoadingModule,
-                resolvedPackageGraphModule, resolvedPackageCollectionsModelModule, resolvedPackageCollectionsSigningModule,
+                resolvedPackageGraphModule, resolvedPackageCollectionsModelModule,
+                resolvedPackageCollectionsSigningModule,
                 resolvedPackageCollectionsModule, resolvedPackageMetadataModule, resolvedPackageFingerprintModule,
                 resolvedPackageSigningModule, resolvedPackageRegistryModule, resolvedSPMBuildCoreModule,
                 resolvedWorkspaceModule, resolvedLLBuildManifestModule, resolvedSPMLLBuildModule,
                 resolvedDriverSupportModule, resolvedBuildModule, resolvedSourceKitLSPAPIModule,
-                resolvedQueryEngineModule, resolvedSBOMModelModule, resolvedSPMSQLite3Module
+                resolvedQueryEngineModule, resolvedSBOMModelModule, resolvedSPMSQLite3Module,
             ]
         )
     }

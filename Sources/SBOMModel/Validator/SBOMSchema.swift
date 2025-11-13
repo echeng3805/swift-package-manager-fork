@@ -33,17 +33,17 @@ package struct SBOMSchema {
         let validator = try createValidator(for: spec)
         try validator.validate(jsonObject)
     }
-    
+
     private func createValidator(for spec: SBOMSpec) throws -> any SBOMValidatorProtocol {
         switch spec.type {
         case .cyclonedx, .cyclonedx1:
-            return CycloneDXValidator(schema: schema)
+            CycloneDXValidator(schema: self.schema)
         case .spdx, .spdx3:
-            return SPDXValidator(schema: schema)
-        // case .cyclonedx2:
-        //     return CycloneDX2Validator(schema: schema)
-        // case .spdx4:
-        //     return SPDX4Validator(schema: schema)
+            SPDXValidator(schema: self.schema)
+            // case .cyclonedx2:
+            //     return CycloneDX2Validator(schema: schema)
+            // case .spdx4:
+            //     return SPDX4Validator(schema: schema)
         }
     }
 }

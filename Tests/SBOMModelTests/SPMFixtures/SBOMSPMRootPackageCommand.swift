@@ -18,9 +18,8 @@ import PackageModel
 @testable import SBOMModel
 
 extension SBOMTestModulesGraph {
-    
     // MARK: - Root SPM Package - Part 2: Command & Support Modules
-    
+
     /// Creates command, support, and plugin modules for the root SwiftPM package
     /// These include Commands, XCBuildSupport, SwiftBuildSupport, PackagePlugin, etc.
     static func createSPMRootCommandModules(
@@ -40,7 +39,7 @@ extension SBOMTestModulesGraph {
         resolvedModules: [ResolvedModule]
     ) {
         let identity = PackageIdentity.plain("swift-package-manager")
-        
+
         // Extract core resolved modules we need
         let resolvedBasicsModule = coreResolvedModules.first { $0.name == "Basics" }!
         let resolvedBinarySymbolsModule = coreResolvedModules.first { $0.name == "BinarySymbols" }!
@@ -49,16 +48,16 @@ extension SBOMTestModulesGraph {
         let resolvedPackageLoadingModule = coreResolvedModules.first { $0.name == "PackageLoading" }!
         let resolvedPackageGraphModule = coreResolvedModules.first { $0.name == "PackageGraph" }!
         let resolvedPackageCollectionsModule = coreResolvedModules.first { $0.name == "PackageCollections" }!
-        let _ = coreResolvedModules.first { $0.name == "PackageCollectionsModel" }!
+        _ = coreResolvedModules.first { $0.name == "PackageCollectionsModel" }!
         let resolvedPackageRegistryModule = coreResolvedModules.first { $0.name == "PackageRegistry" }!
         let resolvedPackageSigningModule = coreResolvedModules.first { $0.name == "PackageSigning" }!
         let resolvedSourceControlModule = coreResolvedModules.first { $0.name == "SourceControl" }!
         let resolvedWorkspaceModule = coreResolvedModules.first { $0.name == "Workspace" }!
         let resolvedSBOMModelModule = coreResolvedModules.first { $0.name == "SBOMModel" }!
         let resolvedSPMBuildCoreModule = coreResolvedModules.first { $0.name == "SPMBuildCore" }!
-        
+
         // MARK: - Create Command & Support Modules
-        
+
         let xcBuildSupportModule = self.createSwiftModule(name: "XCBuildSupport")
         let swiftBuildSupportModule = self.createSwiftModule(name: "SwiftBuildSupport")
         let swiftFixItModule = self.createSwiftModule(name: "SwiftFixIt")
@@ -72,25 +71,25 @@ extension SBOMTestModulesGraph {
         let packagePluginModule = self.createSwiftModule(name: "PackagePlugin")
         let appleProductTypesModule = self.createSwiftModule(name: "AppleProductTypes")
         let packageManagerDocsModule = self.createSwiftModule(name: "PackageManagerDocs")
-        
+
         // Test support modules
         let internalTestSupportModule = self.createSwiftModule(name: "_InternalTestSupport")
         let integrationTestSupportModule = self.createSwiftModule(name: "_IntegrationTestSupport")
         let internalBuildTestSupportModule = self.createSwiftModule(name: "_InternalBuildTestSupport")
         let tsanUtilsModule = self.createSwiftModule(name: "tsan_utils")
-        
+
         // MARK: - Create Resolved Modules with Dependencies
-        
+
         let resolvedXCBuildSupportModule = self.createResolvedModule(
             packageIdentity: identity,
             module: xcBuildSupportModule,
             dependencies: [
                 .module(resolvedSPMBuildCoreModule, conditions: []),
                 .module(resolvedPackageGraphModule, conditions: []),
-                .product(orderedCollectionsProduct, conditions: [])
+                .product(orderedCollectionsProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftBuildSupportModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftBuildSupportModule,
@@ -98,10 +97,10 @@ extension SBOMTestModulesGraph {
                 .module(resolvedSPMBuildCoreModule, conditions: []),
                 .module(resolvedPackageGraphModule, conditions: []),
                 .product(swiftBuildProduct, conditions: []),
-                .product(swbBuildServiceProduct, conditions: [])
+                .product(swbBuildServiceProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftFixItModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftFixItModule,
@@ -111,10 +110,10 @@ extension SBOMTestModulesGraph {
                 .product(swiftDiagnosticsProduct, conditions: []),
                 .product(swiftIDEUtilsProduct, conditions: []),
                 .product(swiftParserProduct, conditions: []),
-                .product(swiftSyntaxProduct, conditions: [])
+                .product(swiftSyntaxProduct, conditions: []),
             ]
         )
-        
+
         let resolvedCoreCommandsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: coreCommandsModule,
@@ -127,10 +126,10 @@ extension SBOMTestModulesGraph {
                 .module(resolvedWorkspaceModule, conditions: []),
                 .module(resolvedXCBuildSupportModule, conditions: []),
                 .module(resolvedSwiftBuildSupportModule, conditions: []),
-                .product(argumentParserProduct, conditions: [])
+                .product(argumentParserProduct, conditions: []),
             ]
         )
-        
+
         let resolvedCommandsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: commandsModule,
@@ -149,10 +148,10 @@ extension SBOMTestModulesGraph {
                 .product(argumentParserProduct, conditions: []),
                 .product(orderedCollectionsProduct, conditions: []),
                 .product(swiftIDEUtilsProduct, conditions: []),
-                .product(swiftRefactorProduct, conditions: [])
+                .product(swiftRefactorProduct, conditions: []),
             ]
         )
-        
+
         let resolvedPackageCollectionsCommandModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageCollectionsCommandModule,
@@ -162,10 +161,10 @@ extension SBOMTestModulesGraph {
                 .module(resolvedCoreCommandsModule, conditions: []),
                 .module(resolvedPackageCollectionsModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
-                .product(argumentParserProduct, conditions: [])
+                .product(argumentParserProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftSDKCommandModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftSDKCommandModule,
@@ -174,10 +173,10 @@ extension SBOMTestModulesGraph {
                 .module(resolvedCoreCommandsModule, conditions: []),
                 .module(resolvedSPMBuildCoreModule, conditions: []),
                 .module(resolvedPackageModelModule, conditions: []),
-                .product(argumentParserProduct, conditions: [])
+                .product(argumentParserProduct, conditions: []),
             ]
         )
-        
+
         let resolvedPackageRegistryCommandModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageRegistryCommandModule,
@@ -193,37 +192,37 @@ extension SBOMTestModulesGraph {
                 .module(resolvedSourceControlModule, conditions: []),
                 .module(resolvedSPMBuildCoreModule, conditions: []),
                 .module(resolvedWorkspaceModule, conditions: []),
-                .product(argumentParserProduct, conditions: [])
+                .product(argumentParserProduct, conditions: []),
             ]
         )
-        
+
         let resolvedPackageDescriptionModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageDescriptionModule
         )
-        
+
         let resolvedCompilerPluginSupportModule = self.createResolvedModule(
             packageIdentity: identity,
             module: compilerPluginSupportModule,
             dependencies: [.module(resolvedPackageDescriptionModule, conditions: [])]
         )
-        
+
         let resolvedPackagePluginModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packagePluginModule
         )
-        
+
         let resolvedAppleProductTypesModule = self.createResolvedModule(
             packageIdentity: identity,
             module: appleProductTypesModule,
             dependencies: [.module(resolvedPackageDescriptionModule, conditions: [])]
         )
-        
+
         let resolvedPackageManagerDocsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: packageManagerDocsModule
         )
-        
+
         // Test support modules
         let resolvedInternalTestSupportModule = self.createResolvedModule(
             packageIdentity: identity,
@@ -236,16 +235,16 @@ extension SBOMTestModulesGraph {
                 .module(resolvedPackageSigningModule, conditions: []),
                 .module(resolvedSourceControlModule, conditions: []),
                 .module(resolvedWorkspaceModule, conditions: []),
-                .product(orderedCollectionsProduct, conditions: [])
+                .product(orderedCollectionsProduct, conditions: []),
             ]
         )
-        
+
         let resolvedIntegrationTestSupportModule = self.createResolvedModule(
             packageIdentity: identity,
             module: integrationTestSupportModule,
             dependencies: [.module(resolvedInternalTestSupportModule, conditions: [])]
         )
-        
+
         let resolvedInternalBuildTestSupportModule = self.createResolvedModule(
             packageIdentity: identity,
             module: internalBuildTestSupportModule,
@@ -253,15 +252,15 @@ extension SBOMTestModulesGraph {
                 .module(resolvedBuildModule, conditions: []),
                 .module(resolvedXCBuildSupportModule, conditions: []),
                 .module(resolvedSwiftBuildSupportModule, conditions: []),
-                .module(resolvedInternalTestSupportModule, conditions: [])
+                .module(resolvedInternalTestSupportModule, conditions: []),
             ]
         )
-        
+
         let resolvedTsanUtilsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: tsanUtilsModule
         )
-        
+
         return (
             modules: [
                 xcBuildSupportModule, swiftBuildSupportModule, swiftFixItModule, coreCommandsModule,
@@ -269,15 +268,16 @@ extension SBOMTestModulesGraph {
                 packageRegistryCommandModule, packageDescriptionModule, compilerPluginSupportModule,
                 packagePluginModule, appleProductTypesModule, packageManagerDocsModule,
                 internalTestSupportModule, integrationTestSupportModule, internalBuildTestSupportModule,
-                tsanUtilsModule
+                tsanUtilsModule,
             ],
             resolvedModules: [
                 resolvedXCBuildSupportModule, resolvedSwiftBuildSupportModule, resolvedSwiftFixItModule,
                 resolvedCoreCommandsModule, resolvedCommandsModule, resolvedPackageCollectionsCommandModule,
                 resolvedSwiftSDKCommandModule, resolvedPackageRegistryCommandModule, resolvedPackageDescriptionModule,
                 resolvedCompilerPluginSupportModule, resolvedPackagePluginModule, resolvedAppleProductTypesModule,
-                resolvedPackageManagerDocsModule, resolvedInternalTestSupportModule, resolvedIntegrationTestSupportModule,
-                resolvedInternalBuildTestSupportModule, resolvedTsanUtilsModule
+                resolvedPackageManagerDocsModule, resolvedInternalTestSupportModule,
+                resolvedIntegrationTestSupportModule,
+                resolvedInternalBuildTestSupportModule, resolvedTsanUtilsModule,
             ]
         )
     }

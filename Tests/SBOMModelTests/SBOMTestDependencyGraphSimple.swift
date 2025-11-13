@@ -19,7 +19,7 @@ extension SBOMTestDependencyGraph {
             "MyApp": ["Utils", "App-product"],
             "Utils": ["Utils-product"],
             "App-product": ["Utils-product"],
-            "Utils-product": []
+            "Utils-product": [],
         ]
     }
 }

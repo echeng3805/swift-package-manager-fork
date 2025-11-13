@@ -14,7 +14,7 @@ import Foundation
 
 package struct CycloneDXConverter {
     private init() {}
-    
+
     private static func convertToCycloneDXScope(from scope: SBOMComponent.Scope) async -> CycloneDXComponent.Scope {
         switch scope {
         case .runtime:
@@ -26,7 +26,9 @@ package struct CycloneDXConverter {
         }
     }
 
-    private static func convertToCycloneDXCategory(from category: SBOMComponent.Category) async -> CycloneDXComponent.Category {
+    private static func convertToCycloneDXCategory(from category: SBOMComponent.Category) async -> CycloneDXComponent
+        .Category
+    {
         switch category {
         case .application:
             .application
@@ -81,16 +83,16 @@ package struct CycloneDXConverter {
         //     }
         //     nestedComponents = convertedComponents
         // }
-        
-        return try await CycloneDXComponent(
-            type: convertToCycloneDXCategory(from: comp.category),
+
+        try await CycloneDXComponent(
+            type: self.convertToCycloneDXCategory(from: comp.category),
             bomRef: comp.id.value,
             name: comp.name,
             version: comp.version.revision,
-            scope: convertToCycloneDXScope(from: comp.scope ?? .runtime),
+            scope: self.convertToCycloneDXScope(from: comp.scope ?? .runtime),
             purl: comp.purl,
             // components: nestedComponents,
-            pedigree: convertToCycloneDXPedigree(from: comp.originator)
+            pedigree: self.convertToCycloneDXPedigree(from: comp.originator)
         )
     }
 
@@ -126,12 +128,15 @@ package struct CycloneDXConverter {
 
         return try await CycloneDXMetadata(
             timestamp: document.metadata.timestamp,
-            component: convertToCycloneDXComponent(from: document.primaryComponent),
+            component: self.convertToCycloneDXComponent(from: document.primaryComponent),
             tools: tools
         )
     }
 
-    package static func convertToCycloneDXDocument(from document: SBOMDocument, spec: SBOMSpec) async throws -> CycloneDXDocument {
+    package static func convertToCycloneDXDocument(
+        from document: SBOMDocument,
+        spec: SBOMSpec
+    ) async throws -> CycloneDXDocument {
         guard spec.type.supportsCycloneDX else {
             throw SBOMError.unexpectedSpecType(expected: "cyclonedx", actual: spec.type)
         }
@@ -151,12 +156,12 @@ package struct CycloneDXConverter {
         }
 
         return try await CycloneDXDocument(
-            schema: convertToCycloneDXSchema(from: spec),
+            schema: self.convertToCycloneDXSchema(from: spec),
             bomFormat: "CycloneDX",
             specVersion: spec.version,
             serialNumber: document.id.value,
             version: 1,
-            metadata: convertToCycloneDXMetadata(from: document),
+            metadata: self.convertToCycloneDXMetadata(from: document),
             components: components,
             dependencies: dependencies
         )

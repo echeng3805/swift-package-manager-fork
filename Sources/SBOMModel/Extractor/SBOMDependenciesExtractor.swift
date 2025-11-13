@@ -22,9 +22,9 @@ extension SBOMExtractor {
     /// Converts a ModulesGraph product name to a dependency graph target name.
     /// Products in the dependency graph have a "-product" suffix.
     package static func getTargetName(fromProduct name: String) -> String {
-        return "\(name)-product"
+        "\(name)-product"
     }
-    
+
     /// Converts a dependency graph target name back to a ModulesGraph product name.
     /// Removes the "-product" suffix if present.
     package static func getProductName(fromTarget name: String) -> String? {
@@ -35,7 +35,9 @@ extension SBOMExtractor {
     }
 
     /// Converts a dependency graph target name back to a ModulesGraph module package and name.
-    package static func getPackageAndModuleNames(fromTarget name: String) -> (packageName: String?, moduleName: String)? {
+    package static func getPackageAndModuleNames(fromTarget name: String)
+        -> (packageName: String?, moduleName: String)?
+    {
         guard !name.hasSuffix("-product") else {
             return nil
         }
@@ -55,15 +57,15 @@ extension SBOMExtractor {
         return (nil, name)
     }
 
-    internal func toProduct(fromTarget name: String) -> ResolvedProduct? {
+    func toProduct(fromTarget name: String) -> ResolvedProduct? {
         Self.getProductName(fromTarget: name).flatMap { modulesGraph.product(for: $0) }
     }
 
-    internal func toModule(fromTarget name: String) -> ResolvedModule? {
+    func toModule(fromTarget name: String) -> ResolvedModule? {
         guard let (packageName, moduleName) = Self.getPackageAndModuleNames(fromTarget: name) else {
             return nil
         }
-        if let packageName = packageName {
+        if let packageName {
             return modulesGraph.allModules.first { module in
                 module.name == moduleName && module.packageIdentity.description == packageName
             }
@@ -72,11 +74,11 @@ extension SBOMExtractor {
     }
 
     private static func processRelationships(from dict: [SBOMIdentifier: Set<SBOMIdentifier>]) -> [SBOMRelationship] {
-        return dict.map { (parentID, childrenSet) in
+        dict.map { parentID, childrenSet in
             SBOMRelationship(
                 id: SBOMIdentifier(value: "\(parentID.value)-depends-on"),
                 parentID: parentID,
-                childrenID: Array(childrenSet),
+                childrenID: Array(childrenSet)
             )
         }
     }
@@ -88,13 +90,16 @@ extension SBOMExtractor {
         let targetProducts: [ResolvedProduct]
         if let name = product {
             guard let targetProduct = rootPackage.products.first(where: { $0.name == name }) else {
-                throw SBOMExtractorError.productNotFound(productName: name, packageIdentity: rootPackage.identity.description)
+                throw SBOMExtractorError.productNotFound(
+                    productName: name,
+                    packageIdentity: rootPackage.identity.description
+                )
             }
             targetProducts = [targetProduct]
         } else {
             targetProducts = rootPackage.products
         }
-        return try await extractDependenciesForProducts(targetProducts: targetProducts)
+        return try await self.extractDependenciesForProducts(targetProducts: targetProducts)
     }
 
     private func populateTargetNameCache() async {
@@ -107,14 +112,15 @@ extension SBOMExtractor {
         }
     }
 
-    private func extractDependenciesForProducts(targetProducts: [ResolvedProduct]) async throws -> SBOMDependencies {        
+    private func extractDependenciesForProducts(targetProducts: [ResolvedProduct]) async throws -> SBOMDependencies {
         guard let rootPackage = modulesGraph.rootPackages.first else {
-            throw SBOMExtractorError.noRootPackage(context: "extract dependencies for the following products: \(targetProducts)")
+            throw SBOMExtractorError
+                .noRootPackage(context: "extract dependencies for the following products: \(targetProducts)")
         }
         let rootPackageID = SBOMExtractor.extractComponentID(from: rootPackage)
 
         // This is to avoid trying to remap modules back to targets
-        await populateTargetNameCache()
+        await self.populateTargetNameCache()
 
         var components: Set<SBOMComponent> = []
         func addComponent(_ component: SBOMComponent) {
@@ -125,7 +131,7 @@ extension SBOMExtractor {
 
         var relationships: [SBOMIdentifier: Set<SBOMIdentifier>] = [:] // parentID:childrenID
         func trackRelationship(parentID: SBOMIdentifier, childID: SBOMIdentifier) {
-            guard parentID != childID else { return }  // prevent self-referential dependencies
+            guard parentID != childID else { return } // prevent self-referential dependencies
             relationships[parentID, default: []].insert(childID)
         }
 
@@ -138,7 +144,7 @@ extension SBOMExtractor {
             var result: [ResolvedProduct] = []
             var modulesToProcess: [ResolvedModule] = [dependentModule]
             var processedModules = Set<ResolvedModule.ID>()
-            
+
             while !modulesToProcess.isEmpty {
                 let currentModule = modulesToProcess.removeFirst()
                 guard !processedModules.contains(currentModule.id) else {
@@ -148,23 +154,26 @@ extension SBOMExtractor {
 
                 if let buildGraph = dependencyGraph {
                     if let targetName = await caches.targetName.get(currentModule.id),
-                      let targetDeps = buildGraph[targetName] {
+                       let targetDeps = buildGraph[targetName]
+                    {
                         for targetDep in targetDeps {
                             if let dependentProduct = toProduct(fromTarget: targetDep) {
-                                if let toProcess = try await processProductDependency(from: product, dependentProduct: dependentProduct) {
+                                if let toProcess = try await processProductDependency(
+                                    from: product,
+                                    dependentProduct: dependentProduct
+                                ) {
                                     result.append(toProcess)
                                 }
-                            }
-                            else if let dependentModule = toModule(fromTarget: targetDep) {
+                            } else if let dependentModule = toModule(fromTarget: targetDep) {
                                 if !processedModules.contains(dependentModule.id) {
                                     modulesToProcess.append(dependentModule)
                                 }
                             }
                             // else it's not in the modules graph
-                            // TODO ev_cheng, print a warning?
+                            // TODO: ev_cheng, print a warning?
                         }
-                    } 
-                }    
+                    }
+                }
             }
             return result
         }
@@ -178,10 +187,10 @@ extension SBOMExtractor {
             var results: [ResolvedProduct] = []
             var modulesToProcess: [ResolvedModule] = [dependentModule]
             var processedModules = Set<ResolvedModule.ID>()
-            
+
             while !modulesToProcess.isEmpty {
                 let currentModule = modulesToProcess.removeFirst()
-                
+
                 guard !processedModules.contains(currentModule.id) else {
                     continue
                 }
@@ -194,7 +203,10 @@ extension SBOMExtractor {
                 for dependency in currentModule.dependencies {
                     switch dependency {
                     case .product(let dependentProduct, _):
-                        if let processed = try await processProductDependency(from: product, dependentProduct: dependentProduct) {
+                        if let processed = try await processProductDependency(
+                            from: product,
+                            dependentProduct: dependentProduct
+                        ) {
                             results.append(processed)
                         }
                     case .module(let nestedModule, _):
@@ -202,11 +214,11 @@ extension SBOMExtractor {
                             modulesToProcess.append(nestedModule)
                         }
                     }
-                }    
+                }
             }
             return results
         }
-        
+
         // Takes a product and a dependent product, processes the relationships, and then returns the dependent product.
         func processProductDependency(
             from product: ResolvedProduct,
@@ -216,10 +228,11 @@ extension SBOMExtractor {
             let productID = SBOMExtractor.extractComponentID(from: product)
             let dependentProductID = SBOMExtractor.extractComponentID(from: dependentProduct)
             if let productRelationships = relationships[productID],
-               productRelationships.contains(dependentProductID) {
+               productRelationships.contains(dependentProductID)
+            {
                 return dependentProduct
             }
-            
+
             let processedProductComponent = try await extractComponent(product: product)
             let dependentProductComponent = try await extractComponent(product: dependentProduct)
             addComponent(dependentProductComponent)
@@ -227,14 +240,16 @@ extension SBOMExtractor {
 
             // check if both products are in the same root package
             let bothInRootPackage = product.packageIdentity == rootPackage.identity &&
-                                    dependentProduct.packageIdentity == rootPackage.identity
+                dependentProduct.packageIdentity == rootPackage.identity
 
             // only track dependency if not both in root package (skip internal-to-internal relationships)
             if !bothInRootPackage {
                 // add product -> dependentProduct dependency
                 trackRelationship(parentID: processedProductComponent.id, childID: dependentProductComponent.id)
             }
-            if let dependentProductPackage = modulesGraph.packages.first(where: { $0.identity == dependentProduct.packageIdentity }) {
+            if let dependentProductPackage = modulesGraph.packages
+                .first(where: { $0.identity == dependentProduct.packageIdentity })
+            {
                 let dependentProductPackageComponent = try await extractComponent(package: dependentProductPackage)
                 addComponent(dependentProductPackageComponent)
                 // add dependentProductPackage -> dependentProduct dependency
@@ -244,7 +259,10 @@ extension SBOMExtractor {
                     addComponent(productPackageComponent)
                     // add productPackage -> dependentProductPackage dependency if they're from different packages
                     if product.packageIdentity != dependentProduct.packageIdentity {
-                        trackRelationship(parentID: productPackageComponent.id, childID: dependentProductPackageComponent.id)
+                        trackRelationship(
+                            parentID: productPackageComponent.id,
+                            childID: dependentProductPackageComponent.id
+                        )
                     }
                     // add rootPackage -> productPackage dependency if it's not the root package itself
                     if productPackageComponent.id != rootPackageID {
@@ -263,18 +281,23 @@ extension SBOMExtractor {
                 if let targetDeps = buildGraph[Self.getTargetName(fromProduct: product.name)] {
                     for targetDep in targetDeps {
                         if let dependentProduct = toProduct(fromTarget: targetDep) {
-                            if let toProcess = try await processProductDependency(from: product, dependentProduct: dependentProduct) {
+                            if let toProcess = try await processProductDependency(
+                                from: product,
+                                dependentProduct: dependentProduct
+                            ) {
                                 result.insert(toProcess)
                             }
-                        }
-                        else if let dependentModule = toModule(fromTarget: targetDep) {
-                            let toProcess = try await processModuleDependency(from: product, dependentModule: dependentModule)
+                        } else if let dependentModule = toModule(fromTarget: targetDep) {
+                            let toProcess = try await processModuleDependency(
+                                from: product,
+                                dependentModule: dependentModule
+                            )
                             for productToProcess in toProcess {
                                 result.insert(productToProcess)
                             }
                         }
                         // else it's not in the modules graph
-                        // TODO ev_cheng, print a warning?
+                        // TODO: ev_cheng, print a warning?
                     }
                 }
             } else {
@@ -284,18 +307,24 @@ extension SBOMExtractor {
                     for dependency in module.dependencies {
                         switch dependency {
                         case .product(let dependentProduct, _): // dependencies on products from other packages
-                            if let toProcess = try await processProductDependency(from: product, dependentProduct: dependentProduct) {
+                            if let toProcess = try await processProductDependency(
+                                from: product,
+                                dependentProduct: dependentProduct
+                            ) {
                                 result.insert(toProcess)
                             }
                         case .module(let dependentModule, _): // dependencies within the same package
-                            let toProcess = try await processModuleDependencyUsingModulesGraph(from: product, dependentModule: dependentModule)
+                            let toProcess = try await processModuleDependencyUsingModulesGraph(
+                                from: product,
+                                dependentModule: dependentModule
+                            )
                             for productToProcess in toProcess {
                                 result.insert(productToProcess)
                             }
                         }
                     }
                 }
-            }            
+            }
             return Array(result)
         }
 
@@ -327,4 +356,3 @@ extension SBOMExtractor {
         )
     }
 }
-

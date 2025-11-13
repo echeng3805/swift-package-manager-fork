@@ -17,9 +17,9 @@ package enum Entity: String, Codable, Equatable, CaseIterable {
 
     package var defaultValueDescription: String {
         switch self {
-        case .all: return "Include all entities in the SBOM"
-        case .product: return "Only include product information and product dependencies"
-        case .package: return "Only include package information and package dependencies"
+        case .all: "Include all entities in the SBOM"
+        case .product: "Only include product information and product dependencies"
+        case .package: "Only include package information and package dependencies"
         }
     }
 }

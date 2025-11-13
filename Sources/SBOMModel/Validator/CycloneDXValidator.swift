@@ -10,18 +10,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-internal struct CycloneDXValidator: SBOMValidatorProtocol {
+struct CycloneDXValidator: SBOMValidatorProtocol {
     private let validator: SBOMValidator
-    
-    internal init(schema: [String: Any]) {
+
+    init(schema: [String: Any]) {
         self.validator = SBOMValidator(schema: schema)
     }
-    
-    internal func validate(_ jsonObject: Any) throws {
-        try validator.validate(jsonObject)
+
+    func validate(_ jsonObject: Any) throws {
+        try self.validator.validate(jsonObject)
     }
-    
-    internal func validateValue(_ value: Any, path: String) throws {
-        try validator.validateValue(value, path: path)
+
+    func validateValue(_ value: Any, path: String) throws {
+        try self.validator.validateValue(value, path: path)
     }
 }

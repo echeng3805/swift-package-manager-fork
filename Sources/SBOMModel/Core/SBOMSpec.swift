@@ -56,17 +56,17 @@ package enum Spec: String, Codable, Equatable, CaseIterable, Comparable {
     package var latestSpec: (type: Spec, version: String) {
         switch self {
         case .cyclonedx:
-            return (.cyclonedx1, CycloneDXConstants.cyclonedx1SpecVersion)
+            (.cyclonedx1, CycloneDXConstants.cyclonedx1SpecVersion)
         case .spdx:
-            return (.spdx3, SPDXConstants.spdx3SpecVersion)
+            (.spdx3, SPDXConstants.spdx3SpecVersion)
         case .cyclonedx1:
-            return (.cyclonedx1, CycloneDXConstants.cyclonedx1SpecVersion)
+            (.cyclonedx1, CycloneDXConstants.cyclonedx1SpecVersion)
         case .spdx3:
-            return (.spdx3, SPDXConstants.spdx3SpecVersion)
-        // When adding new major versions (e.g., .cyclonedx2, .spdx4):
-        // 1. Add the new case to the enum
-        // 2. Update the .cyclonedx or .spdx case above to return the new version
-        // 3. Add a case for the new version that returns itself
+            (.spdx3, SPDXConstants.spdx3SpecVersion)
+            // When adding new major versions (e.g., .cyclonedx2, .spdx4):
+            // 1. Add the new case to the enum
+            // 2. Update the .cyclonedx or .spdx case above to return the new version
+            // 3. Add a case for the new version that returns itself
         }
     }
 }

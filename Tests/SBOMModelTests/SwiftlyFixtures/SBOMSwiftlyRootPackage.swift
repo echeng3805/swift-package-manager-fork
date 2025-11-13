@@ -18,9 +18,8 @@ import PackageModel
 @testable import SBOMModel
 
 extension SBOMTestModulesGraph {
-    
     // MARK: - swiftly Package (Root)
-    
+
     static func createSwiftlyRootPackage(
         rootPath: String = "/tmp/swiftly-mock",
         openAPIGeneratorProduct: ResolvedProduct,
@@ -43,21 +42,21 @@ extension SBOMTestModulesGraph {
         packageRef: PackageReference
     ) {
         let identity = PackageIdentity.plain("swiftly")
-        
+
         // System module
         let cLibArchiveModule = self.createSwiftModule(name: "CLibArchive", type: .systemModule)
-        
+
         // Plugin modules
         let generateCommandModelsModule = self.createSwiftModule(name: "GenerateCommandModels", type: .plugin)
         let generateDocsReferenceModule = self.createSwiftModule(name: "GenerateDocsReference", type: .plugin)
-        
+
         // Executable modules
         let generateCommandModelsExecModule = self.createSwiftModule(name: "generate-command-models", type: .executable)
         let generateDocsReferenceExecModule = self.createSwiftModule(name: "generate-docs-reference", type: .executable)
         let swiftlyModule = self.createSwiftModule(name: "Swiftly", type: .executable)
         let testSwiftlyModule = self.createSwiftModule(name: "TestSwiftly", type: .executable)
         let buildSwiftlyReleaseModule = self.createSwiftModule(name: "build-swiftly-release", type: .executable)
-        
+
         // Library modules
         let swiftlyWebsiteAPIModule = self.createSwiftModule(name: "SwiftlyWebsiteAPI")
         let swiftlyDownloadAPIModule = self.createSwiftModule(name: "SwiftlyDownloadAPI")
@@ -65,10 +64,10 @@ extension SBOMTestModulesGraph {
         let swiftlyCoreModule = self.createSwiftModule(name: "SwiftlyCore")
         let macOSPlatformModule = self.createSwiftModule(name: "MacOSPlatform")
         let linuxPlatformModule = self.createSwiftModule(name: "LinuxPlatform")
-        
+
         // Test module
         let swiftlyTestsModule = self.createSwiftModule(name: "SwiftlyTests", type: .test)
-        
+
         // Products
         let swiftlyProduct = try Product(
             package: identity,
@@ -76,42 +75,42 @@ extension SBOMTestModulesGraph {
             type: .executable,
             modules: [swiftlyModule]
         )
-        
+
         let testSwiftlyProduct = try Product(
             package: identity,
             name: "test-swiftly",
             type: .executable,
             modules: [testSwiftlyModule]
         )
-        
+
         let generateDocsReferenceProduct = try Product(
             package: identity,
             name: "generate-docs-reference",
             type: .executable,
             modules: [generateDocsReferenceExecModule]
         )
-        
+
         let generateCommandModelsProduct = try Product(
             package: identity,
             name: "generate-command-models",
             type: .executable,
             modules: [generateCommandModelsExecModule]
         )
-        
+
         let buildSwiftlyReleaseProduct = try Product(
             package: identity,
             name: "build-swiftly-release",
             type: .executable,
             modules: [buildSwiftlyReleaseModule]
         )
-        
+
         let swiftlyTestsProduct = try Product(
             package: identity,
             name: "SwiftlyTests",
             type: .test,
             modules: [swiftlyTestsModule]
         )
-        
+
         // Package
         let package = self.createPackage(
             identity: identity,
@@ -123,77 +122,77 @@ extension SBOMTestModulesGraph {
                 swiftlyModule, testSwiftlyModule, buildSwiftlyReleaseModule,
                 swiftlyWebsiteAPIModule, swiftlyDownloadAPIModule, swiftlyDocsModule,
                 swiftlyCoreModule, macOSPlatformModule, linuxPlatformModule,
-                swiftlyTestsModule
+                swiftlyTestsModule,
             ],
             products: [
                 swiftlyProduct, testSwiftlyProduct, generateDocsReferenceProduct,
-                generateCommandModelsProduct, buildSwiftlyReleaseProduct, swiftlyTestsProduct
+                generateCommandModelsProduct, buildSwiftlyReleaseProduct, swiftlyTestsProduct,
             ]
         )
-        
+
         // Resolved modules - System and plugins
         let resolvedCLibArchiveModule = self.createResolvedModule(
             packageIdentity: identity,
             module: cLibArchiveModule
         )
-        
+
         let resolvedGenerateCommandModelsExecModule = self.createResolvedModule(
             packageIdentity: identity,
             module: generateCommandModelsExecModule,
             dependencies: [
                 .product(argumentParserProduct, conditions: []),
-                .product(systemPackageProduct, conditions: [])
+                .product(systemPackageProduct, conditions: []),
             ]
         )
-        
+
         let resolvedGenerateCommandModelsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: generateCommandModelsModule,
             dependencies: [
-                .module(resolvedGenerateCommandModelsExecModule, conditions: [])
+                .module(resolvedGenerateCommandModelsExecModule, conditions: []),
             ]
         )
-        
+
         let resolvedGenerateDocsReferenceExecModule = self.createResolvedModule(
             packageIdentity: identity,
             module: generateDocsReferenceExecModule,
             dependencies: [
-                .product(argumentParserProduct, conditions: [])
+                .product(argumentParserProduct, conditions: []),
             ]
         )
-        
+
         let resolvedGenerateDocsReferenceModule = self.createResolvedModule(
             packageIdentity: identity,
             module: generateDocsReferenceModule,
             dependencies: [
-                .module(resolvedGenerateDocsReferenceExecModule, conditions: [])
+                .module(resolvedGenerateDocsReferenceExecModule, conditions: []),
             ]
         )
-        
+
         // Resolved library modules
         let resolvedSwiftlyWebsiteAPIModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftlyWebsiteAPIModule,
             dependencies: [
                 .product(openAPIGeneratorProduct, conditions: []),
-                .product(openAPIRuntimeProduct, conditions: [])
+                .product(openAPIRuntimeProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftlyDownloadAPIModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftlyDownloadAPIModule,
             dependencies: [
                 .product(openAPIGeneratorProduct, conditions: []),
-                .product(openAPIRuntimeProduct, conditions: [])
+                .product(openAPIRuntimeProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftlyDocsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftlyDocsModule
         )
-        
+
         let resolvedSwiftlyCoreModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftlyCoreModule,
@@ -208,10 +207,10 @@ extension SBOMTestModulesGraph {
                 .product(asyncHTTPClientProduct, conditions: []),
                 .product(nioFoundationCompatProduct, conditions: []),
                 .product(openAPIAsyncHTTPClientProduct, conditions: []),
-                .product(subprocessProduct, conditions: [])
+                .product(subprocessProduct, conditions: []),
             ]
         )
-        
+
         let resolvedMacOSPlatformModule = self.createResolvedModule(
             packageIdentity: identity,
             module: macOSPlatformModule,
@@ -227,10 +226,10 @@ extension SBOMTestModulesGraph {
                 .product(asyncHTTPClientProduct, conditions: []),
                 .product(nioFoundationCompatProduct, conditions: []),
                 .product(openAPIAsyncHTTPClientProduct, conditions: []),
-                .product(subprocessProduct, conditions: [])
+                .product(subprocessProduct, conditions: []),
             ]
         )
-        
+
         let resolvedLinuxPlatformModule = self.createResolvedModule(
             packageIdentity: identity,
             module: linuxPlatformModule,
@@ -247,10 +246,10 @@ extension SBOMTestModulesGraph {
                 .product(asyncHTTPClientProduct, conditions: []),
                 .product(nioFoundationCompatProduct, conditions: []),
                 .product(openAPIAsyncHTTPClientProduct, conditions: []),
-                .product(subprocessProduct, conditions: [])
+                .product(subprocessProduct, conditions: []),
             ]
         )
-        
+
         // Resolved executable modules
         let resolvedSwiftlyModule = self.createResolvedModule(
             packageIdentity: identity,
@@ -270,10 +269,10 @@ extension SBOMTestModulesGraph {
                 .product(nioFoundationCompatProduct, conditions: []),
                 .product(openAPIAsyncHTTPClientProduct, conditions: []),
                 .product(subprocessProduct, conditions: []),
-                .product(swiftToolsSupportProduct, conditions: [])
+                .product(swiftToolsSupportProduct, conditions: []),
             ]
         )
-        
+
         let resolvedTestSwiftlyModule = self.createResolvedModule(
             packageIdentity: identity,
             module: testSwiftlyModule,
@@ -291,10 +290,10 @@ extension SBOMTestModulesGraph {
                 .product(asyncHTTPClientProduct, conditions: []),
                 .product(nioFoundationCompatProduct, conditions: []),
                 .product(openAPIAsyncHTTPClientProduct, conditions: []),
-                .product(subprocessProduct, conditions: [])
+                .product(subprocessProduct, conditions: []),
             ]
         )
-        
+
         let resolvedBuildSwiftlyReleaseModule = self.createResolvedModule(
             packageIdentity: identity,
             module: buildSwiftlyReleaseModule,
@@ -313,56 +312,56 @@ extension SBOMTestModulesGraph {
                 .product(nioFoundationCompatProduct, conditions: []),
                 .product(openAPIAsyncHTTPClientProduct, conditions: []),
                 .product(subprocessProduct, conditions: []),
-                .product(nioFileSystemProduct, conditions: [])
+                .product(nioFileSystemProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftlyTestsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftlyTestsModule,
             dependencies: [
                 .module(resolvedSwiftlyModule, conditions: []),
-                .product(systemPackageProduct, conditions: [])
+                .product(systemPackageProduct, conditions: []),
             ]
         )
-        
+
         // Resolved products
         let resolvedSwiftlyProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftlyProduct,
             modules: IdentifiableSet([resolvedSwiftlyModule])
         )
-        
+
         let resolvedTestSwiftlyProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: testSwiftlyProduct,
             modules: IdentifiableSet([resolvedTestSwiftlyModule])
         )
-        
+
         let resolvedGenerateDocsReferenceProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: generateDocsReferenceProduct,
             modules: IdentifiableSet([resolvedGenerateDocsReferenceExecModule])
         )
-        
+
         let resolvedGenerateCommandModelsProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: generateCommandModelsProduct,
             modules: IdentifiableSet([resolvedGenerateCommandModelsExecModule])
         )
-        
+
         let resolvedBuildSwiftlyReleaseProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: buildSwiftlyReleaseProduct,
             modules: IdentifiableSet([resolvedBuildSwiftlyReleaseModule])
         )
-        
+
         let resolvedSwiftlyTestsProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftlyTestsProduct,
             modules: IdentifiableSet([resolvedSwiftlyTestsModule])
         )
-        
+
         // Resolved package
         let resolvedPackage = self.createResolvedPackage(
             package: package,
@@ -372,11 +371,11 @@ extension SBOMTestModulesGraph {
                 resolvedSwiftlyModule, resolvedTestSwiftlyModule, resolvedBuildSwiftlyReleaseModule,
                 resolvedSwiftlyWebsiteAPIModule, resolvedSwiftlyDownloadAPIModule, resolvedSwiftlyDocsModule,
                 resolvedSwiftlyCoreModule, resolvedMacOSPlatformModule, resolvedLinuxPlatformModule,
-                resolvedSwiftlyTestsModule
+                resolvedSwiftlyTestsModule,
             ]),
             products: [
                 resolvedSwiftlyProduct, resolvedTestSwiftlyProduct, resolvedGenerateDocsReferenceProduct,
-                resolvedGenerateCommandModelsProduct, resolvedBuildSwiftlyReleaseProduct, resolvedSwiftlyTestsProduct
+                resolvedGenerateCommandModelsProduct, resolvedBuildSwiftlyReleaseProduct, resolvedSwiftlyTestsProduct,
             ],
             dependencies: [
                 PackageIdentity.plain("async-http-client"),
@@ -389,16 +388,16 @@ extension SBOMTestModulesGraph {
                 PackageIdentity.plain("swift-subprocess"),
                 PackageIdentity.plain("swift-system"),
                 PackageIdentity.plain("swift-tools-support-core"),
-                PackageIdentity.plain("swiftformat")
+                PackageIdentity.plain("swiftformat"),
             ]
         )
-        
+
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
             kind: .root(AbsolutePath(rootPath))
         )
-        
+
         return (
             package: package,
             modules: [
@@ -407,11 +406,11 @@ extension SBOMTestModulesGraph {
                 swiftlyModule, testSwiftlyModule, buildSwiftlyReleaseModule,
                 swiftlyWebsiteAPIModule, swiftlyDownloadAPIModule, swiftlyDocsModule,
                 swiftlyCoreModule, macOSPlatformModule, linuxPlatformModule,
-                swiftlyTestsModule
+                swiftlyTestsModule,
             ],
             products: [
                 swiftlyProduct, testSwiftlyProduct, generateDocsReferenceProduct,
-                generateCommandModelsProduct, buildSwiftlyReleaseProduct, swiftlyTestsProduct
+                generateCommandModelsProduct, buildSwiftlyReleaseProduct, swiftlyTestsProduct,
             ],
             resolvedPackage: resolvedPackage,
             resolvedModules: [
@@ -420,11 +419,11 @@ extension SBOMTestModulesGraph {
                 resolvedSwiftlyModule, resolvedTestSwiftlyModule, resolvedBuildSwiftlyReleaseModule,
                 resolvedSwiftlyWebsiteAPIModule, resolvedSwiftlyDownloadAPIModule, resolvedSwiftlyDocsModule,
                 resolvedSwiftlyCoreModule, resolvedMacOSPlatformModule, resolvedLinuxPlatformModule,
-                resolvedSwiftlyTestsModule
+                resolvedSwiftlyTestsModule,
             ],
             resolvedProducts: [
                 resolvedSwiftlyProduct, resolvedTestSwiftlyProduct, resolvedGenerateDocsReferenceProduct,
-                resolvedGenerateCommandModelsProduct, resolvedBuildSwiftlyReleaseProduct, resolvedSwiftlyTestsProduct
+                resolvedGenerateCommandModelsProduct, resolvedBuildSwiftlyReleaseProduct, resolvedSwiftlyTestsProduct,
             ],
             packageRef: packageRef
         )

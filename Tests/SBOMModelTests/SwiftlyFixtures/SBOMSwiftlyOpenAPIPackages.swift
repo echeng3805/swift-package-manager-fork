@@ -18,9 +18,8 @@ import PackageModel
 @testable import SBOMModel
 
 extension SBOMTestModulesGraph {
-    
     // MARK: - swift-openapi-runtime Package
-    
+
     static func createSwiftOpenAPIRuntimePackage(
         httpTypesProduct: ResolvedProduct
     ) throws -> (
@@ -33,10 +32,10 @@ extension SBOMTestModulesGraph {
         packageRef: PackageReference
     ) {
         let identity = PackageIdentity.plain("swift-openapi-runtime")
-        
+
         // Modules
         let openAPIRuntimeModule = self.createSwiftModule(name: "OpenAPIRuntime")
-        
+
         // Products
         let openAPIRuntimeProduct = try Product(
             package: identity,
@@ -44,7 +43,7 @@ extension SBOMTestModulesGraph {
             type: .library(.automatic),
             modules: [openAPIRuntimeModule]
         )
-        
+
         // Package
         let package = self.createPackage(
             identity: identity,
@@ -53,23 +52,23 @@ extension SBOMTestModulesGraph {
             modules: [openAPIRuntimeModule],
             products: [openAPIRuntimeProduct]
         )
-        
+
         // Resolved modules
         let resolvedOpenAPIRuntimeModule = self.createResolvedModule(
             packageIdentity: identity,
             module: openAPIRuntimeModule,
             dependencies: [
-                .product(httpTypesProduct, conditions: [])
+                .product(httpTypesProduct, conditions: []),
             ]
         )
-        
+
         // Resolved products
         let resolvedOpenAPIRuntimeProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: openAPIRuntimeProduct,
             modules: IdentifiableSet([resolvedOpenAPIRuntimeModule])
         )
-        
+
         // Resolved package
         let resolvedPackage = self.createResolvedPackage(
             package: package,
@@ -77,13 +76,13 @@ extension SBOMTestModulesGraph {
             products: [resolvedOpenAPIRuntimeProduct],
             dependencies: [PackageIdentity.plain("swift-http-types")]
         )
-        
+
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
             kind: .remoteSourceControl(SourceControlURL("https://github.com/apple/swift-openapi-runtime"))
         )
-        
+
         return (
             package: package,
             modules: [openAPIRuntimeModule],
@@ -94,9 +93,9 @@ extension SBOMTestModulesGraph {
             packageRef: packageRef
         )
     }
-    
+
     // MARK: - swift-openapi-generator Package
-    
+
     static func createSwiftOpenAPIGeneratorPackage(
         openAPIKitProduct: ResolvedProduct,
         openAPIKit30Product: ResolvedProduct,
@@ -115,12 +114,12 @@ extension SBOMTestModulesGraph {
         packageRef: PackageReference
     ) {
         let identity = PackageIdentity.plain("swift-openapi-generator")
-        
+
         // Modules
         let openAPIGeneratorCoreModule = self.createSwiftModule(name: "_OpenAPIGeneratorCore")
         let openAPIGeneratorModule = self.createSwiftModule(name: "OpenAPIGenerator", type: .plugin)
         let swiftOpenAPIGeneratorModule = self.createSwiftModule(name: "swift-openapi-generator", type: .executable)
-        
+
         // Products
         let openAPIGeneratorProduct = try Product(
             package: identity,
@@ -128,14 +127,14 @@ extension SBOMTestModulesGraph {
             type: .plugin,
             modules: [openAPIGeneratorModule]
         )
-        
+
         let swiftOpenAPIGeneratorProduct = try Product(
             package: identity,
             name: "swift-openapi-generator",
             type: .executable,
             modules: [swiftOpenAPIGeneratorModule]
         )
-        
+
         // Package
         let package = self.createPackage(
             identity: identity,
@@ -144,7 +143,7 @@ extension SBOMTestModulesGraph {
             modules: [openAPIGeneratorCoreModule, openAPIGeneratorModule, swiftOpenAPIGeneratorModule],
             products: [openAPIGeneratorProduct, swiftOpenAPIGeneratorProduct]
         )
-        
+
         // Resolved modules
         let resolvedOpenAPIGeneratorCoreModule = self.createResolvedModule(
             packageIdentity: identity,
@@ -155,47 +154,47 @@ extension SBOMTestModulesGraph {
                 .product(openAPIKitCompatProduct, conditions: []),
                 .product(algorithmsProduct, conditions: []),
                 .product(orderedCollectionsProduct, conditions: []),
-                .product(yamsProduct, conditions: [])
+                .product(yamsProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftOpenAPIGeneratorModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftOpenAPIGeneratorModule,
             dependencies: [
                 .module(resolvedOpenAPIGeneratorCoreModule, conditions: []),
-                .product(argumentParserProduct, conditions: [])
+                .product(argumentParserProduct, conditions: []),
             ]
         )
-        
+
         let resolvedOpenAPIGeneratorModule = self.createResolvedModule(
             packageIdentity: identity,
             module: openAPIGeneratorModule,
             dependencies: [
-                .module(resolvedSwiftOpenAPIGeneratorModule, conditions: [])
+                .module(resolvedSwiftOpenAPIGeneratorModule, conditions: []),
             ]
         )
-        
+
         // Resolved products
         let resolvedOpenAPIGeneratorProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: openAPIGeneratorProduct,
             modules: IdentifiableSet([resolvedOpenAPIGeneratorModule])
         )
-        
+
         let resolvedSwiftOpenAPIGeneratorProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftOpenAPIGeneratorProduct,
             modules: IdentifiableSet([resolvedSwiftOpenAPIGeneratorModule])
         )
-        
+
         // Resolved package
         let resolvedPackage = self.createResolvedPackage(
             package: package,
             modules: IdentifiableSet([
                 resolvedOpenAPIGeneratorCoreModule,
                 resolvedOpenAPIGeneratorModule,
-                resolvedSwiftOpenAPIGeneratorModule
+                resolvedSwiftOpenAPIGeneratorModule,
             ]),
             products: [resolvedOpenAPIGeneratorProduct, resolvedSwiftOpenAPIGeneratorProduct],
             dependencies: [
@@ -203,16 +202,16 @@ extension SBOMTestModulesGraph {
                 PackageIdentity.plain("swift-algorithms"),
                 PackageIdentity.plain("swift-argument-parser"),
                 PackageIdentity.plain("swift-collections"),
-                PackageIdentity.plain("yams")
+                PackageIdentity.plain("yams"),
             ]
         )
-        
+
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
             kind: .remoteSourceControl(SourceControlURL("https://github.com/apple/swift-openapi-generator"))
         )
-        
+
         return (
             package: package,
             modules: [openAPIGeneratorCoreModule, openAPIGeneratorModule, swiftOpenAPIGeneratorModule],
@@ -221,15 +220,15 @@ extension SBOMTestModulesGraph {
             resolvedModules: [
                 resolvedOpenAPIGeneratorCoreModule,
                 resolvedOpenAPIGeneratorModule,
-                resolvedSwiftOpenAPIGeneratorModule
+                resolvedSwiftOpenAPIGeneratorModule,
             ],
             resolvedProducts: [resolvedOpenAPIGeneratorProduct, resolvedSwiftOpenAPIGeneratorProduct],
             packageRef: packageRef
         )
     }
-    
+
     // MARK: - async-http-client Package
-    
+
     static func createAsyncHTTPClientPackage(
         nioProduct: ResolvedProduct,
         nioTLSProduct: ResolvedProduct,
@@ -256,11 +255,11 @@ extension SBOMTestModulesGraph {
         packageRef: PackageReference
     ) {
         let identity = PackageIdentity.plain("async-http-client")
-        
+
         // Modules
         let cAsyncHTTPClientModule = self.createSwiftModule(name: "CAsyncHTTPClient")
         let asyncHTTPClientModule = self.createSwiftModule(name: "AsyncHTTPClient")
-        
+
         // Products
         let asyncHTTPClientProduct = try Product(
             package: identity,
@@ -268,7 +267,7 @@ extension SBOMTestModulesGraph {
             type: .library(.automatic),
             modules: [asyncHTTPClientModule]
         )
-        
+
         // Package
         let package = self.createPackage(
             identity: identity,
@@ -277,13 +276,13 @@ extension SBOMTestModulesGraph {
             modules: [cAsyncHTTPClientModule, asyncHTTPClientModule],
             products: [asyncHTTPClientProduct]
         )
-        
+
         // Resolved modules
         let resolvedCAsyncHTTPClientModule = self.createResolvedModule(
             packageIdentity: identity,
             module: cAsyncHTTPClientModule
         )
-        
+
         let resolvedAsyncHTTPClientModule = self.createResolvedModule(
             packageIdentity: identity,
             module: asyncHTTPClientModule,
@@ -303,17 +302,17 @@ extension SBOMTestModulesGraph {
                 .product(atomicsProduct, conditions: []),
                 .product(algorithmsProduct, conditions: []),
                 .product(loggingProduct, conditions: []),
-                .product(tracingProduct, conditions: [])
+                .product(tracingProduct, conditions: []),
             ]
         )
-        
+
         // Resolved products
         let resolvedAsyncHTTPClientProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: asyncHTTPClientProduct,
             modules: IdentifiableSet([resolvedAsyncHTTPClientModule])
         )
-        
+
         // Resolved package
         let resolvedPackage = self.createResolvedPackage(
             package: package,
@@ -328,16 +327,16 @@ extension SBOMTestModulesGraph {
                 PackageIdentity.plain("swift-nio-extras"),
                 PackageIdentity.plain("swift-nio-http2"),
                 PackageIdentity.plain("swift-nio-ssl"),
-                PackageIdentity.plain("swift-nio-transport-services")
+                PackageIdentity.plain("swift-nio-transport-services"),
             ]
         )
-        
+
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
             kind: .remoteSourceControl(SourceControlURL("https://github.com/swift-server/async-http-client"))
         )
-        
+
         return (
             package: package,
             modules: [cAsyncHTTPClientModule, asyncHTTPClientModule],
@@ -348,9 +347,9 @@ extension SBOMTestModulesGraph {
             packageRef: packageRef
         )
     }
-    
+
     // MARK: - swift-openapi-async-http-client Package
-    
+
     static func createSwiftOpenAPIAsyncHTTPClientPackage(
         openAPIRuntimeProduct: ResolvedProduct,
         httpTypesProduct: ResolvedProduct,
@@ -366,10 +365,10 @@ extension SBOMTestModulesGraph {
         packageRef: PackageReference
     ) {
         let identity = PackageIdentity.plain("swift-openapi-async-http-client")
-        
+
         // Modules
         let openAPIAsyncHTTPClientModule = self.createSwiftModule(name: "OpenAPIAsyncHTTPClient")
-        
+
         // Products
         let openAPIAsyncHTTPClientProduct = try Product(
             package: identity,
@@ -377,7 +376,7 @@ extension SBOMTestModulesGraph {
             type: .library(.automatic),
             modules: [openAPIAsyncHTTPClientModule]
         )
-        
+
         // Package
         let package = self.createPackage(
             identity: identity,
@@ -386,7 +385,7 @@ extension SBOMTestModulesGraph {
             modules: [openAPIAsyncHTTPClientModule],
             products: [openAPIAsyncHTTPClientProduct]
         )
-        
+
         // Resolved modules
         let resolvedOpenAPIAsyncHTTPClientModule = self.createResolvedModule(
             packageIdentity: identity,
@@ -395,17 +394,17 @@ extension SBOMTestModulesGraph {
                 .product(openAPIRuntimeProduct, conditions: []),
                 .product(httpTypesProduct, conditions: []),
                 .product(asyncHTTPClientProduct, conditions: []),
-                .product(nioFoundationCompatProduct, conditions: [])
+                .product(nioFoundationCompatProduct, conditions: []),
             ]
         )
-        
+
         // Resolved products
         let resolvedOpenAPIAsyncHTTPClientProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: openAPIAsyncHTTPClientProduct,
             modules: IdentifiableSet([resolvedOpenAPIAsyncHTTPClientModule])
         )
-        
+
         // Resolved package
         let resolvedPackage = self.createResolvedPackage(
             package: package,
@@ -415,16 +414,18 @@ extension SBOMTestModulesGraph {
                 PackageIdentity.plain("async-http-client"),
                 PackageIdentity.plain("swift-http-types"),
                 PackageIdentity.plain("swift-nio"),
-                PackageIdentity.plain("swift-openapi-runtime")
+                PackageIdentity.plain("swift-openapi-runtime"),
             ]
         )
-        
+
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
-            kind: .remoteSourceControl(SourceControlURL("https://github.com/swift-server/swift-openapi-async-http-client"))
+            kind: .remoteSourceControl(
+                SourceControlURL("https://github.com/swift-server/swift-openapi-async-http-client")
+            )
         )
-        
+
         return (
             package: package,
             modules: [openAPIAsyncHTTPClientModule],

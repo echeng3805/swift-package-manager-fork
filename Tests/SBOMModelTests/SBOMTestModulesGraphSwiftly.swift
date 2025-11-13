@@ -18,46 +18,44 @@ import PackageModel
 @testable import SBOMModel
 
 extension SBOMTestModulesGraph {
-    
     /// Creates a complete ModulesGraph for the Swiftly project with all dependencies
     static func createSwiftlyModulesGraph(rootPath: String = "/tmp/swiftly-mock") throws -> ModulesGraph {
-
         // MARK: - Create Foundation Packages (no dependencies)
-        
+
         let systemPackage = try createSwiftSystemPackage()
         let argumentParserPackage = try createSwiftArgumentParserPackage()
         let toolsSupportPackage = try createSwiftToolsSupportCorePackage()
         let httpTypesPackage = try createSwiftHTTPTypesPackage()
-        
+
         // MARK: - Create Security Packages
-        
+
         let asn1Package = try createSwiftlySwiftASN1Package()
-        
+
         let cryptoPackage = try createSwiftlySwiftCryptoPackage(
             swiftASN1Product: asn1Package.resolvedProducts[0]
         )
-        
+
         let certificatesPackage = try createSwiftlySwiftCertificatesPackage(
             swiftASN1Product: asn1Package.resolvedProducts[0],
             cryptoProduct: cryptoPackage.resolvedProducts[0],
             cryptoExtrasProduct: cryptoPackage.resolvedProducts[1]
         )
-        
+
         // MARK: - Create Packages with Foundation Dependencies
-        
+
         let subprocessPackage = try createSwiftSubprocessPackage(
             systemPackageProduct: systemPackage.resolvedProducts[0]
         )
-        
+
         // MARK: - Create Collections and Utility Packages
-        
+
         let collectionsPackage = try createSwiftCollectionsPackage()
         let numericsPackage = try createSwiftNumericsPackage()
         let algorithmsPackage = try createSwiftAlgorithmsPackage(
             realModuleProduct: numericsPackage.resolvedProducts[0]
         )
         let atomicsPackage = try createSwiftAtomicsPackage()
-        
+
         let logPackage = try createSwiftLogPackage()
         let serviceContextPackage = try createSwiftServiceContextPackage()
         let distributedTracingPackage = try createSwiftDistributedTracingPackage(
@@ -65,22 +63,22 @@ extension SBOMTestModulesGraph {
         )
         let yamsPackage = try createYamsPackage()
         let openAPIKitPackage = try createOpenAPIKitPackage()
-        
+
         // MARK: - Create NIO Packages
-        
+
         let nioPackage = try createSwiftNIOPackage(
             atomicsProduct: atomicsPackage.resolvedProducts[0],
             dequeProduct: collectionsPackage.resolvedProducts[0], // DequeModule
             systemPackageProduct: systemPackage.resolvedProducts[0]
         )
-        
+
         let nioSSLPackage = try createSwiftNIOSSLPackage(
             nioProduct: nioPackage.resolvedProducts[2], // NIO
             nioCoreProduct: nioPackage.resolvedProducts[1], // NIOCore
             nioConcurrencyHelpersProduct: nioPackage.resolvedProducts[0], // NIOConcurrencyHelpers
             nioTLSProduct: nioPackage.resolvedProducts[4] // NIOTLS
         )
-        
+
         let nioHTTP2Package = try createSwiftNIOHTTP2Package(
             nioProduct: nioPackage.resolvedProducts[2], // NIO
             nioCoreProduct: nioPackage.resolvedProducts[1], // NIOCore
@@ -89,13 +87,13 @@ extension SBOMTestModulesGraph {
             nioTLSProduct: nioPackage.resolvedProducts[4], // NIOTLS
             atomicsProduct: atomicsPackage.resolvedProducts[0]
         )
-        
+
         let nioExtrasPackage = try createSwiftNIOExtrasPackage(
             nioProduct: nioPackage.resolvedProducts[2], // NIO
             nioCoreProduct: nioPackage.resolvedProducts[1], // NIOCore
             nioHTTP1Product: nioPackage.resolvedProducts[5] // NIOHTTP1
         )
-        
+
         let nioTransportServicesPackage = try createSwiftNIOTransportServicesPackage(
             nioProduct: nioPackage.resolvedProducts[2], // NIO
             nioCoreProduct: nioPackage.resolvedProducts[1], // NIOCore
@@ -103,13 +101,13 @@ extension SBOMTestModulesGraph {
             nioTLSProduct: nioPackage.resolvedProducts[4], // NIOTLS
             atomicsProduct: atomicsPackage.resolvedProducts[0]
         )
-        
+
         // MARK: - Create OpenAPI Packages
-        
+
         let openAPIRuntimePackage = try createSwiftOpenAPIRuntimePackage(
             httpTypesProduct: httpTypesPackage.resolvedProducts[0]
         )
-        
+
         let openAPIGeneratorPackage = try createSwiftOpenAPIGeneratorPackage(
             openAPIKitProduct: openAPIKitPackage.resolvedProducts[0], // OpenAPIKit
             openAPIKit30Product: openAPIKitPackage.resolvedProducts[1], // OpenAPIKit30
@@ -119,7 +117,7 @@ extension SBOMTestModulesGraph {
             yamsProduct: yamsPackage.resolvedProducts[0],
             argumentParserProduct: argumentParserPackage.resolvedProducts[0]
         )
-        
+
         let asyncHTTPClientPackage = try createAsyncHTTPClientPackage(
             nioProduct: nioPackage.resolvedProducts[2], // NIO
             nioTLSProduct: nioPackage.resolvedProducts[4], // NIOTLS
@@ -137,16 +135,16 @@ extension SBOMTestModulesGraph {
             loggingProduct: logPackage.resolvedProducts[0],
             tracingProduct: distributedTracingPackage.resolvedProducts[0]
         )
-        
+
         let openAPIAsyncHTTPClientPackage = try createSwiftOpenAPIAsyncHTTPClientPackage(
             openAPIRuntimeProduct: openAPIRuntimePackage.resolvedProducts[0],
             httpTypesProduct: httpTypesPackage.resolvedProducts[0],
             asyncHTTPClientProduct: asyncHTTPClientPackage.resolvedProducts[0],
             nioFoundationCompatProduct: nioPackage.resolvedProducts[6] // NIOFoundationCompat
         )
-        
+
         // MARK: - Create Swiftly Root Package
-        
+
         let swiftlyPackage = try createSwiftlyRootPackage(
             rootPath: rootPath,
             openAPIGeneratorProduct: openAPIGeneratorPackage.resolvedProducts[0], // OpenAPIGenerator
@@ -160,9 +158,9 @@ extension SBOMTestModulesGraph {
             swiftToolsSupportProduct: toolsSupportPackage.resolvedProducts[0],
             nioFileSystemProduct: nioPackage.resolvedProducts[7] // _NIOFileSystem
         )
-        
+
         // MARK: - Assemble All Packages
-        
+
         let allResolvedPackages: IdentifiableSet<ResolvedPackage> = IdentifiableSet([
             swiftlyPackage.resolvedPackage,
             systemPackage.resolvedPackage,
@@ -190,9 +188,9 @@ extension SBOMTestModulesGraph {
             openAPIRuntimePackage.resolvedPackage,
             openAPIGeneratorPackage.resolvedPackage,
             asyncHTTPClientPackage.resolvedPackage,
-            openAPIAsyncHTTPClientPackage.resolvedPackage
+            openAPIAsyncHTTPClientPackage.resolvedPackage,
         ])
-        
+
         let rootDependencies = [
             systemPackage.resolvedPackage,
             subprocessPackage.resolvedPackage,
@@ -219,9 +217,9 @@ extension SBOMTestModulesGraph {
             openAPIRuntimePackage.resolvedPackage,
             openAPIGeneratorPackage.resolvedPackage,
             asyncHTTPClientPackage.resolvedPackage,
-            openAPIAsyncHTTPClientPackage.resolvedPackage
+            openAPIAsyncHTTPClientPackage.resolvedPackage,
         ]
-        
+
         let packageReferences = [
             swiftlyPackage.packageRef,
             systemPackage.packageRef,
@@ -249,11 +247,11 @@ extension SBOMTestModulesGraph {
             openAPIRuntimePackage.packageRef,
             openAPIGeneratorPackage.packageRef,
             asyncHTTPClientPackage.packageRef,
-            openAPIAsyncHTTPClientPackage.packageRef
+            openAPIAsyncHTTPClientPackage.packageRef,
         ]
-        
+
         // MARK: - Create ModulesGraph
-        
+
         return try ModulesGraph(
             rootPackages: [swiftlyPackage.resolvedPackage],
             rootDependencies: rootDependencies,

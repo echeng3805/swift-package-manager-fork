@@ -17,7 +17,7 @@ import PackageGraph
 import PackageModel
 @testable import SBOMModel
 
-struct SBOMTestModulesGraph {
+enum SBOMTestModulesGraph {
     // MARK: - Helper functions
 
     static func createSwiftModule(
@@ -112,9 +112,13 @@ struct SBOMTestModulesGraph {
         )
     }
 
-    static func createProduct(name: String, type: ProductType, moduleType: Module.Kind = .library) throws -> ResolvedProduct {
+    static func createProduct(
+        name: String,
+        type: ProductType,
+        moduleType: Module.Kind = .library
+    ) throws -> ResolvedProduct {
         let packageName = PackageIdentity.plain("Package\(name)")
-        let module = createSwiftModule(
+        let module = self.createSwiftModule(
             name: "\(name)Module",
             type: moduleType
         )
@@ -124,20 +128,24 @@ struct SBOMTestModulesGraph {
             type: type,
             modules: [module]
         )
-        let resolvedModule = createResolvedModule(
+        let resolvedModule = self.createResolvedModule(
             packageIdentity: packageName,
             module: module
         )
-        return createResolvedProduct(
+        return self.createResolvedProduct(
             packageIdentity: packageName,
             product: product,
             modules: IdentifiableSet([resolvedModule])
         )
     }
 
-    static func createPackage(name: String, products: [ResolvedProduct], modules: [Module] = []) throws -> ResolvedPackage {
+    static func createPackage(
+        name: String,
+        products: [ResolvedProduct],
+        modules: [Module] = []
+    ) throws -> ResolvedPackage {
         let packageName = PackageIdentity.plain("Package\(name)")
-        let package = createPackage(
+        let package = self.createPackage(
             identity: packageName,
             displayName: name,
             path: "/\(name)",
@@ -145,12 +153,12 @@ struct SBOMTestModulesGraph {
             products: products.map(\.underlying)
         )
         let resolvedModules = modules.map { module in
-            createResolvedModule(
+            self.createResolvedModule(
                 packageIdentity: packageName,
                 module: module
             )
         }
-        return createResolvedPackage(
+        return self.createResolvedPackage(
             package: package,
             modules: IdentifiableSet(resolvedModules),
             products: products

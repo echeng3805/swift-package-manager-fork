@@ -53,29 +53,29 @@ struct SBOMGetSpecTests {
     }
 
     // MARK: - getSpecs Tests
-    
+
     @Test("getSpecs returns unique specs")
     func getSpecsReturnsUniqueSpecs() async throws {
         let specs = await SBOMEncoder.getSpecs(from: [.cyclonedx, .cyclonedx1, .spdx, .spdx3])
-        
+
         #expect(specs.count == 2, "Should return only unique specs")
-        
+
         let types = Set(specs.map(\.type))
         #expect(types.contains(.cyclonedx1))
         #expect(types.contains(.spdx3))
     }
-    
+
     @Test("getSpecs handles empty array")
     func getSpecsHandlesEmptyArray() async throws {
         let specs = await SBOMEncoder.getSpecs(from: [])
-        
+
         #expect(specs.isEmpty, "Should return empty array for empty input")
     }
-    
+
     @Test("getSpecs handles single spec")
     func getSpecsHandlesSingleSpec() async throws {
         let specs = await SBOMEncoder.getSpecs(from: [.cyclonedx])
-        
+
         #expect(specs.count == 1)
         #expect(specs[0].type == .cyclonedx1)
     }

@@ -18,16 +18,16 @@ import Foundation
 package enum SBOMError: Error, LocalizedError, CustomStringConvertible {
     /// Expected a specific SBOM spec type but got another
     case unexpectedSpecType(expected: String, actual: Spec)
-    
+
     package var errorDescription: String? {
         switch self {
         case .unexpectedSpecType(let expected, let actual):
-            return "Expected \(expected) spec but got \(actual)"
+            "Expected \(expected) spec but got \(actual)"
         }
     }
-    
+
     package var description: String {
-        errorDescription ?? "Unknown SBOM error"
+        self.errorDescription ?? "Unknown SBOM error"
     }
 }
 
@@ -42,13 +42,14 @@ package enum SBOMSchemaError: Error, LocalizedError, CustomStringConvertible {
     package var errorDescription: String? {
         switch self {
         case .schemaFileNotFound(let filename, let bundlePath):
-            return "SBOM schema file '\(filename).json' not found in bundle: \(bundlePath)"
+            "SBOM schema file '\(filename).json' not found in bundle: \(bundlePath)"
         case .invalidSchemaFormat(let message):
-            return "Invalid JSON schema format: \(message)"
+            "Invalid JSON schema format: \(message)"
         }
     }
+
     package var description: String {
-        errorDescription ?? "Unknown SBOM schema error"
+        self.errorDescription ?? "Unknown SBOM schema error"
     }
 }
 
@@ -58,16 +59,16 @@ package enum SBOMSchemaError: Error, LocalizedError, CustomStringConvertible {
 package enum SBOMConverterError: Error, LocalizedError, CustomStringConvertible {
     /// Missing required metadata for conversion
     case missingRequiredMetadata(message: String)
-    
+
     package var errorDescription: String? {
         switch self {
         case .missingRequiredMetadata(let message):
-            return "Missing required metadata: \(message)"
+            "Missing required metadata: \(message)"
         }
     }
-    
+
     package var description: String {
-        errorDescription ?? "Unknown SBOM converter error"
+        self.errorDescription ?? "Unknown SBOM converter error"
     }
 }
 
@@ -77,22 +78,23 @@ package enum SBOMConverterError: Error, LocalizedError, CustomStringConvertible 
 package enum SBOMExtractorError: Error, LocalizedError, CustomStringConvertible {
     /// No root package found in package graph
     case noRootPackage(context: String)
-    /// No build graph available 
+    /// No build graph available
     case noBuildGraph(context: String)
     /// Product not found in package
     case productNotFound(productName: String, packageIdentity: String)
     package var errorDescription: String? {
         switch self {
         case .noRootPackage(let context):
-            return "No root package found in package graph, cannot \(context)"
+            "No root package found in package graph, cannot \(context)"
         case .noBuildGraph(let context):
-            return "No build graph available, cannot \(context)"
+            "No build graph available, cannot \(context)"
         case .productNotFound(let productName, let packageIdentity):
-            return "Product '\(productName)' not found in root package '\(packageIdentity)'"
+            "Product '\(productName)' not found in root package '\(packageIdentity)'"
         }
     }
+
     package var description: String {
-        errorDescription ?? "Unknown SBOM extractor error"
+        self.errorDescription ?? "Unknown SBOM extractor error"
     }
 }
 
@@ -105,11 +107,12 @@ package enum SBOMEncoderError: Error, LocalizedError, CustomStringConvertible {
     package var errorDescription: String? {
         switch self {
         case .jsonConversionFailed(let message):
-            return "Failed to convert SBOM to JSON: \(message)"
+            "Failed to convert SBOM to JSON: \(message)"
         }
     }
+
     package var description: String {
-        errorDescription ?? "Unknown SBOM encoder error"
+        self.errorDescription ?? "Unknown SBOM encoder error"
     }
 }
 
@@ -132,20 +135,21 @@ package enum SBOMValidatorError: Error, LocalizedError, CustomStringConvertible 
     package var errorDescription: String? {
         switch self {
         case .notSchemaViolation(let path, let valueDescription):
-            return "Value at \(path) matches 'not' schema (should not match). Value: \(valueDescription)"
+            "Value at \(path) matches 'not' schema (should not match). Value: \(valueDescription)"
         case .typeMismatch(let path, let expected, let actual, let debugInfo):
-            return "Type mismatch at \(path): expected \(expected), got \(actual) (\(debugInfo))"
+            "Type mismatch at \(path): expected \(expected), got \(actual) (\(debugInfo))"
         case .missingRequired(let path, let property):
-            return "Missing required property '\(property)' at \(path)"
+            "Missing required property '\(property)' at \(path)"
         case .invalidValue(let path, let message):
-            return "Invalid value at \(path): \(message)"
+            "Invalid value at \(path): \(message)"
         case .schemaComposition(let path, let message):
-            return "Schema composition error at \(path): \(message)"
+            "Schema composition error at \(path): \(message)"
         case .constraintViolation(let path, let message):
-            return "Constraint violation at \(path): \(message)"
+            "Constraint violation at \(path): \(message)"
         }
     }
+
     package var description: String {
-        errorDescription ?? "Unknown SBOM validator error"
+        self.errorDescription ?? "Unknown SBOM validator error"
     }
 }

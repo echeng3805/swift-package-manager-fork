@@ -18,61 +18,59 @@ import PackageModel
 @testable import SBOMModel
 
 extension SBOMTestModulesGraph {
-    
     /// Creates a complete SPM ModulesGraph with all dependencies including the root SwiftPM package
     /// This assembles all the individual package fixtures into a complete dependency graph
     /// The root package includes the SwiftPMDataModel product that was previously missing
     static func createSPMModulesGraph(rootPath: String = "/swift-package-manager") throws -> ModulesGraph {
-        
         // MARK: - Create all foundation packages
-        
+
         let systemPackage = try createSPMSwiftSystemPackage()
         let collectionsPackage = try createSPMSwiftCollectionsPackage()
         let argumentParserPackage = try createSPMSwiftArgumentParserPackage()
         let sqlitePackage = try createSPMSwiftToolchainSQLitePackage()
-        
+
         // MARK: - Create build tooling packages
-        
+
         let llbuildPackage = try createSPMSwiftLLBuildPackage(
             swiftToolchainCSQLiteProduct: sqlitePackage.resolvedProducts[0]
         )
-        
+
         let toolsSupportPackage = try createSPMSwiftToolsSupportCorePackage()
-        
+
         let driverPackage = try createSPMSwiftDriverPackage(
             swiftToolsSupportAutoProduct: toolsSupportPackage.resolvedProducts[2],
             llbuildSwiftProduct: llbuildPackage.resolvedProducts[3],
             argumentParserProduct: argumentParserPackage.resolvedProducts[0]
         )
-        
+
         // MARK: - Create security packages
-        
+
         let asn1Package = try createSPMSwiftASN1Package()
-        
+
         let cryptoPackage = try createSPMSwiftCryptoPackage(
             swiftASN1Product: asn1Package.resolvedProducts[0]
         )
-        
+
         let certificatesPackage = try createSPMSwiftCertificatesPackage(
             swiftASN1Product: asn1Package.resolvedProducts[0],
             cryptoProduct: cryptoPackage.resolvedProducts[0],
             cryptoExtrasProduct: cryptoPackage.resolvedProducts[1]
         )
-        
+
         // MARK: - Create documentation packages
-        
+
         let symbolKitPackage = try createSPMSwiftDoccSymbolKitPackage()
-        
+
         let doccPluginPackage = try createSPMSwiftDoccPluginPackage(
             symbolKitProduct: symbolKitPackage.resolvedProducts[0]
         )
-        
+
         // MARK: - Create swift-syntax package
-        
+
         let syntaxPackage = try createSPMSwiftSyntaxPackage()
-        
+
         // MARK: - Create swift-build package
-        
+
         let buildPackage = try createSPMSwiftBuildPackage(
             swiftSyntaxProduct: syntaxPackage.resolvedProducts[0],
             swiftParserProduct: syntaxPackage.resolvedProducts[2],
@@ -85,9 +83,9 @@ extension SBOMTestModulesGraph {
             cryptoProduct: cryptoPackage.resolvedProducts[0],
             x509Product: certificatesPackage.resolvedProducts[0]
         )
-        
+
         // MARK: - Create ROOT SwiftPM package (with SwiftPMDataModel product)
-        
+
         let rootPackage = try createSPMRootPackageComplete(
             rootPath: rootPath,
             systemPackageProduct: systemPackage.resolvedProducts[0],
@@ -110,9 +108,9 @@ extension SBOMTestModulesGraph {
             swiftBuildProduct: buildPackage.resolvedProducts[5],
             swbBuildServiceProduct: buildPackage.resolvedProducts[0]
         )
-        
+
         // MARK: - Assemble all packages
-        
+
         let allResolvedPackages: IdentifiableSet<ResolvedPackage> = IdentifiableSet([
             rootPackage.resolvedPackage,
             buildPackage.resolvedPackage,
@@ -128,9 +126,9 @@ extension SBOMTestModulesGraph {
             cryptoPackage.resolvedPackage,
             certificatesPackage.resolvedPackage,
             symbolKitPackage.resolvedPackage,
-            doccPluginPackage.resolvedPackage
+            doccPluginPackage.resolvedPackage,
         ])
-        
+
         let rootDependencies = [
             buildPackage.resolvedPackage,
             syntaxPackage.resolvedPackage,
@@ -145,9 +143,9 @@ extension SBOMTestModulesGraph {
             cryptoPackage.resolvedPackage,
             certificatesPackage.resolvedPackage,
             symbolKitPackage.resolvedPackage,
-            doccPluginPackage.resolvedPackage
+            doccPluginPackage.resolvedPackage,
         ]
-        
+
         let packageReferences = [
             rootPackage.packageRef,
             buildPackage.packageRef,
@@ -163,11 +161,11 @@ extension SBOMTestModulesGraph {
             cryptoPackage.packageRef,
             certificatesPackage.packageRef,
             symbolKitPackage.packageRef,
-            doccPluginPackage.packageRef
+            doccPluginPackage.packageRef,
         ]
-        
+
         // MARK: - Create and return ModulesGraph
-        
+
         return try ModulesGraph(
             rootPackages: [rootPackage.resolvedPackage],
             rootDependencies: rootDependencies,

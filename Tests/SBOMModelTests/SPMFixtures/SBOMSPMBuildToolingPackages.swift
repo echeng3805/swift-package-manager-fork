@@ -18,9 +18,8 @@ import PackageModel
 @testable import SBOMModel
 
 extension SBOMTestModulesGraph {
-    
     // MARK: - swift-llbuild Package
-    
+
     static func createSPMSwiftLLBuildPackage(
         swiftToolchainCSQLiteProduct: ResolvedProduct
     ) throws -> (
@@ -33,7 +32,7 @@ extension SBOMTestModulesGraph {
         packageRef: PackageReference
     ) {
         let identity = PackageIdentity.plain("swift-llbuild")
-        
+
         // Modules
         let llvmDemangleModule = self.createSwiftModule(name: "llvmDemangle")
         let llvmSupportModule = self.createSwiftModule(name: "llvmSupport")
@@ -46,7 +45,7 @@ extension SBOMTestModulesGraph {
         let llbuildSwiftModule = self.createSwiftModule(name: "llbuildSwift")
         let llbuildAnalysisModule = self.createSwiftModule(name: "llbuildAnalysis")
         let llbuildExecModule = self.createSwiftModule(name: "llbuild", type: .executable)
-        
+
         // Products
         let libllbuildProduct = try Product(
             package: identity,
@@ -54,35 +53,35 @@ extension SBOMTestModulesGraph {
             type: .library(.automatic),
             modules: [libllbuildModule]
         )
-        
+
         let llbuildProduct = try Product(
             package: identity,
             name: "llbuild",
             type: .executable,
             modules: [llbuildExecModule]
         )
-        
+
         let llbuildAnalysisProduct = try Product(
             package: identity,
             name: "llbuildAnalysis",
             type: .library(.automatic),
             modules: [llbuildAnalysisModule]
         )
-        
+
         let llbuildSwiftProduct = try Product(
             package: identity,
             name: "llbuildSwift",
             type: .library(.automatic),
             modules: [llbuildSwiftModule]
         )
-        
+
         let llbuildSwiftDynamicProduct = try Product(
             package: identity,
             name: "llbuildSwiftDynamic",
             type: .library(.dynamic),
             modules: [llbuildSwiftModule]
         )
-        
+
         // Package
         let package = self.createPackage(
             identity: identity,
@@ -91,136 +90,136 @@ extension SBOMTestModulesGraph {
             modules: [
                 llvmDemangleModule, llvmSupportModule, llbuildBasicModule, llbuildCoreModule,
                 llbuildNinjaModule, llbuildBuildSystemModule, llbuildCommandsModule,
-                libllbuildModule, llbuildSwiftModule, llbuildAnalysisModule, llbuildExecModule
+                libllbuildModule, llbuildSwiftModule, llbuildAnalysisModule, llbuildExecModule,
             ],
             products: [
                 libllbuildProduct, llbuildProduct, llbuildAnalysisProduct,
-                llbuildSwiftProduct, llbuildSwiftDynamicProduct
+                llbuildSwiftProduct, llbuildSwiftDynamicProduct,
             ]
         )
-        
+
         // Resolved modules
         let resolvedLLVMDemangleModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llvmDemangleModule
         )
-        
+
         let resolvedLLVMSupportModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llvmSupportModule,
             dependencies: [
-                .module(resolvedLLVMDemangleModule, conditions: [])
+                .module(resolvedLLVMDemangleModule, conditions: []),
             ]
         )
-        
+
         let resolvedLLBuildBasicModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llbuildBasicModule,
             dependencies: [
-                .module(resolvedLLVMSupportModule, conditions: [])
+                .module(resolvedLLVMSupportModule, conditions: []),
             ]
         )
-        
+
         let resolvedLLBuildCoreModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llbuildCoreModule,
             dependencies: [
                 .module(resolvedLLBuildBasicModule, conditions: []),
-                .product(swiftToolchainCSQLiteProduct, conditions: [])
+                .product(swiftToolchainCSQLiteProduct, conditions: []),
             ]
         )
-        
+
         let resolvedLLBuildNinjaModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llbuildNinjaModule,
             dependencies: [
-                .module(resolvedLLBuildBasicModule, conditions: [])
+                .module(resolvedLLBuildBasicModule, conditions: []),
             ]
         )
-        
+
         let resolvedLLBuildBuildSystemModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llbuildBuildSystemModule,
             dependencies: [
-                .module(resolvedLLBuildCoreModule, conditions: [])
+                .module(resolvedLLBuildCoreModule, conditions: []),
             ]
         )
-        
+
         let resolvedLLBuildCommandsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llbuildCommandsModule,
             dependencies: [
                 .module(resolvedLLBuildCoreModule, conditions: []),
                 .module(resolvedLLBuildBuildSystemModule, conditions: []),
-                .module(resolvedLLBuildNinjaModule, conditions: [])
+                .module(resolvedLLBuildNinjaModule, conditions: []),
             ]
         )
-        
+
         let resolvedLibllbuildModule = self.createResolvedModule(
             packageIdentity: identity,
             module: libllbuildModule,
             dependencies: [
                 .module(resolvedLLBuildCoreModule, conditions: []),
                 .module(resolvedLLBuildBuildSystemModule, conditions: []),
-                .module(resolvedLLBuildNinjaModule, conditions: [])
+                .module(resolvedLLBuildNinjaModule, conditions: []),
             ]
         )
-        
+
         let resolvedLLBuildSwiftModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llbuildSwiftModule,
             dependencies: [
-                .module(resolvedLibllbuildModule, conditions: [])
+                .module(resolvedLibllbuildModule, conditions: []),
             ]
         )
-        
+
         let resolvedLLBuildAnalysisModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llbuildAnalysisModule,
             dependencies: [
-                .module(resolvedLLBuildSwiftModule, conditions: [])
+                .module(resolvedLLBuildSwiftModule, conditions: []),
             ]
         )
-        
+
         let resolvedLLBuildExecModule = self.createResolvedModule(
             packageIdentity: identity,
             module: llbuildExecModule,
             dependencies: [
-                .module(resolvedLLBuildCommandsModule, conditions: [])
+                .module(resolvedLLBuildCommandsModule, conditions: []),
             ]
         )
-        
+
         // Resolved products
         let resolvedLibllbuildProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: libllbuildProduct,
             modules: IdentifiableSet([resolvedLibllbuildModule])
         )
-        
+
         let resolvedLLBuildProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: llbuildProduct,
             modules: IdentifiableSet([resolvedLLBuildExecModule])
         )
-        
+
         let resolvedLLBuildAnalysisProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: llbuildAnalysisProduct,
             modules: IdentifiableSet([resolvedLLBuildAnalysisModule])
         )
-        
+
         let resolvedLLBuildSwiftProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: llbuildSwiftProduct,
             modules: IdentifiableSet([resolvedLLBuildSwiftModule])
         )
-        
+
         let resolvedLLBuildSwiftDynamicProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: llbuildSwiftDynamicProduct,
             modules: IdentifiableSet([resolvedLLBuildSwiftModule])
         )
-        
+
         // Resolved package
         let resolvedPackage = self.createResolvedPackage(
             package: package,
@@ -228,49 +227,49 @@ extension SBOMTestModulesGraph {
                 resolvedLLVMDemangleModule, resolvedLLVMSupportModule, resolvedLLBuildBasicModule,
                 resolvedLLBuildCoreModule, resolvedLLBuildNinjaModule, resolvedLLBuildBuildSystemModule,
                 resolvedLLBuildCommandsModule, resolvedLibllbuildModule, resolvedLLBuildSwiftModule,
-                resolvedLLBuildAnalysisModule, resolvedLLBuildExecModule
+                resolvedLLBuildAnalysisModule, resolvedLLBuildExecModule,
             ]),
             products: [
                 resolvedLibllbuildProduct, resolvedLLBuildProduct, resolvedLLBuildAnalysisProduct,
-                resolvedLLBuildSwiftProduct, resolvedLLBuildSwiftDynamicProduct
+                resolvedLLBuildSwiftProduct, resolvedLLBuildSwiftDynamicProduct,
             ],
             dependencies: [PackageIdentity.plain("swift-toolchain-sqlite")]
         )
-        
+
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
             kind: .remoteSourceControl(SourceControlURL("https://github.com/swiftlang/swift-llbuild.git"))
         )
-        
+
         return (
             package: package,
             modules: [
                 llvmDemangleModule, llvmSupportModule, llbuildBasicModule, llbuildCoreModule,
                 llbuildNinjaModule, llbuildBuildSystemModule, llbuildCommandsModule,
-                libllbuildModule, llbuildSwiftModule, llbuildAnalysisModule, llbuildExecModule
+                libllbuildModule, llbuildSwiftModule, llbuildAnalysisModule, llbuildExecModule,
             ],
             products: [
                 libllbuildProduct, llbuildProduct, llbuildAnalysisProduct,
-                llbuildSwiftProduct, llbuildSwiftDynamicProduct
+                llbuildSwiftProduct, llbuildSwiftDynamicProduct,
             ],
             resolvedPackage: resolvedPackage,
             resolvedModules: [
                 resolvedLLVMDemangleModule, resolvedLLVMSupportModule, resolvedLLBuildBasicModule,
                 resolvedLLBuildCoreModule, resolvedLLBuildNinjaModule, resolvedLLBuildBuildSystemModule,
                 resolvedLLBuildCommandsModule, resolvedLibllbuildModule, resolvedLLBuildSwiftModule,
-                resolvedLLBuildAnalysisModule, resolvedLLBuildExecModule
+                resolvedLLBuildAnalysisModule, resolvedLLBuildExecModule,
             ],
             resolvedProducts: [
                 resolvedLibllbuildProduct, resolvedLLBuildProduct, resolvedLLBuildAnalysisProduct,
-                resolvedLLBuildSwiftProduct, resolvedLLBuildSwiftDynamicProduct
+                resolvedLLBuildSwiftProduct, resolvedLLBuildSwiftDynamicProduct,
             ],
             packageRef: packageRef
         )
     }
-    
+
     // MARK: - swift-tools-support-core Package
-    
+
     static func createSPMSwiftToolsSupportCorePackage() throws -> (
         package: Package,
         modules: [Module],
@@ -281,14 +280,14 @@ extension SBOMTestModulesGraph {
         packageRef: PackageReference
     ) {
         let identity = PackageIdentity.plain("swift-tools-support-core")
-        
+
         // Modules
         let tscLibcModule = self.createSwiftModule(name: "TSCLibc")
         let tscClibcModule = self.createSwiftModule(name: "TSCclibc")
         let tscBasicModule = self.createSwiftModule(name: "TSCBasic")
         let tscUtilityModule = self.createSwiftModule(name: "TSCUtility")
         let tscTestSupportModule = self.createSwiftModule(name: "TSCTestSupport")
-        
+
         // Products
         let tscBasicProduct = try Product(
             package: identity,
@@ -296,28 +295,28 @@ extension SBOMTestModulesGraph {
             type: .library(.automatic),
             modules: [tscBasicModule]
         )
-        
+
         let swiftToolsSupportProduct = try Product(
             package: identity,
             name: "SwiftToolsSupport",
             type: .library(.dynamic),
             modules: [tscBasicModule, tscUtilityModule]
         )
-        
+
         let swiftToolsSupportAutoProduct = try Product(
             package: identity,
             name: "SwiftToolsSupport-auto",
             type: .library(.automatic),
             modules: [tscBasicModule, tscUtilityModule]
         )
-        
+
         let tscTestSupportProduct = try Product(
             package: identity,
             name: "TSCTestSupport",
             type: .library(.automatic),
             modules: [tscTestSupportModule]
         )
-        
+
         // Package
         let package = self.createPackage(
             identity: identity,
@@ -326,89 +325,89 @@ extension SBOMTestModulesGraph {
             modules: [tscLibcModule, tscClibcModule, tscBasicModule, tscUtilityModule, tscTestSupportModule],
             products: [tscBasicProduct, swiftToolsSupportProduct, swiftToolsSupportAutoProduct, tscTestSupportProduct]
         )
-        
+
         // Resolved modules
         let resolvedTSCLibcModule = self.createResolvedModule(
             packageIdentity: identity,
             module: tscLibcModule
         )
-        
+
         let resolvedTSCClibcModule = self.createResolvedModule(
             packageIdentity: identity,
             module: tscClibcModule
         )
-        
+
         let resolvedTSCBasicModule = self.createResolvedModule(
             packageIdentity: identity,
             module: tscBasicModule,
             dependencies: [
                 .module(resolvedTSCLibcModule, conditions: []),
-                .module(resolvedTSCClibcModule, conditions: [])
+                .module(resolvedTSCClibcModule, conditions: []),
             ]
         )
-        
+
         let resolvedTSCUtilityModule = self.createResolvedModule(
             packageIdentity: identity,
             module: tscUtilityModule,
             dependencies: [
                 .module(resolvedTSCBasicModule, conditions: []),
-                .module(resolvedTSCClibcModule, conditions: [])
+                .module(resolvedTSCClibcModule, conditions: []),
             ]
         )
-        
+
         let resolvedTSCTestSupportModule = self.createResolvedModule(
             packageIdentity: identity,
             module: tscTestSupportModule,
             dependencies: [
                 .module(resolvedTSCBasicModule, conditions: []),
-                .module(resolvedTSCUtilityModule, conditions: [])
+                .module(resolvedTSCUtilityModule, conditions: []),
             ]
         )
-        
+
         // Resolved products
         let resolvedTSCBasicProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: tscBasicProduct,
             modules: IdentifiableSet([resolvedTSCBasicModule])
         )
-        
+
         let resolvedSwiftToolsSupportProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftToolsSupportProduct,
             modules: IdentifiableSet([resolvedTSCBasicModule, resolvedTSCUtilityModule])
         )
-        
+
         let resolvedSwiftToolsSupportAutoProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftToolsSupportAutoProduct,
             modules: IdentifiableSet([resolvedTSCBasicModule, resolvedTSCUtilityModule])
         )
-        
+
         let resolvedTSCTestSupportProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: tscTestSupportProduct,
             modules: IdentifiableSet([resolvedTSCTestSupportModule])
         )
-        
+
         // Resolved package
         let resolvedPackage = self.createResolvedPackage(
             package: package,
             modules: IdentifiableSet([
                 resolvedTSCLibcModule, resolvedTSCClibcModule, resolvedTSCBasicModule,
-                resolvedTSCUtilityModule, resolvedTSCTestSupportModule
+                resolvedTSCUtilityModule, resolvedTSCTestSupportModule,
             ]),
             products: [
                 resolvedTSCBasicProduct, resolvedSwiftToolsSupportProduct,
-                resolvedSwiftToolsSupportAutoProduct, resolvedTSCTestSupportProduct
+                resolvedSwiftToolsSupportAutoProduct, resolvedTSCTestSupportProduct,
             ]
         )
-        
+
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
             kind: .remoteSourceControl(SourceControlURL("https://github.com/swiftlang/swift-tools-support-core.git"))
         )
-        
+
         return (
             package: package,
             modules: [tscLibcModule, tscClibcModule, tscBasicModule, tscUtilityModule, tscTestSupportModule],
@@ -416,18 +415,18 @@ extension SBOMTestModulesGraph {
             resolvedPackage: resolvedPackage,
             resolvedModules: [
                 resolvedTSCLibcModule, resolvedTSCClibcModule, resolvedTSCBasicModule,
-                resolvedTSCUtilityModule, resolvedTSCTestSupportModule
+                resolvedTSCUtilityModule, resolvedTSCTestSupportModule,
             ],
             resolvedProducts: [
                 resolvedTSCBasicProduct, resolvedSwiftToolsSupportProduct,
-                resolvedSwiftToolsSupportAutoProduct, resolvedTSCTestSupportProduct
+                resolvedSwiftToolsSupportAutoProduct, resolvedTSCTestSupportProduct,
             ],
             packageRef: packageRef
         )
     }
-    
+
     // MARK: - swift-driver Package
-    
+
     static func createSPMSwiftDriverPackage(
         swiftToolsSupportAutoProduct: ResolvedProduct,
         llbuildSwiftProduct: ResolvedProduct,
@@ -442,7 +441,7 @@ extension SBOMTestModulesGraph {
         packageRef: PackageReference
     ) {
         let identity = PackageIdentity.plain("swift-driver")
-        
+
         // Modules
         let cSwiftScanModule = self.createSwiftModule(name: "CSwiftScan")
         let swiftOptionsModule = self.createSwiftModule(name: "SwiftOptions")
@@ -450,8 +449,11 @@ extension SBOMTestModulesGraph {
         let swiftDriverExecutionModule = self.createSwiftModule(name: "SwiftDriverExecution")
         let swiftDriverExecModule = self.createSwiftModule(name: "swift-driver", type: .executable)
         let swiftHelpModule = self.createSwiftModule(name: "swift-help", type: .executable)
-        let swiftBuildSDKInterfacesModule = self.createSwiftModule(name: "swift-build-sdk-interfaces", type: .executable)
-        
+        let swiftBuildSDKInterfacesModule = self.createSwiftModule(
+            name: "swift-build-sdk-interfaces",
+            type: .executable
+        )
+
         // Products
         let swiftDriverProduct = try Product(
             package: identity,
@@ -459,49 +461,49 @@ extension SBOMTestModulesGraph {
             type: .library(.automatic),
             modules: [swiftDriverModule]
         )
-        
+
         let swiftDriverDynamicProduct = try Product(
             package: identity,
             name: "SwiftDriverDynamic",
             type: .library(.dynamic),
             modules: [swiftDriverModule]
         )
-        
+
         let swiftDriverExecutionProduct = try Product(
             package: identity,
             name: "SwiftDriverExecution",
             type: .library(.automatic),
             modules: [swiftDriverExecutionModule]
         )
-        
+
         let swiftOptionsProduct = try Product(
             package: identity,
             name: "SwiftOptions",
             type: .library(.automatic),
             modules: [swiftOptionsModule]
         )
-        
+
         let swiftDriverExecProduct = try Product(
             package: identity,
             name: "swift-driver",
             type: .executable,
             modules: [swiftDriverExecModule]
         )
-        
+
         let swiftHelpProduct = try Product(
             package: identity,
             name: "swift-help",
             type: .executable,
             modules: [swiftHelpModule]
         )
-        
+
         let swiftBuildSDKInterfacesProduct = try Product(
             package: identity,
             name: "swift-build-sdk-interfaces",
             type: .executable,
             modules: [swiftBuildSDKInterfacesModule]
         )
-        
+
         // Package
         let package = self.createPackage(
             identity: identity,
@@ -509,165 +511,165 @@ extension SBOMTestModulesGraph {
             path: "/swift-driver",
             modules: [
                 cSwiftScanModule, swiftOptionsModule, swiftDriverModule, swiftDriverExecutionModule,
-                swiftDriverExecModule, swiftHelpModule, swiftBuildSDKInterfacesModule
+                swiftDriverExecModule, swiftHelpModule, swiftBuildSDKInterfacesModule,
             ],
             products: [
                 swiftDriverProduct, swiftDriverDynamicProduct, swiftDriverExecutionProduct,
-                swiftOptionsProduct, swiftDriverExecProduct, swiftHelpProduct, swiftBuildSDKInterfacesProduct
+                swiftOptionsProduct, swiftDriverExecProduct, swiftHelpProduct, swiftBuildSDKInterfacesProduct,
             ]
         )
-        
+
         // Resolved modules
         let resolvedCSwiftScanModule = self.createResolvedModule(
             packageIdentity: identity,
             module: cSwiftScanModule
         )
-        
+
         let resolvedSwiftOptionsModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftOptionsModule,
             dependencies: [
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .product(swiftToolsSupportAutoProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftDriverModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftDriverModule,
             dependencies: [
                 .module(resolvedSwiftOptionsModule, conditions: []),
                 .module(resolvedCSwiftScanModule, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .product(swiftToolsSupportAutoProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftDriverExecutionModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftDriverExecutionModule,
             dependencies: [
                 .module(resolvedSwiftDriverModule, conditions: []),
                 .product(swiftToolsSupportAutoProduct, conditions: []),
-                .product(llbuildSwiftProduct, conditions: [])
+                .product(llbuildSwiftProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftDriverExecModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftDriverExecModule,
             dependencies: [
                 .module(resolvedSwiftDriverExecutionModule, conditions: []),
-                .module(resolvedSwiftDriverModule, conditions: [])
+                .module(resolvedSwiftDriverModule, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftHelpModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftHelpModule,
             dependencies: [
                 .module(resolvedSwiftOptionsModule, conditions: []),
                 .product(argumentParserProduct, conditions: []),
-                .product(swiftToolsSupportAutoProduct, conditions: [])
+                .product(swiftToolsSupportAutoProduct, conditions: []),
             ]
         )
-        
+
         let resolvedSwiftBuildSDKInterfacesModule = self.createResolvedModule(
             packageIdentity: identity,
             module: swiftBuildSDKInterfacesModule,
             dependencies: [
                 .module(resolvedSwiftDriverModule, conditions: []),
-                .module(resolvedSwiftDriverExecutionModule, conditions: [])
+                .module(resolvedSwiftDriverExecutionModule, conditions: []),
             ]
         )
-        
+
         // Resolved products
         let resolvedSwiftDriverProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftDriverProduct,
             modules: IdentifiableSet([resolvedSwiftDriverModule])
         )
-        
+
         let resolvedSwiftDriverDynamicProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftDriverDynamicProduct,
             modules: IdentifiableSet([resolvedSwiftDriverModule])
         )
-        
+
         let resolvedSwiftDriverExecutionProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftDriverExecutionProduct,
             modules: IdentifiableSet([resolvedSwiftDriverExecutionModule])
         )
-        
+
         let resolvedSwiftOptionsProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftOptionsProduct,
             modules: IdentifiableSet([resolvedSwiftOptionsModule])
         )
-        
+
         let resolvedSwiftDriverExecProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftDriverExecProduct,
             modules: IdentifiableSet([resolvedSwiftDriverExecModule])
         )
-        
+
         let resolvedSwiftHelpProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftHelpProduct,
             modules: IdentifiableSet([resolvedSwiftHelpModule])
         )
-        
+
         let resolvedSwiftBuildSDKInterfacesProduct = self.createResolvedProduct(
             packageIdentity: identity,
             product: swiftBuildSDKInterfacesProduct,
             modules: IdentifiableSet([resolvedSwiftBuildSDKInterfacesModule])
         )
-        
+
         // Resolved package
         let resolvedPackage = self.createResolvedPackage(
             package: package,
             modules: IdentifiableSet([
                 resolvedCSwiftScanModule, resolvedSwiftOptionsModule, resolvedSwiftDriverModule,
                 resolvedSwiftDriverExecutionModule, resolvedSwiftDriverExecModule, resolvedSwiftHelpModule,
-                resolvedSwiftBuildSDKInterfacesModule
+                resolvedSwiftBuildSDKInterfacesModule,
             ]),
             products: [
                 resolvedSwiftDriverProduct, resolvedSwiftDriverDynamicProduct, resolvedSwiftDriverExecutionProduct,
                 resolvedSwiftOptionsProduct, resolvedSwiftDriverExecProduct, resolvedSwiftHelpProduct,
-                resolvedSwiftBuildSDKInterfacesProduct
+                resolvedSwiftBuildSDKInterfacesProduct,
             ],
             dependencies: [
                 PackageIdentity.plain("swift-argument-parser"),
                 PackageIdentity.plain("swift-llbuild"),
-                PackageIdentity.plain("swift-tools-support-core")
+                PackageIdentity.plain("swift-tools-support-core"),
             ]
         )
-        
+
         // Package reference
         let packageRef = PackageReference(
             identity: identity,
             kind: .remoteSourceControl(SourceControlURL("https://github.com/swiftlang/swift-driver.git"))
         )
-        
+
         return (
             package: package,
             modules: [
                 cSwiftScanModule, swiftOptionsModule, swiftDriverModule, swiftDriverExecutionModule,
-                swiftDriverExecModule, swiftHelpModule, swiftBuildSDKInterfacesModule
+                swiftDriverExecModule, swiftHelpModule, swiftBuildSDKInterfacesModule,
             ],
             products: [
                 swiftDriverProduct, swiftDriverDynamicProduct, swiftDriverExecutionProduct,
-                swiftOptionsProduct, swiftDriverExecProduct, swiftHelpProduct, swiftBuildSDKInterfacesProduct
+                swiftOptionsProduct, swiftDriverExecProduct, swiftHelpProduct, swiftBuildSDKInterfacesProduct,
             ],
             resolvedPackage: resolvedPackage,
             resolvedModules: [
                 resolvedCSwiftScanModule, resolvedSwiftOptionsModule, resolvedSwiftDriverModule,
                 resolvedSwiftDriverExecutionModule, resolvedSwiftDriverExecModule, resolvedSwiftHelpModule,
-                resolvedSwiftBuildSDKInterfacesModule
+                resolvedSwiftBuildSDKInterfacesModule,
             ],
             resolvedProducts: [
                 resolvedSwiftDriverProduct, resolvedSwiftDriverDynamicProduct, resolvedSwiftDriverExecutionProduct,
                 resolvedSwiftOptionsProduct, resolvedSwiftDriverExecProduct, resolvedSwiftHelpProduct,
-                resolvedSwiftBuildSDKInterfacesProduct
+                resolvedSwiftBuildSDKInterfacesProduct,
             ],
             packageRef: packageRef
         )

@@ -24,7 +24,7 @@ package struct SBOMExtractor {
     let dependencyGraph: [String: [String]]?
     let store: ResolvedPackagesStore
     let caches: SBOMCaches
-    
+
     package init(
         modulesGraph: ModulesGraph,
         dependencyGraph: [String: [String]]? = nil,
@@ -35,7 +35,7 @@ package struct SBOMExtractor {
         self.store = store
         self.caches = SBOMCaches()
     }
-    
+
     package init(
         modulesGraph: ModulesGraph,
         dependencyGraph: [String: [String]]? = nil,
@@ -47,9 +47,9 @@ package struct SBOMExtractor {
         self.store = store
         self.caches = caches
     }
-    
+
     package func extractMetadata() async throws -> SBOMMetadata {
-        return SBOMMetadata(
+        SBOMMetadata(
             timestamp: Date().ISO8601Format(),
             creators: [
                 SBOMTool(
@@ -57,7 +57,7 @@ package struct SBOMExtractor {
                     name: "swift-package-manager",
                     version: SwiftVersion.current.displayString,
                     licenses: [
-                        SBOMLicense( // TODO ev_cheng: better way to get license without network call?
+                        SBOMLicense( // TODO: ev_cheng: better way to get license without network call?
                             name: PackageCollectionsModel.LicenseType.Apache2_0.description,
                             url: "http://swift.org/LICENSE.txt"
                         ),
@@ -89,12 +89,12 @@ package struct SBOMExtractor {
         if product.type == .test {
             return .test
         }
-        
+
         // For non-test products, check if ALL modules are test modules
         guard !product.modules.isEmpty else {
             return .runtime
         }
-        
+
         let allModulesAreTests = product.modules.allSatisfy { $0.type == .test }
         return allModulesAreTests ? .test : .runtime
     }
@@ -104,17 +104,17 @@ package struct SBOMExtractor {
         guard !package.products.isEmpty else {
             return .runtime
         }
-        
+
         let allProductsAreTests = package.products.allSatisfy { product in
             product.isLinkingXCTest || product.type == .test
         }
-        
+
         return allProductsAreTests ? .test : .runtime
     }
-    
+
     private func extractComponentInfoFromGit(packagePath: AbsolutePath) async throws -> SBOMGitInfo {
         let gitRepo = GitRepository(path: packagePath, isWorkingRepo: true)
-        
+
         let currentRevision = try? gitRepo.getCurrentRevision()
         guard let currentRevision else {
             return SBOMGitInfo(
@@ -122,23 +122,22 @@ package struct SBOMExtractor {
                 originator: SBOMOriginator(commits: nil)
             )
         }
-        
+
         let remotes = (try? gitRepo.remotes()) ?? []
         let hasUncommittedChanges = gitRepo.hasUncommittedChanges()
         let currentTag = gitRepo.getCurrentTag()
-        
-        let revisionString: String
-        if let currentTag {
-            revisionString = hasUncommittedChanges ? "\(currentTag)-modified" : currentTag
+
+        let revisionString: String = if let currentTag {
+            hasUncommittedChanges ? "\(currentTag)-modified" : currentTag
         } else {
-            revisionString = hasUncommittedChanges ? "\(currentRevision.identifier)-modified" : currentRevision.identifier
+            hasUncommittedChanges ? "\(currentRevision.identifier)-modified" : currentRevision.identifier
         }
-        
+
         let primaryRemote = remotes.first(where: { $0.name == "origin" }) ?? remotes.first
-        
+
         let versionCommit: SBOMCommit?
         let commits: [SBOMCommit]?
-        
+
         if let primaryRemote {
             let commit = SBOMCommit(
                 sha: currentRevision.identifier,
@@ -150,7 +149,7 @@ package struct SBOMExtractor {
             versionCommit = nil
             commits = nil
         }
-        
+
         return SBOMGitInfo(
             version: SBOMComponent.Version(
                 revision: revisionString,
@@ -167,7 +166,7 @@ package struct SBOMExtractor {
         // root package (try to get version and commits from git)
         if let rootPackage = modulesGraph.rootPackages.first(where: { $0.identity == packageIdentity }) {
             let gitInfo = try await extractComponentInfoFromGit(packagePath: rootPackage.path)
-            await caches.git.set(packageIdentity, gitInfo: gitInfo)
+            await self.caches.git.set(packageIdentity, gitInfo: gitInfo)
             return gitInfo
         }
         guard let resolvedPackage = store.resolvedPackages[packageIdentity] else {
@@ -200,7 +199,7 @@ package struct SBOMExtractor {
             originator: SBOMOriginator(commits: [commit])
         )
     }
-    
+
     package static func extractComponentID(from package: ResolvedPackage) -> SBOMIdentifier {
         SBOMIdentifier(value: package.identity.description)
     }
@@ -222,7 +221,7 @@ package struct SBOMExtractor {
         if let cached = await caches.component.getPackage(package.identity) {
             return cached
         }
-        
+
         let gitInfo = try await extractComponentVersionAndCommits(from: package.identity)
         let products = try await extractProductsFromPackage(package: package)
         let component = try await SBOMComponent(
@@ -236,9 +235,9 @@ package struct SBOMExtractor {
             scope: Self.extractScope(from: package),
             components: products
         )
-        
-        await caches.component.setPackage(package.identity, component: component)
-        
+
+        await self.caches.component.setPackage(package.identity, component: component)
+
         return component
     }
 
@@ -246,7 +245,7 @@ package struct SBOMExtractor {
         if let cached = await caches.component.getProduct(product.packageIdentity, productName: product.name) {
             return cached
         }
-        
+
         let gitInfo = try await extractComponentVersionAndCommits(from: product.packageIdentity)
         let component = try await SBOMComponent(
             category: Self.extractCategory(from: product),
@@ -258,9 +257,9 @@ package struct SBOMExtractor {
             description: nil,
             scope: Self.extractScope(from: product)
         )
-        
-        await caches.component.setProduct(product.packageIdentity, productName: product.name, component: component)
-        
+
+        await self.caches.component.setProduct(product.packageIdentity, productName: product.name, component: component)
+
         return component
     }
 
@@ -271,19 +270,22 @@ package struct SBOMExtractor {
         // product of root package
         if let productName = product {
             guard let resolvedProduct = rootPackage.products.first(where: { $0.name == productName }) else {
-                throw SBOMExtractorError.productNotFound(productName: productName, packageIdentity: rootPackage.identity.description)
+                throw SBOMExtractorError.productNotFound(
+                    productName: productName,
+                    packageIdentity: rootPackage.identity.description
+                )
             }
-            return try await extractComponent(product: resolvedProduct)
+            return try await self.extractComponent(product: resolvedProduct)
         }
         // root package
-        return try await extractComponent(package: rootPackage)
+        return try await self.extractComponent(package: rootPackage)
     }
 
     package func extractSBOM(product: String? = nil) async throws -> SBOMDocument {
-        return try await SBOMDocument(
+        try await SBOMDocument(
             id: SBOMIdentifier.generate(),
-            metadata: extractMetadata(),
-            primaryComponent: extractPrimaryComponent(product: product),
+            metadata: self.extractMetadata(),
+            primaryComponent: self.extractPrimaryComponent(product: product),
             dependencies: extractDependencies(product: product)
         )
     }

@@ -34,14 +34,10 @@ package struct SBOMRelationship: Codable, Equatable, Hashable {
     package init(
         id: SBOMIdentifier,
         parentID: SBOMIdentifier,
-        childrenID: [SBOMIdentifier],
+        childrenID: [SBOMIdentifier]
     ) {
         self.id = id
         self.parentID = parentID
         self.childrenID = childrenID
     }
 }
-
-
-
-

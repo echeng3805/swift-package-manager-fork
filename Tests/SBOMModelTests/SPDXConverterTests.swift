@@ -503,7 +503,10 @@ struct SPDXConverterTests {
 
     @Test("convertToSPDXRelationships with empty dependencies")
     func convertToSPDXRelationshipsWithEmptyDependencies() async throws {
-        let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(components: [], relationships: []))
+        let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
+            components: [],
+            relationships: []
+        ))
         #expect(result.isEmpty)
     }
 
@@ -512,7 +515,7 @@ struct SPDXConverterTests {
         let dependency = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "parent-component"),
-            childrenID: [SBOMIdentifier(value: "child1"), SBOMIdentifier(value: "child2")],
+            childrenID: [SBOMIdentifier(value: "child1"), SBOMIdentifier(value: "child2")]
         )
 
         let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
@@ -536,12 +539,12 @@ struct SPDXConverterTests {
         let dependency1 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "parent1"),
-            childrenID: [SBOMIdentifier(value: "child1")],
+            childrenID: [SBOMIdentifier(value: "child1")]
         )
         let dependency2 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-2"),
             parentID: SBOMIdentifier(value: "parent2"),
-            childrenID: [SBOMIdentifier(value: "child2"), SBOMIdentifier(value: "child3")],
+            childrenID: [SBOMIdentifier(value: "child2"), SBOMIdentifier(value: "child3")]
         )
 
         let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
@@ -604,7 +607,7 @@ struct SPDXConverterTests {
         let dependency1 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep1"),
             parentID: SBOMIdentifier(value: "parent-id"),
-            childrenID: [SBOMIdentifier(value: "test-id"), SBOMIdentifier(value: "test-id2")],
+            childrenID: [SBOMIdentifier(value: "test-id"), SBOMIdentifier(value: "test-id2")]
         )
 
         let result = await SPDXConverter.convertToSPDXRelationships(from: SBOMDependencies(
@@ -688,7 +691,8 @@ struct SPDXConverterTests {
 
         #expect(result.context == SPDXConstants.spdx3Context)
         #expect(result.graph
-            .count == 6) // 1 agent CreationInfo + 1 agent + 4 document elements + 0 packages + 0 relationships + 0 commits
+            .count ==
+            6) // 1 agent CreationInfo + 1 agent + 4 document elements + 0 packages + 0 relationships + 0 commits
     }
 
     @Test("convertToSPDXGraph with components and dependencies")
@@ -724,7 +728,7 @@ struct SPDXConverterTests {
         let dependency = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "primary-id"),
-            childrenID: [SBOMIdentifier(value: "lib1-id")],
+            childrenID: [SBOMIdentifier(value: "lib1-id")]
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
@@ -736,7 +740,9 @@ struct SPDXConverterTests {
         let result = try await SPDXConverter.convertToSPDXGraph(from: document, spec: spec)
 
         #expect(result.context == SPDXConstants.spdx3Context)
-        #expect(result.graph.count == 8) // 1 agent CreationInfo + 1 agent + 4 document elements + 1 package + 1 relationship + 0 commits
+        #expect(result.graph
+            .count ==
+            8) // 1 agent CreationInfo + 1 agent + 4 document elements + 1 package + 1 relationship + 0 commits
 
         let agents = result.graph.compactMap { $0.getValue() as SPDXAgent? }
         #expect(agents.count == 1)

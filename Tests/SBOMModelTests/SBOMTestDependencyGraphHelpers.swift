@@ -13,6 +13,4 @@
 import Foundation
 @testable import SBOMModel
 
-struct SBOMTestDependencyGraph {
-
-}
+struct SBOMTestDependencyGraph {}

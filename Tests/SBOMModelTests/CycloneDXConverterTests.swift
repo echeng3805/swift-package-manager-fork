@@ -281,7 +281,7 @@ struct CycloneDXConverterTests {
             SBOMRelationship(
                 id: SBOMIdentifier(value: "dep-1"),
                 parentID: SBOMIdentifier(value: "parent-component"),
-                childrenID: ["child1", "child2", "child3"].map { SBOMIdentifier(value: $0) },
+                childrenID: ["child1", "child2", "child3"].map { SBOMIdentifier(value: $0) }
             )
         )
 
@@ -295,7 +295,7 @@ struct CycloneDXConverterTests {
             SBOMRelationship(
                 id: SBOMIdentifier(value: "dep-1"),
                 parentID: SBOMIdentifier(value: "parent-component"),
-                childrenID: [],
+                childrenID: []
             )
         )
         #expect(result.ref == "parent-component")
@@ -442,12 +442,12 @@ struct CycloneDXConverterTests {
         let dependency1 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-1"),
             parentID: SBOMIdentifier(value: "primary-id"),
-            childrenID: ["lib1-id", "framework1-id"].map { SBOMIdentifier(value: $0) },
+            childrenID: ["lib1-id", "framework1-id"].map { SBOMIdentifier(value: $0) }
         )
         let dependency2 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-2"),
             parentID: SBOMIdentifier(value: "lib1-id"),
-            childrenID: ["framework1-id"].map { SBOMIdentifier(value: $0) },
+            childrenID: ["framework1-id"].map { SBOMIdentifier(value: $0) }
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "urn:uuid:12345678-1234-1234-1234-123456789abc"),

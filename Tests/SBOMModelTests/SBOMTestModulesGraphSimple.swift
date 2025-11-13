@@ -10,7 +10,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 import _InternalTestSupport
 import Basics
 import Foundation
@@ -20,12 +19,10 @@ import PackageModel
 
 extension SBOMTestModulesGraph {
     static func createSimpleModulesGraph(rootPath: String = "/tmp/simple-mock") throws -> ModulesGraph {
-
         // - MyApp package depends on Utils package and App product
         // - Utils package depends on Utils product
         // - App product depends on Utils product
-        
-        
+
         // Package identities
         let appIdentity = PackageIdentity.plain("MyApp")
         let utilsIdentity = PackageIdentity.plain("Utils")
@@ -82,7 +79,7 @@ extension SBOMTestModulesGraph {
                     packageIdentity: utilsIdentity,
                     product: utilsProduct,
                     modules: IdentifiableSet([resolvedUtilsModule])
-                ), conditions: [])
+                ), conditions: []),
             ]
         )
 

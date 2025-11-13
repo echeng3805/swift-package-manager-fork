@@ -40,13 +40,18 @@ struct SBOMExtractTests {
 
         let componentIDs = Set(sbom.dependencies.components.map(\.id.value))
 
-        #expect(componentIDs.contains("swift-package-manager:SwiftPMPackageCollections"), "should contain target product")
+        #expect(
+            componentIDs.contains("swift-package-manager:SwiftPMPackageCollections"),
+            "should contain target product"
+        )
         #expect(componentIDs.contains("swift-package-manager"), "should contain root package")
 
         let swiftPMDependency = try #require(sbom.dependencies.relationships?
             .first(where: { $0.parentID.value == "swift-package-manager" }))
         #expect(Set(swiftPMDependency.childrenID.map(\.value)) == Set([
-            "swift-certificates", "swift-tools-support-core", "swift-collections", "swift-crypto", "swift-toolchain-sqlite", "swift-system", "swift-package-manager:SwiftPMPackageCollections"
+            "swift-certificates", "swift-tools-support-core", "swift-collections", "swift-crypto",
+            "swift-toolchain-sqlite",
+            "swift-system", "swift-package-manager:SwiftPMPackageCollections",
         ]))
     }
 
@@ -118,10 +123,12 @@ struct SBOMExtractTests {
         #expect(Set(swiftSystemDependency.childrenID.map(\.value)) == Set(["swift-system:SystemPackage"]))
         let swiftArgumentParserDependency = try #require(sbom.dependencies.relationships?
             .first(where: { $0.parentID.value == "swift-argument-parser" }))
-        #expect(Set(swiftArgumentParserDependency.childrenID.map(\.value)) == Set(["swift-argument-parser:ArgumentParser"]))
+        #expect(Set(swiftArgumentParserDependency.childrenID.map(\.value)) ==
+            Set(["swift-argument-parser:ArgumentParser"]))
         let swiftToolsSupportDependency = try #require(sbom.dependencies.relationships?
             .first(where: { $0.parentID.value == "swift-tools-support-core" }))
-        #expect(Set(swiftToolsSupportDependency.childrenID.map(\.value)) == Set(["swift-tools-support-core:SwiftToolsSupport-auto"]))
+        #expect(Set(swiftToolsSupportDependency.childrenID.map(\.value)) ==
+            Set(["swift-tools-support-core:SwiftToolsSupport-auto"]))
     }
 
     @Test("extractSBOM with invalid product name throws error")

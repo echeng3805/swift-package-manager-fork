@@ -14,7 +14,7 @@ import Foundation
 
 package struct SPDXConverter {
     private init() {}
-    
+
     private static func generateSPDXID(_ id: String) -> String {
         if id.starts(with: "urn:") { return id }
         return "urn:spdx:\(id)"
@@ -42,7 +42,7 @@ package struct SPDXConverter {
         }
         var agents: [any SPDXObject] = []
         for creator in creators {
-            let creatorID = generateSPDXID(creator.id.value)
+            let creatorID = self.generateSPDXID(creator.id.value)
             let toolCreationInfoID = "\(creatorID):creationInfo"
             let toolCreationInfo = SPDXCreationInfo(
                 id: toolCreationInfoID,
@@ -63,7 +63,10 @@ package struct SPDXConverter {
         return agents
     }
 
-    package static func convertToSPDXDocument(from document: SBOMDocument, spec: SBOMSpec) async throws -> [any SPDXObject] {
+    package static func convertToSPDXDocument(
+        from document: SBOMDocument,
+        spec: SBOMSpec
+    ) async throws -> [any SPDXObject] {
         guard let timestamp = document.metadata.timestamp,
               let creators = document.metadata.creators,
               !creators.isEmpty
@@ -81,7 +84,7 @@ package struct SPDXConverter {
             id: creationInfoID,
             type: .CreationInfo,
             specVersion: spec.version,
-            createdBy: creators.map { generateSPDXID($0.id.value) },
+            createdBy: creators.map { self.generateSPDXID($0.id.value) },
             created: timestamp
         )
         elements.append(creationInfo)
@@ -89,8 +92,8 @@ package struct SPDXConverter {
         let spdxSBOMID = SBOMIdentifier.generate().value
         let profileConformance = ["core", "software"]
 
-        let primaryComponentID = generateSPDXID(document.primaryComponent.id.value)
-        
+        let primaryComponentID = self.generateSPDXID(document.primaryComponent.id.value)
+
         let spdxSBOM = SPDXSBOM(
             id: spdxSBOMID,
             type: .SoftwareSBOM,
@@ -124,9 +127,9 @@ package struct SPDXConverter {
 
     package static func convertToSPDXPackage(from component: SBOMComponent) async throws -> SPDXPackage {
         await SPDXPackage(
-            id: generateSPDXID(component.id.value),
+            id: self.generateSPDXID(component.id.value),
             type: .SoftwarePackage,
-            purpose: convertToSPDXPurpose(from: component.category),
+            purpose: self.convertToSPDXPurpose(from: component.category),
             purl: component.purl,
             name: component.name,
             version: component.version.revision,
@@ -144,7 +147,7 @@ package struct SPDXConverter {
         var commitToComponents: [String: (repository: String, componentIDs: [String])] = [:]
         for component in comps {
             if let commits = component.originator.commits {
-                let componentID = generateSPDXID(component.id.value)
+                let componentID = self.generateSPDXID(component.id.value)
                 for commit in commits {
                     if commitToComponents[commit.sha] != nil {
                         commitToComponents[commit.sha]?.componentIDs.append(componentID)
@@ -167,7 +170,7 @@ package struct SPDXConverter {
                 type: .Relationship,
                 category: .generates,
                 creationInfoID: SPDXConstants.spdxRootCreationInfoID,
-                parentID: generateSPDXID(commitSHA),
+                parentID: self.generateSPDXID(commitSHA),
                 childrenID: commitInfo.componentIDs
             )
             externalIdentifiers.append(relationship)
@@ -184,9 +187,9 @@ package struct SPDXConverter {
         var relationships: [any SPDXObject] = []
         if let sbomRelationships = dependencies.relationships {
             for dependency in sbomRelationships {
-                let parentID = generateSPDXID(dependency.parentID.value)
-                let childrenIDs = dependency.childrenID.map { generateSPDXID($0.value) }
-                
+                let parentID = self.generateSPDXID(dependency.parentID.value)
+                let childrenIDs = dependency.childrenID.map { self.generateSPDXID($0.value) }
+
                 let relationship = SPDXRelationship(
                     id: generateSPDXID("\(dependency.parentID.value)-dependsOn"),
                     type: .Relationship,
@@ -203,7 +206,7 @@ package struct SPDXConverter {
                     guard let comp = dependencies.components.first(where: { $0.id == childID }) else {
                         continue
                     }
-                    let spdxChildID = generateSPDXID(childID.value)
+                    let spdxChildID = self.generateSPDXID(childID.value)
                     switch comp.scope {
                     case .optional:
                         optionalDependencies.append(spdxChildID)

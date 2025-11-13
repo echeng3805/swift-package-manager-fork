@@ -99,7 +99,7 @@ enum SBOMTestStore {
             url: "https://github.com/example/myapp.git",
             revision: "abc123def456abc123def456abc123def456abc1",
             dependencies: [
-                ("Utils", "https://github.com/example/utils.git", "1.0.0")
+                ("Utils", "https://github.com/example/utils.git", "1.0.0"),
             ]
         )
     }
