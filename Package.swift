@@ -603,6 +603,7 @@ let package = Package(
                 "Workspace",
                 "XCBuildSupport",
                 "SwiftBuildSupport",
+                "SBOMModel",
             ],
             exclude: ["CMakeLists.txt"],
             swiftSettings: commonExperimentalFeatures + [

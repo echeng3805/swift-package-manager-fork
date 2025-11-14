@@ -22,19 +22,35 @@ enum SBOMTestRepo {
         let path = AbsolutePath("/tmp/SwiftPM-mock-\(uniqueID)")
 
         try localFileSystem.createDirectory(path, recursive: true)
-        initGitRepo(path, addFile: true)
-
+        
+        let repo = GitRepository(path: path)
+        try repo.create()
+        
         try Process.checkNonZeroExit(
             args: "git",
             "-C",
             path.pathString,
             "remote",
             "add",
-            "origin",
+            "test_origin",
             SBOMTestStore.swiftPMURL
         )
+        
+        let file = path.appending("Package.swift")
+        try localFileSystem.writeFileContents(file, string: "// swift-tools-version: 5.9\nimport PackageDescription\n")
+        try repo.stageEverything()
+        try repo.commit(message: "Initial commit")
+        
+        try Process.checkNonZeroExit(
+            args: "git",
+            "-C",
+            path.pathString,
+            "config",
+            "branch.main.remote",
+            "test_origin"
+        )
 
-        return (GitRepository(path: path), path)
+        return (repo, path)
     }
 
     static func setupSwiftlyTestRepo() throws -> (GitRepository, AbsolutePath) {
@@ -42,19 +58,37 @@ enum SBOMTestRepo {
         let path = AbsolutePath("/tmp/swiftly-mock-\(uniqueID)")
 
         try localFileSystem.createDirectory(path, recursive: true)
-        initGitRepo(path, tag: "v1.0.0", addFile: true)
-
+        
+        let repo = GitRepository(path: path)
+        try repo.create()
+        
         try Process.checkNonZeroExit(
             args: "git",
             "-C",
             path.pathString,
             "remote",
             "add",
-            "origin",
+            "test_origin",
             SBOMTestStore.swiftlyURL
         )
+        
+        let file = path.appending("Package.swift")
+        try localFileSystem.writeFileContents(file, string: "// swift-tools-version: 5.9\nimport PackageDescription\n")
+        try repo.stageEverything()
+        try repo.commit(message: "Initial commit")
+        
+        try repo.tag(name: "v1.0.0")
+        
+        try Process.checkNonZeroExit(
+            args: "git",
+            "-C",
+            path.pathString,
+            "config",
+            "branch.main.remote",
+            "test_origin"
+        )
 
-        return (GitRepository(path: path), path)
+        return (repo, path)
     }
 
     /// Clean up a test repository directory

@@ -23,6 +23,11 @@ package struct SBOMComponent: Codable, Equatable, Hashable {
         case optional
         case test
     }
+    
+    package enum Entity: String, Codable, Equatable {
+        case product
+        case package
+    }
 
     package struct Version: Codable, Equatable, Hashable {
         package let revision: String
@@ -46,6 +51,7 @@ package struct SBOMComponent: Codable, Equatable, Hashable {
     package let description: String?
     package let scope: Scope?
     package let components: [SBOMComponent]?
+    package let entity: Entity
 
     package init(
         category: Category,
@@ -56,7 +62,8 @@ package struct SBOMComponent: Codable, Equatable, Hashable {
         originator: SBOMOriginator,
         description: String? = nil,
         scope: Scope?,
-        components: [SBOMComponent]? = nil
+        components: [SBOMComponent]? = nil,
+        entity: Entity
     ) {
         self.category = category
         self.id = id
@@ -67,5 +74,6 @@ package struct SBOMComponent: Codable, Equatable, Hashable {
         self.description = description
         self.scope = scope
         self.components = components
+        self.entity = entity
     }
 }

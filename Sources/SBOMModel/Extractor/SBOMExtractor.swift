@@ -85,30 +85,23 @@ package struct SBOMExtractor {
     }
 
     package static func extractScope(from product: ResolvedProduct) throws -> SBOMComponent.Scope {
-        // A product is only .test scope if it's a test product type OR all its modules are test modules
         if product.type == .test {
             return .test
         }
-
-        // For non-test products, check if ALL modules are test modules
         guard !product.modules.isEmpty else {
             return .runtime
         }
-
         let allModulesAreTests = product.modules.allSatisfy { $0.type == .test }
         return allModulesAreTests ? .test : .runtime
     }
 
     package static func extractScope(from package: ResolvedPackage) throws -> SBOMComponent.Scope {
-        // A package is only .test scope if ALL products are test products
         guard !package.products.isEmpty else {
             return .runtime
         }
-
         let allProductsAreTests = package.products.allSatisfy { product in
             product.isLinkingXCTest || product.type == .test
         }
-
         return allProductsAreTests ? .test : .runtime
     }
 
@@ -123,32 +116,19 @@ package struct SBOMExtractor {
             )
         }
 
-        let remotes = (try? gitRepo.remotes()) ?? []
         let hasUncommittedChanges = gitRepo.hasUncommittedChanges()
         let currentTag = gitRepo.getCurrentTag()
-
         let revisionString: String = if let currentTag {
             hasUncommittedChanges ? "\(currentTag)-modified" : currentTag
         } else {
             hasUncommittedChanges ? "\(currentRevision.identifier)-modified" : currentRevision.identifier
         }
 
-        let primaryRemote = remotes.first(where: { $0.name == "origin" }) ?? remotes.first
-
-        let versionCommit: SBOMCommit?
-        let commits: [SBOMCommit]?
-
-        if let primaryRemote {
-            let commit = SBOMCommit(
-                sha: currentRevision.identifier,
-                repository: primaryRemote.url
-            )
-            versionCommit = commit
-            commits = [commit]
-        } else {
-            versionCommit = nil
-            commits = nil
-        }
+        let commit = try gitRepo.getCurrentBranch()
+            .flatMap { try? gitRepo.getRemote(for: $0) }
+            .map { SBOMCommit(sha: currentRevision.identifier, repository: $0.1) }
+        let versionCommit = commit
+        let commits = commit.map { [$0] }
 
         return SBOMGitInfo(
             version: SBOMComponent.Version(
@@ -233,7 +213,8 @@ package struct SBOMExtractor {
             originator: gitInfo.originator,
             description: package.description,
             scope: Self.extractScope(from: package),
-            components: products
+            components: products,
+            entity: .package
         )
 
         await self.caches.component.setPackage(package.identity, component: component)
@@ -255,7 +236,8 @@ package struct SBOMExtractor {
             version: gitInfo.version,
             originator: gitInfo.originator,
             description: nil,
-            scope: Self.extractScope(from: product)
+            scope: Self.extractScope(from: product),
+            entity: .product
         )
 
         await self.caches.component.setProduct(product.packageIdentity, productName: product.name, component: component)
@@ -281,12 +263,12 @@ package struct SBOMExtractor {
         return try await self.extractComponent(package: rootPackage)
     }
 
-    package func extractSBOM(product: String? = nil) async throws -> SBOMDocument {
+    package func extractSBOM(product: String? = nil, filter: Filter = .all) async throws -> SBOMDocument {
         try await SBOMDocument(
             id: SBOMIdentifier.generate(),
             metadata: self.extractMetadata(),
-            primaryComponent: self.extractPrimaryComponent(product: product),
-            dependencies: extractDependencies(product: product)
+            primaryComponent: self.extractPrimaryComponent(product: product), // either a root package or a product of the root package
+            dependencies: extractDependencies(product: product, filter: filter)
         )
     }
 }

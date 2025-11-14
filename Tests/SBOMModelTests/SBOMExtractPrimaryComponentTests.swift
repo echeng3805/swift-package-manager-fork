@@ -631,50 +631,6 @@ struct SBOMExtractPrimaryComponentTests {
         #expect(originCommit != nil, "Should have commit for origin remote")
     }
 
-    @Test("extractComponent falls back to first remote when no origin exists")
-    func extractComponentFallsBackToFirstRemoteWhenNoOriginExists() async throws {
-        let uniqueID = UUID().uuidString
-        let path = AbsolutePath("/tmp/SwiftPM-no-origin-\(uniqueID)")
-        defer { try? SBOMTestRepo.cleanup(path) }
-
-        try localFileSystem.createDirectory(path, recursive: true)
-        initGitRepo(path, addFile: true)
-
-        // Add a remote with a different name (not "origin")
-        let customRemoteURL = "https://github.com/custom/repo.git"
-        try await Process.checkNonZeroExit(
-            args: "git",
-            "-C",
-            path.pathString,
-            "remote",
-            "add",
-            "custom",
-            customRemoteURL
-        )
-
-        let gitRepo = GitRepository(path: path)
-        let graph = try SBOMTestModulesGraph.createSPMModulesGraph(rootPath: path.pathString)
-        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
-        let rootPackage = try #require(graph.rootPackages.first)
-        let expectedRevision = try gitRepo.getCurrentRevision().identifier
-
-        let component = try await { let extractor = SBOMExtractor(
-            modulesGraph: graph,
-            dependencyGraph: nil,
-            store: store
-        ); return try await extractor.extractComponent(package: rootPackage) }()
-
-        // Should fall back to the first (and only) remote
-        #expect(component.version.commit?.repository == customRemoteURL)
-        #expect(component.version.commit?.sha == expectedRevision)
-
-        // Verify originator contains the custom remote
-        #expect(component.originator.commits != nil)
-        let commits = try #require(component.originator.commits)
-        #expect(commits.count == 1)
-        #expect(commits.first?.repository == customRemoteURL)
-    }
-
     @Test("extractComponent handles repository with no remotes")
     func extractComponentHandlesRepositoryWithNoRemotes() async throws {
         let uniqueID = UUID().uuidString

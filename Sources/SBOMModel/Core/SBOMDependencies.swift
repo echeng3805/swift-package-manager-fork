@@ -10,20 +10,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-package enum Entity: String, Codable, Equatable, CaseIterable {
-    case all
-    case product
-    case package
-
-    package var defaultValueDescription: String {
-        switch self {
-        case .all: "Include all entities in the SBOM"
-        case .product: "Only include product information and product dependencies"
-        case .package: "Only include package information and package dependencies"
-        }
-    }
-}
-
 package struct SBOMDependencies: Codable, Equatable {
     package let components: [SBOMComponent]
     package let relationships: [SBOMRelationship]?

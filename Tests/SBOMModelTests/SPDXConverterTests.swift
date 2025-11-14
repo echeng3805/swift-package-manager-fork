@@ -127,7 +127,8 @@ struct SPDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .package
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
@@ -155,7 +156,8 @@ struct SPDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
@@ -183,7 +185,8 @@ struct SPDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
@@ -216,7 +219,8 @@ struct SPDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
@@ -278,7 +282,8 @@ struct SPDXConverterTests {
                 version: SBOMComponent.Version(revision: "1.0.0"),
                 originator: SBOMOriginator(commits: nil),
                 description: "Test description",
-                scope: .runtime
+                scope: .runtime,
+                entity: .product
             )
 
             let result = try await SPDXConverter.convertToSPDXPackage(from: component)
@@ -304,7 +309,8 @@ struct SPDXConverterTests {
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
             description: nil,
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
 
         let result = try await SPDXConverter.convertToSPDXPackage(from: component)
@@ -336,7 +342,8 @@ struct SPDXConverterTests {
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
 
         let result = await SPDXConverter.convertToSPDXExternalIdentifiers(from: [component])
@@ -352,7 +359,8 @@ struct SPDXConverterTests {
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: []),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let result = await SPDXConverter.convertToSPDXExternalIdentifiers(from: [component])
         #expect(result.isEmpty)
@@ -374,7 +382,8 @@ struct SPDXConverterTests {
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit]),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
 
         let result = await SPDXConverter.convertToSPDXExternalIdentifiers(from: [component])
@@ -420,7 +429,8 @@ struct SPDXConverterTests {
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit1, commit2]),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
 
         let result = await SPDXConverter.convertToSPDXExternalIdentifiers(from: [component])
@@ -461,7 +471,8 @@ struct SPDXConverterTests {
             name: "TestComponent1",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit]),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let component2 = SBOMComponent(
             category: .library,
@@ -470,7 +481,8 @@ struct SPDXConverterTests {
             name: "TestComponent2",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit]),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
 
         let result = await SPDXConverter.convertToSPDXExternalIdentifiers(from: [component1, component2])
@@ -584,7 +596,8 @@ struct SPDXConverterTests {
             name: "TestComponent3",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit1]),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let component = SBOMComponent(
             category: .library,
@@ -593,7 +606,8 @@ struct SPDXConverterTests {
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit1]),
-            scope: .test
+            scope: .test,
+            entity: .product,
         )
         let component2 = SBOMComponent(
             category: .library,
@@ -602,7 +616,8 @@ struct SPDXConverterTests {
             name: "TestComponent2",
             version: SBOMComponent.Version(revision: "2.0.0"),
             originator: SBOMOriginator(commits: [commit1]),
-            scope: .optional
+            scope: .optional,
+            entity: .product,
         )
         let dependency1 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep1"),
@@ -645,7 +660,8 @@ struct SPDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
@@ -678,7 +694,8 @@ struct SPDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
@@ -714,7 +731,8 @@ struct SPDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let component1 = SBOMComponent(
             category: .library,
@@ -723,7 +741,8 @@ struct SPDXConverterTests {
             name: "Library1",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let dependency = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-1"),
@@ -783,7 +802,8 @@ struct SPDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let commit = SBOMCommit(
             sha: "abc123",
@@ -799,7 +819,8 @@ struct SPDXConverterTests {
             name: "Library1",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: [commit]),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),

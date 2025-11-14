@@ -21,18 +21,18 @@ package struct SBOMEncoder {
         self.sbom = sbom
     }
 
-    package func writeSBOMs(specs: [Spec], outputDir: AbsolutePath) async throws {
+    package func writeSBOMs(specs: [Spec], outputDir: AbsolutePath, filter: Filter = .all) async throws {
         try localFileSystem.createDirectory(outputDir, recursive: true)
         let specs = await Self.getSpecs(from: specs)
         for spec in specs {
-            try await self.encodeSBOM(spec: spec, outputDir: outputDir)
+            try await self.encodeSBOM(spec: spec, outputDir: outputDir, filter: filter)
         }
     }
 
-    package func encodeSBOM(spec: SBOMSpec, outputDir: AbsolutePath?) async throws {
+    package func encodeSBOM(spec: SBOMSpec, outputDir: AbsolutePath?, filter: Filter = .all) async throws {
         let encoded = try await encodeSBOMData(spec: spec)
         if let outputDir {
-            let filename = "\(spec.type)-\(spec.version)-\(self.sbom.primaryComponent.name)-\(self.sbom.primaryComponent.version.revision).json"
+            let filename = "\(spec.type)-\(spec.version)-\(self.sbom.primaryComponent.name)-\(self.sbom.primaryComponent.version.revision)-\(filter).json"
             let outputPath = outputDir.appending(component: filename)
             try localFileSystem.writeFileContents(outputPath, data: encoded)
         }

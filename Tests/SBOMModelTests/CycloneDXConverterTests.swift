@@ -179,7 +179,8 @@ struct CycloneDXConverterTests {
                 name: "TestComponent",
                 version: SBOMComponent.Version(revision: "1.0.0"),
                 originator: SBOMOriginator(commits: nil),
-                scope: .runtime
+                scope: .runtime,
+                entity: .product
             )
 
             let result = try await CycloneDXConverter.convertToCycloneDXComponent(from: component)
@@ -210,7 +211,8 @@ struct CycloneDXConverterTests {
                 name: "TestComponent",
                 version: SBOMComponent.Version(revision: "1.0.0"),
                 originator: SBOMOriginator(commits: nil),
-                scope: sbomScope
+                scope: sbomScope,
+                entity: .product
             )
 
             let result = try await CycloneDXConverter.convertToCycloneDXComponent(from: component)
@@ -249,7 +251,8 @@ struct CycloneDXConverterTests {
             name: "TestComponent",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: originator,
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
 
         let result = try await CycloneDXConverter.convertToCycloneDXComponent(from: component)
@@ -315,7 +318,8 @@ struct CycloneDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
 
         let document = SBOMDocument(
@@ -349,7 +353,8 @@ struct CycloneDXConverterTests {
             name: "PrimaryFramework",
             version: SBOMComponent.Version(revision: "2.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
@@ -384,7 +389,8 @@ struct CycloneDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
 
         let document = SBOMDocument(
@@ -419,7 +425,8 @@ struct CycloneDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let component1 = SBOMComponent(
             category: .library,
@@ -428,7 +435,8 @@ struct CycloneDXConverterTests {
             name: "Library1",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let component2 = SBOMComponent(
             category: .framework,
@@ -437,7 +445,8 @@ struct CycloneDXConverterTests {
             name: "Framework1",
             version: SBOMComponent.Version(revision: "2.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .optional
+            scope: .optional,
+            entity: .product
         )
         let dependency1 = SBOMRelationship(
             id: SBOMIdentifier(value: "dep-1"),
@@ -512,7 +521,8 @@ struct CycloneDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "urn:uuid:12345678-1234-1234-1234-123456789abc"),
@@ -557,7 +567,8 @@ struct CycloneDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
         let document = SBOMDocument(
             id: SBOMIdentifier(value: "doc-1"),
@@ -605,7 +616,8 @@ struct CycloneDXConverterTests {
             name: "PrimaryApp",
             version: SBOMComponent.Version(revision: "1.0.0"),
             originator: SBOMOriginator(commits: nil),
-            scope: .runtime
+            scope: .runtime,
+            entity: .product
         )
 
         let document = SBOMDocument(

@@ -7,6 +7,7 @@
 # See http://swift.org/CONTRIBUTORS.txt for Swift project authors
 
 add_library(SBOMModel
+  SBOMInput.swift
   Core/SBOMCommit.swift
   Core/SBOMComponent.swift
   Core/SBOMDependencies.swift

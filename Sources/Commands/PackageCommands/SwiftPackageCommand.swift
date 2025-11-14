@@ -69,7 +69,7 @@ public struct SwiftPackageCommand: AsyncParsableCommand {
             CompletionCommand.self,
             PluginCommand.self,
 
-            SBOM.self,
+            GenerateSbom.self,
 
             DefaultCommand.self,
         ]

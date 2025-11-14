@@ -106,6 +106,7 @@ struct SBOMEncoderTests {
     @Test("writeSBOMs tests cleans up properly on success")
     func writeSBOMsCleansUpProperlyOnSuccess() async throws {
         let outputDir = try createTempOutputDir()
+        defer { try? cleanupTempDir(outputDir) }
 
         let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()

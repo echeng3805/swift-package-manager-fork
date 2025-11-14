@@ -29,7 +29,7 @@ import enum PackageModel.Sanitizer
 
 import enum PackageModel.TraitConfiguration
 
-import enum SBOMModel.Entity
+import enum SBOMModel.Filter
 import enum SBOMModel.Spec
 
 import struct SPMBuildCore.BuildParameters
@@ -779,10 +779,10 @@ public struct SBOMOptions: ParsableArguments {
 
     /// Filter SBOM components and dependencies by entity.
     @Option(
-        name: .customLong("sbom-entity"),
-        help: "Filter the SBOM components and dependencies by entity. Must be used with --sbom-spec."
+        name: .customLong("sbom-filter"),
+        help: "Filter the SBOM components and dependencies by products and/or packages. Must be used with --sbom-spec."
     )
-    package var sbomEntity: SBOMModel.Entity = .all
+    package var sbomFilter: SBOMModel.Filter = .all
 }
 
 // MARK: - Extensions
@@ -862,5 +862,5 @@ extension BuildSystemProvider.Kind: ExpressibleByArgument {}
 extension Version: @retroactive ExpressibleByArgument {}
 extension PackageIdentity: ExpressibleByArgument {}
 extension Spec: ExpressibleByArgument {}
-extension Entity: ExpressibleByArgument {}
+extension Filter: ExpressibleByArgument {}
 extension URL: @retroactive ExpressibleByArgument {}

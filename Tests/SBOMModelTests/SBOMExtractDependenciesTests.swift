@@ -692,4 +692,6 @@ struct SBOMExtractDependenciesTests {
         _ = try await extractor.extractDependencies()
         try await self.verifyDependencies(graph: graph, store: store)
     }
+
+    // MARK: - Filter Tests
 }
