@@ -76,8 +76,8 @@ struct SBOMEncoderTests {
         #expect(files.count == 2, "Should generate two files for two specs")
 
         // Since test packages don't have real Git repos, the revision will be "unknown"
-        let cycloneDXFile = "cyclonedx1-1.7-MyApp-unknown.json"
-        let spdxFile = "spdx3-3.0.1-MyApp-unknown.json"
+        let cycloneDXFile = "cyclonedx1-1.7-MyApp-unknown-all.json"
+        let spdxFile = "spdx3-3.0.1-MyApp-unknown-all.json"
 
         #expect(files.contains(cycloneDXFile), "Should generate CycloneDX file")
         #expect(files.contains(spdxFile), "Should generate SPDX file")
