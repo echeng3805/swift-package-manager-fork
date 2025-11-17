@@ -112,60 +112,23 @@ extension SBOMExtractor {
         guard let rootPackage = modulesGraph.rootPackages.first else {
             throw SBOMExtractorError
                 .noRootPackage(context: "extract dependencies for the following products: \(targetProducts)")
-        }
+        }        
 
+        let filterStrategy = filter.createStrategy()
         var components: Set<SBOMComponent> = []
-        
-        func addComponent(_ component: SBOMComponent) {
-            switch filter {
-            case .all:
-                components.insert(component)
-            case .product:
-                if component.entity == .product {
-                    components.insert(component)
-                }
-            case .package:
-                if component.entity == .package {
-                    components.insert(component)
-                }
-            }
-        }
-        
         var relationships: [SBOMComponent: Set<SBOMComponent>] = [:] // parent:children
         
-        func insertRelationship(_ parent: SBOMComponent, _ child: SBOMComponent) {
-            relationships[parent, default: []].insert(child)
+        func addComponent(_ component: SBOMComponent) {
+            if filterStrategy.shouldIncludeComponent(component, primaryComponent: primaryComponent) {
+                components.insert(component)
+            }
         }
 
         func trackRelationship(parent: SBOMComponent, child: SBOMComponent) {
-            guard parent != child else { return } // prevent self-referential dependencies
-            switch filter {
-            case .all:
-                insertRelationship(parent, child)
-                return
-            
-            case .product:
-                // if the primary component is a product, then only include product-product relationships
-                if parent.entity == .product && child.entity == .product {
-                    insertRelationship(parent, child)
-                    return
-                } 
-                // if the primary component is a package, then need to also include package-to-product relationship(s) for a full graph
-                if primaryComponent.entity == .package && parent.id == primaryComponent.id {
-                    insertRelationship(parent, child)
-                    return
-                }
-            case .package:
-                // if the primary component is a package, then only include package-package relationships
-                if parent.entity == .package && child.entity == .package {
-                    insertRelationship(parent, child)
-                    return
-                }
-                // if the primary component is a product, then include package-to-product relationship for a full graph
-                if primaryComponent.entity == .product && child.id == primaryComponent.id {
-                    insertRelationship(parent, child)
-                    return
-                }
+            if filterStrategy.shouldTrackRelationship(parent: parent, child: child, primaryComponent: primaryComponent) {
+                addComponent(parent)
+                addComponent(child)
+                relationships[parent, default: []].insert(child)
             }
         }
 
@@ -263,9 +226,6 @@ extension SBOMExtractor {
                 return dependentProduct
             }
 
-            addComponent(dependentProductComponent)
-            addComponent(processedProductComponent)
-
             // check if both products are in the same root package
             let bothInRootPackage = product.packageIdentity == rootPackage.identity &&
                 dependentProduct.packageIdentity == rootPackage.identity
@@ -279,12 +239,10 @@ extension SBOMExtractor {
                 .first(where: { $0.identity == dependentProduct.packageIdentity })
             {
                 let dependentProductPackageComponent = try await extractComponent(package: dependentProductPackage)
-                addComponent(dependentProductPackageComponent)
                 // add dependentProductPackage -> dependentProduct dependency
                 trackRelationship(parent: dependentProductPackageComponent, child: dependentProductComponent)
                 if let productPackage = modulesGraph.packages.first(where: { $0.identity == product.packageIdentity }) {
                     let productPackageComponent = try await extractComponent(package: productPackage)
-                    addComponent(productPackageComponent)
                     // add productPackage -> dependentProductPackage dependency if they're from different packages
                     if product.packageIdentity != dependentProduct.packageIdentity {
                         trackRelationship(
@@ -325,7 +283,7 @@ extension SBOMExtractor {
                             }
                         }
                         // else it's not in the modules graph
-                        // TODO: ev_cheng, print a warning?
+                        // TODO: ev_cheng, print a warning
                     }
                 }
             } else {
@@ -374,10 +332,10 @@ extension SBOMExtractor {
         await self.populateTargetNameCache()
 
         // add rootPackage component and create dependencies to all its products
-        try await addComponent(extractComponent(package: rootPackage))
+        // try await addComponent(extractComponent(package: rootPackage))
         for targetProduct in targetProducts {
             let targetComponent = try await extractComponent(product: targetProduct)
-            addComponent(targetComponent)
+            // addComponent(targetComponent)
             trackRelationship(parent: rootPackageComponent, child: targetComponent)
         }
 

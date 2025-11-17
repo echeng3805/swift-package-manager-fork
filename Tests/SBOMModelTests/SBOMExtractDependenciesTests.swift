@@ -17,8 +17,11 @@ import PackageGraph
 import Testing
 
 struct SBOMExtractDependenciesTests {
+
+    // MARK: - Helper Methods for Validation
+
+
     private func detectCycles(in dependencies: [SBOMRelationship]) -> [String] {
-        // Build adjacency list
         var graph: [String: [String]] = [:]
         for dependency in dependencies {
             graph[dependency.parentID.value] = dependency.childrenID.map(\.value)
@@ -56,23 +59,89 @@ struct SBOMExtractDependenciesTests {
         }
         return cycles
     }
-
+    
+    private func isProductID(_ id: String) -> Bool {
+        id.contains(":")
+    }
+    
+    private func isOwnProduct(childID: String, parentID: String) -> Bool {
+        childID.hasPrefix(parentID)
+    }
+    
+    private func validateOwnProductDependency(childID: String, parentID: String) {
+        #expect(
+            isOwnProduct(childID: childID, parentID: parentID),
+            "Package '\(parentID)' product dependency '\(childID)' should depend on '\(parentID)'"
+        )
+    }
+    
+    private func validatePackageDependency(childID: String, parentID: String, packageIDs: [String]) {
+        #expect(
+            packageIDs.contains(childID),
+            "Package '\(parentID)' package dependency '\(childID)' should be a valid package"
+        )
+    }
+    
+    private func validateProductDependency(childID: String, parentID: String) {
+        #expect(
+            isProductID(childID),
+            "Product '\(parentID)' should only depend on other products, but found package dependency '\(childID)'"
+        )
+    }
+    
+    private func validatePackageChildren(
+        dependency: SBOMRelationship,
+        rootPackageID: String,
+        packageIDs: [String],
+        filter: Filter = .all
+    ) {
+        for child in dependency.childrenID {
+            if isProductID(child.value) { // package-to-product
+                // root-package to root product is allowed when filter == .package or .product
+                if filter == .package && rootPackageID != dependency.parentID.value {
+                    #expect(!isProductID(child.value), "Package \(dependency.parentID) should only depend on packages when filter is .package'")
+                    return
+                } else if filter == .product && rootPackageID != dependency.parentID.value { 
+                    #expect(!isProductID(child.value), "Package \(dependency.parentID) should only depend on root products and not other products when filter is .product'")
+                    return
+                }
+                validateOwnProductDependency(childID: child.value, parentID: dependency.parentID.value)
+            } else { // package-to-package
+                validatePackageDependency(childID: child.value, parentID: dependency.parentID.value, packageIDs: packageIDs)
+            }
+        }
+    }
+    
+    private func validateProductChildren(dependency: SBOMRelationship) {
+        for child in dependency.childrenID { // product-to-product
+            validateProductDependency(childID: child.value, parentID: dependency.parentID.value)
+        }
+    }
+    
+    private func validateRootPackageChildren(
+        dependency: SBOMRelationship,
+        rootPackageID: String,
+        packageIDs: [String],
+        filter: Filter = .all
+    ) {
+        #expect(!dependency.childrenID.map(\.value).contains(rootPackageID))
+        validatePackageChildren(dependency: dependency, rootPackageID: rootPackageID, packageIDs: packageIDs, filter: filter)
+    }
+    
     private func verifyProductDependencies(
         graph: ModulesGraph,
         store: ResolvedPackagesStore,
-        product: String? = nil
+        dependencyGraph: [String: [String]]? = nil,
+        filter: Filter = .all,
+        product: String? = nil,
     ) async throws {
-        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
-        let dependencies = try await #require(extractor.extractDependencies(product: product).relationships)
+        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: dependencyGraph, store: store)
+        let dependencies = try await #require(extractor.extractDependencies(product: product, filter: filter).relationships)
         let rootPackage = try #require(graph.rootPackages.first)
         let rootPackageID = SBOMExtractor.extractComponentID(from: rootPackage).value
         let packageIDs = graph.packages.map(\.identity.description)
 
-        if product != nil {
-            #expect(!dependencies.isEmpty, "Product SBOM should have dependencies")
-        } else {
-            #expect(!dependencies.isEmpty)
-        }
+        #expect(!dependencies.isEmpty)
 
         let parentIDs = dependencies.map(\.parentID)
         #expect(parentIDs.count == Set(parentIDs).count, "Parent IDs should be unique")
@@ -90,64 +159,15 @@ struct SBOMExtractDependenciesTests {
                 "parent '\(dependency.parentID.value)' should not depend on itself"
             )
 
-            if product != nil {
-                // Product-filtered validation
-                if packageIDs.contains(dependency.parentID.value) { // package component
-                    for child in dependency.childrenID {
-                        if child.value.contains(":") { // package-to-product dep (own product)
-                            #expect(
-                                child.value.hasPrefix(dependency.parentID.value),
-                                "Package '\(dependency.parentID.value)' product dependency '\(child.value)' should be its own product"
-                            )
-                        } else { // package-to-package dep
-                            #expect(
-                                packageIDs.contains(child.value),
-                                "Package '\(dependency.parentID.value)' package dependency '\(child.value)' should be a valid package"
-                            )
-                        }
-                    }
-                } else {
-                    // Products should only have product-to-product deps, not point back to packages
-                    for child in dependency.childrenID {
-                        #expect(
-                            child.value.contains(":"),
-                            "Product '\(dependency.parentID.value)' should only depend on other products, but found package dependency '\(child.value)'"
-                        )
-                    }
-                }
+            if packageIDs.contains(dependency.parentID.value) { // package-to-product or package-to-package
+                validatePackageChildren(dependency: dependency, rootPackageID: rootPackageID, packageIDs: packageIDs, filter: filter)
             } else {
-                // Full graph validation
-                if dependency.parentID.value == rootPackageID { // root comp
-                    #expect(!dependency.childrenID.map(\.value).contains(rootPackageID))
-                    for child in dependency.childrenID {
-                        if child.value.contains(":") { // own product deps
-                            #expect(child.value.hasPrefix(dependency.parentID.value))
-                        } else { // other dependency packages
-                            #expect(packageIDs.contains(child.value))
-                        }
-                    }
-                } else if packageIDs
-                    .contains(dependency.parentID.value)
-                {
-                    // package comp, can have package-to-product or package-to-package deps
-                    for child in dependency.childrenID {
-                        if child.value.contains(":") { // own product deps
-                            #expect(
-                                child.value.hasPrefix(dependency.parentID.value),
-                                "Package '\(dependency.parentID.value)' product dependency '\(child.value)' should be its own product"
-                            )
-                        } else { // other dependency packages
-                            #expect(
-                                packageIDs.contains(child.value),
-                                "Package '\(dependency.parentID.value)' package dependency '\(child.value)' should be a valid package"
-                            )
-                        }
-                    }
-                } else { // product comp, should have product-to-product deps
-                    for child in dependency.childrenID {
-                        #expect(child.value.contains(":"), "child ID should be product")
-                    }
-                }
+                // product-to-product
+                validateProductChildren(dependency: dependency)
+            }
+
+            if product == nil {
+                #expect(!dependency.childrenID.map(\.value).contains(rootPackageID))
             }
         }
     }
@@ -612,12 +632,10 @@ struct SBOMExtractDependenciesTests {
 
         try await self.verifyDependencies(graph: graph, store: store)
 
-        // Verify specific relationships from build graph
         let myAppPackageDep = try #require(dependencies.first { $0.parentID.value == "MyApp" })
         let utilsPackageDep = try #require(dependencies.first { $0.parentID.value == "Utils" })
         let appProductDep = try #require(dependencies.first { $0.parentID.value == "MyApp:App" })
 
-        // Verify MyApp package dependencies
         #expect(myAppPackageDep.childrenID.count == 2, "MyApp package should have 2 dependencies")
         #expect(myAppPackageDep.childrenID.map(\.value).contains("Utils"), "MyApp should depend on Utils package")
         #expect(
@@ -625,14 +643,12 @@ struct SBOMExtractDependenciesTests {
             "MyApp should depend on its own App product"
         )
 
-        // Verify Utils package dependencies
         #expect(utilsPackageDep.childrenID.count == 1, "Utils package should have 1 dependency")
         #expect(
             utilsPackageDep.childrenID.map(\.value).contains("Utils:Utils"),
             "Utils should depend on its own Utils product"
         )
 
-        // Verify App product dependencies (from build graph)
         #expect(appProductDep.childrenID.count == 1, "App product should have 1 dependency")
         #expect(
             appProductDep.childrenID.map(\.value).contains("Utils:Utils"),
@@ -694,4 +710,41 @@ struct SBOMExtractDependenciesTests {
     }
 
     // MARK: - Filter Tests
+    
+    @Test("Filter.all tracks all relationships")
+    func filterAllTracksAllRelationships() async throws {
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
+        try await self.verifyDependencies(graph: graph, store: store)
+    }
+    
+    @Test("Filter.product tracks only product-to-product and cross-boundary relationships when primary component is package")
+    func filterProductTracksOnlyProductRelationships() async throws {
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()        
+        try await self.verifyProductDependencies(graph: graph, store: store, filter: .product, product: nil)
+        
+    }
+    
+    @Test("Filter.package tracks only package-to-package relationships when primary component is package")
+    func filterPackageTracksOnlyPackageRelationships() async throws {
+        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
+        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()        
+        try await self.verifyProductDependencies(graph: graph, store: store, filter: .package, product: nil)
+    }
+
+    @Test("Filter.product tracks only product-to-product when primary component is product")
+    func filterProductTracksOnlyProductRelationshipsForProduct() async throws {
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        try await self.verifyProductDependencies(graph: graph, store: store, filter: .product, product: "SwiftPMDataModel")
+        
+    }
+    
+    @Test("Filter.package tracks only package-to-package relationships and cross-boundary relationships when primary component is product")
+    func filterPackageTracksOnlyPackageRelationshipsForProduct() async throws {
+        let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
+        let store = try SBOMTestStore.createSPMResolvedPackagesStore()
+        try await self.verifyProductDependencies(graph: graph, store: store, filter: .package, product: "SwiftPMDataModel")
+    }
 }
