@@ -19,6 +19,9 @@ import SourceControl
 import TSCUtility
 
 extension SBOMExtractor {
+
+    // TODO: ev_cheng, there has to be a better way to do all these conversions
+
     /// Converts a ModulesGraph product name to a dependency graph target name.
     /// Products in the dependency graph have a "-product" suffix.
     package static func getTargetName(fromProduct name: String) -> String {
@@ -86,8 +89,10 @@ extension SBOMExtractor {
                     packageIdentity: rootPackage.identity.description
                 )
             }
+            // only get dependencies for single product
             targetProducts = [targetProduct]
         } else {
+            // get dependencies for all products in the root package
             targetProducts = rootPackage.products
         }
         return try await self.extractDependenciesForProducts(targetProducts: targetProducts, primaryComponent: primaryComponent, filter: filter)
@@ -112,50 +117,53 @@ extension SBOMExtractor {
         var components: Set<SBOMComponent> = []
         
         func addComponent(_ component: SBOMComponent) {
-            // if !components.contains(component) {
-                switch filter {
-                case .all:
+            switch filter {
+            case .all:
+                components.insert(component)
+            case .product:
+                if component.entity == .product {
                     components.insert(component)
-                case .product:
-                    if component.entity == .product {
-                        components.insert(component)
-                    }
-                case .package:
-                    if component.entity == .package {
-                        components.insert(component)
-                    }
                 }
-           // }
+            case .package:
+                if component.entity == .package {
+                    components.insert(component)
+                }
+            }
         }
         
-        var relationships: [SBOMComponent: Set<SBOMComponent>] = [:] // parentID:childrenID
+        var relationships: [SBOMComponent: Set<SBOMComponent>] = [:] // parent:children
+        
+        func insertRelationship(_ parent: SBOMComponent, _ child: SBOMComponent) {
+            relationships[parent, default: []].insert(child)
+        }
+
         func trackRelationship(parent: SBOMComponent, child: SBOMComponent) {
             guard parent != child else { return } // prevent self-referential dependencies
             switch filter {
             case .all:
-                relationships[parent, default: []].insert(child)
+                insertRelationship(parent, child)
                 return
             
             case .product:
                 // if the primary component is a product, then only include product-product relationships
-                // if the primary component is a package, then need to also include package-to-product relationship(s) for a full graph
                 if parent.entity == .product && child.entity == .product {
-                    relationships[parent, default: []].insert(child)
+                    insertRelationship(parent, child)
                     return
                 } 
+                // if the primary component is a package, then need to also include package-to-product relationship(s) for a full graph
                 if primaryComponent.entity == .package && parent.id == primaryComponent.id {
-                    relationships[parent, default: []].insert(child)
+                    insertRelationship(parent, child)
                     return
                 }
             case .package:
-            // if the primary component is a package, then only include package-package relationships
-            // if the primary component is a product, then include package-to-product relationship for a full graph
+                // if the primary component is a package, then only include package-package relationships
                 if parent.entity == .package && child.entity == .package {
-                    relationships[parent, default: []].insert(child)
+                    insertRelationship(parent, child)
                     return
                 }
+                // if the primary component is a product, then include package-to-product relationship for a full graph
                 if primaryComponent.entity == .product && child.id == primaryComponent.id {
-                    relationships[parent, default: []].insert(child)
+                    insertRelationship(parent, child)
                     return
                 }
             }
