@@ -14,9 +14,9 @@ import Foundation
 @testable import SBOMModel
 
 extension SBOMTestDependencyGraph {
-    static func createSimpleDependencyGraph() -> [String: [String]] {
+    static func createSimpleDifferentDependencyGraph() -> [String: [String]] {
         [
-            "App-product": ["Utils-product"],
+            "App-product": [],
             "Utils-product": [],
         ]
     }

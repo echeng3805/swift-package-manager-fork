@@ -440,10 +440,7 @@ struct SBOMExtractComponentsTests {
         let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
-        
-        let allDependencies = try await extractor.extractDependencies(filter: .all)
         let dependencies = try await extractor.extractDependencies(filter: .package)
-        
         self.verifyComponents(
             components: dependencies.components,
             graph: graph,
@@ -457,9 +454,7 @@ struct SBOMExtractComponentsTests {
         let graph = try SBOMTestModulesGraph.createSPMModulesGraph()
         let store = try SBOMTestStore.createSPMResolvedPackagesStore()
         let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
-        
         let dependencies = try await extractor.extractDependencies(filter: .all)
-        
         self.verifyComponents(
             components: dependencies.components,
             graph: graph,
@@ -477,7 +472,6 @@ struct SBOMExtractComponentsTests {
         
         let productName = "SwiftPMPackageCollections"
         let dependencies = try await extractor.extractDependencies(product: productName, filter: .product)
-
         self.verifyComponents(
             components: dependencies.components,
             graph: graph,
@@ -495,7 +489,6 @@ struct SBOMExtractComponentsTests {
         
         let productName = "SwiftPMPackageCollections"
         let dependencies = try await extractor.extractDependencies(product: productName, filter: .package)
-
         self.verifyComponents(
             components: dependencies.components,
             graph: graph,

@@ -32,9 +32,6 @@ extension SwiftPackageCommand {
         var product: String?
 
         func run(_ swiftCommandState: SwiftCommandState) async throws {
-            guard swiftCommandState.options.build.buildSystem == .swiftbuild else {
-                throw SBOMGenerationError.notSwiftBuild
-            }
 
             let workspace = try swiftCommandState.getActiveWorkspace()
             let packageGraph = try await workspace.loadPackageGraph(
@@ -44,6 +41,7 @@ extension SwiftPackageCommand {
             )
             let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
 
+            // TODO ev_cheng: remove build graph and instead print a warning that build graph isn't used
             let buildSystem = try await swiftCommandState.createBuildSystem(
                 explicitProduct: self.product
             )
@@ -66,18 +64,5 @@ extension SwiftPackageCommand {
             let creator = SBOMCreator(input: input)
             try await creator.createSBOMs()
         }
-    }
-}
-
-package enum SBOMGenerationError: Error, LocalizedError, CustomStringConvertible {
-    case notSwiftBuild
-    package var errorDescription: String? {
-        switch self {
-        case .notSwiftBuild:
-            "SBOM generation requires the SwiftBuild build system. Please use '--build-system swiftbuild'."
-        }
-    }
-    package var description: String {
-        self.errorDescription ?? "Unknown SBOM generation error"
     }
 }

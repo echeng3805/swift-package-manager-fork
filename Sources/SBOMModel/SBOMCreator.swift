@@ -26,7 +26,8 @@ package struct SBOMCreator {
         
         let sbom = try await extractor.extractSBOM(
             product: input.product,
-            filter: input.filter)
+            filter: input.filter
+        )
         
         let encoder = SBOMEncoder(sbom: sbom)
         try await encoder.writeSBOMs(
