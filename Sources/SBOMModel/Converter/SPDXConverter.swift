@@ -134,7 +134,8 @@ package struct SPDXConverter {
             name: component.name,
             version: component.version.revision,
             creationInfoID: SPDXConstants.spdxRootCreationInfoID,
-            description: component.description
+            description: component.description,
+            summary: component.entity.rawValue
         )
     }
 

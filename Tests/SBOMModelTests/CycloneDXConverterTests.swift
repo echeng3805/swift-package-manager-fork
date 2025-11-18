@@ -194,6 +194,40 @@ struct CycloneDXConverterTests {
         }
     }
 
+    @Test("convertToCycloneDXComponent with all entities")
+    func convertToCycloneDXComponentWithAllEntities() async throws {
+        let entities: [(SBOMComponent.Entity, String)] = [
+            (.package, SBOMComponent.Entity.package.rawValue),
+            (.product, SBOMComponent.Entity.product.rawValue),
+        ]
+
+        for (sbomEntity, sbomEntityString) in entities {
+            let component = SBOMComponent(
+                category: .library,
+                id: SBOMIdentifier(value: "test-id"),
+                purl: "pkg:swift/test@1.0.0",
+                name: "TestComponent",
+                version: SBOMComponent.Version(revision: "1.0.0"),
+                originator: SBOMOriginator(commits: nil),
+                scope: .test,
+                entity: sbomEntity
+            )
+
+            let result = try await CycloneDXConverter.convertToCycloneDXComponent(from: component)
+
+            #expect(result.type == .library)
+            #expect(result.scope == .excluded)
+            #expect(result.bomRef == "test-id")
+            #expect(result.name == "TestComponent")
+            #expect(result.version == "1.0.0")
+            #expect(result.purl == "pkg:swift/test@1.0.0")
+            let properties = try #require(result.properties)
+            #expect(properties.count == 1)
+            #expect(properties[0].name == "swift-entity")
+            #expect(properties[0].value == sbomEntityString)
+        }
+    }
+
     @Test("convertToCycloneDXComponent with all scopes")
     func convertToCycloneDXComponentWithAllScopes() async throws {
         let scopes: [(SBOMComponent.Scope?, CycloneDXComponent.Scope)] = [

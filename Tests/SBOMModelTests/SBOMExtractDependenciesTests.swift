@@ -218,7 +218,6 @@ struct SBOMExtractDependenciesTests {
         let utilsPackageDep = try #require(dependencies.first { $0.parentID.value == "Utils" })
         let appProductDep = try #require(dependencies.first { $0.parentID.value == "MyApp:App" })
 
-        // Verify MyApp package dependencies
         #expect(myAppPackageDep.childrenID.count == 2, "MyApp package should have 2 dependencies")
         #expect(myAppPackageDep.childrenID.map(\.value).contains("Utils"), "MyApp should depend on Utils package")
         #expect(
@@ -226,14 +225,12 @@ struct SBOMExtractDependenciesTests {
             "MyApp should depend on its own App product"
         )
 
-        // Verify Utils package dependencies
         #expect(utilsPackageDep.childrenID.count == 1, "Utils package should have 1 dependency")
         #expect(
             utilsPackageDep.childrenID.map(\.value).contains("Utils:Utils"),
             "Utils should depend on its own Utils product"
         )
 
-        // Verify App product dependencies
         #expect(appProductDep.childrenID.count == 1, "App product should have 1 dependency")
         #expect(
             appProductDep.childrenID.map(\.value).contains("Utils:Utils"),

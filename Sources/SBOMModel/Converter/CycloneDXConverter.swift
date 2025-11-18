@@ -92,7 +92,8 @@ package struct CycloneDXConverter {
             scope: self.convertToCycloneDXScope(from: comp.scope ?? .runtime),
             purl: comp.purl,
             // components: nestedComponents,
-            pedigree: self.convertToCycloneDXPedigree(from: comp.originator)
+            pedigree: self.convertToCycloneDXPedigree(from: comp.originator),
+            properties: [CycloneDXProperty(name: "swift-entity", value: comp.entity.rawValue)]
         )
     }
 
@@ -104,7 +105,7 @@ package struct CycloneDXConverter {
             version: tool.version,
             scope: .excluded,
             purl: "pkg:swift/github.com/swiftlang/\(tool.name)@\(tool.version)",
-            pedigree: nil
+            pedigree: nil,
         )
     }
 

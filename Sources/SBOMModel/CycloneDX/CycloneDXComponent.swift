@@ -32,6 +32,7 @@ package struct CycloneDXComponent: Codable, Equatable {
     package let purl: String
     package let components: [CycloneDXComponent]?
     package let pedigree: CycloneDXPedigree?
+    package let properties: [CycloneDXProperty]?
 
     package init(
         type: Category,
@@ -41,7 +42,8 @@ package struct CycloneDXComponent: Codable, Equatable {
         scope: Scope,
         purl: String,
         components: [CycloneDXComponent]? = nil,
-        pedigree: CycloneDXPedigree? = nil
+        pedigree: CycloneDXPedigree? = nil,
+        properties: [CycloneDXProperty]? = nil
     ) {
         self.type = type
         self.bomRef = bomRef
@@ -51,6 +53,7 @@ package struct CycloneDXComponent: Codable, Equatable {
         self.purl = purl
         self.components = components
         self.pedigree = pedigree
+        self.properties = properties
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -62,5 +65,6 @@ package struct CycloneDXComponent: Codable, Equatable {
         case purl
         case components
         case pedigree
+        case properties
     }
 }

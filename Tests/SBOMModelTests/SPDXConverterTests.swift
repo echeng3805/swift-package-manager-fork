@@ -299,6 +299,40 @@ struct SPDXConverterTests {
         }
     }
 
+    @Test("convertToSPDXPackage with all entites")
+    func convertToSPDXPackageWithAllEntities() async throws {
+        let entities: [(SBOMComponent.Entity, String)] = [
+            (.package, SBOMComponent.Entity.package.rawValue),
+            (.product, SBOMComponent.Entity.product.rawValue),
+        ]
+
+        for (sbomEntity, sbomEntityString) in entities {
+            let component = SBOMComponent(
+                category: .application,
+                id: SBOMIdentifier(value: "test-id"),
+                purl: "pkg:swift/test@1.0.0",
+                name: "TestComponent",
+                version: SBOMComponent.Version(revision: "1.0.0"),
+                originator: SBOMOriginator(commits: nil),
+                description: "Test description",
+                scope: .runtime,
+                entity: sbomEntity
+            )
+
+            let result = try await SPDXConverter.convertToSPDXPackage(from: component)
+
+            #expect(result.id == "urn:spdx:test-id")
+            #expect(result.type == .SoftwarePackage)
+            #expect(result.purpose == .application)
+            #expect(result.purl == "pkg:swift/test@1.0.0")
+            #expect(result.name == "TestComponent")
+            #expect(result.version == "1.0.0")
+            #expect(result.creationInfoID == "_:creationInfo")
+            #expect(result.description == "Test description")
+            #expect(result.summary == sbomEntityString)
+        }
+    }
+
     @Test("convertToSPDXPackage with nil description")
     func convertToSPDXPackageWithNilDescription() async throws {
         let component = SBOMComponent(

@@ -25,8 +25,8 @@ package struct SBOMComponent: Codable, Equatable, Hashable {
     }
     
     package enum Entity: String, Codable, Equatable {
-        case product
-        case package
+        case product = "swift/product"
+        case package = "swift/package"
     }
 
     package struct Version: Codable, Equatable, Hashable {
