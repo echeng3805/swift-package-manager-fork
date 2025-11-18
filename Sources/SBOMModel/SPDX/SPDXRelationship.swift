@@ -10,8 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SPDXRelationship: Codable, Equatable {
-    package enum Category: String, Codable, Equatable {
+internal struct SPDXRelationship: Codable, Equatable {
+    internal enum Category: String, Codable, Equatable {
         case describes
         case dependsOn
         case hasOptionalDependency
@@ -19,14 +19,14 @@ package struct SPDXRelationship: Codable, Equatable {
         case generates
     }
 
-    package let id: String
-    package let type: SPDXType
-    package let category: Category
-    package let creationInfoID: String
-    package let parentID: String
-    package let childrenID: [String]
+    internal let id: String
+    internal let type: SPDXType
+    internal let category: Category
+    internal let creationInfoID: String
+    internal let parentID: String
+    internal let childrenID: [String]
 
-    package init(
+    internal init(
         id: String,
         type: SPDXType,
         category: Category,

@@ -10,10 +10,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMOriginator: Codable, Equatable, Hashable {
-    package let commits: [SBOMCommit]?
+internal struct SBOMOriginator: Codable, Equatable, Hashable {
+    internal let commits: [SBOMCommit]?
 
-    package init(
+    internal init(
         commits: [SBOMCommit]? = nil
     ) {
         self.commits = commits

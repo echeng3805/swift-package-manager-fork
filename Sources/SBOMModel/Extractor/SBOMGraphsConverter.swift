@@ -14,16 +14,16 @@ import PackageGraph
 import PackageModel
 
 /// Utilities for converting between ModulesGraph and dependency graph naming conventions.
-package struct SBOMGraphsConverter {
+internal struct SBOMGraphsConverter {
     // TODO: ev_cheng, there has to be a better way to do all these conversions
 
     /// Converts a ModulesGraph product name to a dependency graph target name.
-    package static func getTargetName(fromProduct name: String) -> String {
+    internal static func getTargetName(fromProduct name: String) -> String {
         "\(name)-product"
     }
 
     /// Converts a dependency graph target name back to a ModulesGraph product name.
-    package static func getProductName(fromTarget name: String) -> String? {
+    internal static func getProductName(fromTarget name: String) -> String? {
         guard name.hasSuffix("-product") else {
             return nil
         }
@@ -31,7 +31,7 @@ package struct SBOMGraphsConverter {
     }
 
     /// Converts a dependency graph target name back to a ModulesGraph module package and name.
-    package static func getPackageAndModuleNames(fromTarget name: String)
+    internal static func getPackageAndModuleNames(fromTarget name: String)
         -> (packageName: String?, moduleName: String)?
     {
         guard !name.hasSuffix("-product") else {
@@ -54,12 +54,12 @@ package struct SBOMGraphsConverter {
     }
 
     /// Converts a dependency graph target name to a ModulesGraph product.
-    package static func toProduct(fromTarget name: String, modulesGraph: ModulesGraph) -> ResolvedProduct? {
+    internal static func toProduct(fromTarget name: String, modulesGraph: ModulesGraph) -> ResolvedProduct? {
         getProductName(fromTarget: name).flatMap { modulesGraph.product(for: $0) }
     }
 
     /// Converts a dependency graph target name to a ModulesGraph module.
-    package static func toModule(fromTarget name: String, modulesGraph: ModulesGraph) -> ResolvedModule? {
+    internal static func toModule(fromTarget name: String, modulesGraph: ModulesGraph) -> ResolvedModule? {
         guard let (packageName, moduleName) = getPackageAndModuleNames(fromTarget: name) else {
             return nil
         }

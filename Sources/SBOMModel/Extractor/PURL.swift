@@ -15,16 +15,16 @@ import PackageGraph
 import PackageModel
 import TSCUtility
 
-package struct PURL: Codable, Equatable, CustomStringConvertible {
-    package let scheme: String
-    package let type: String
-    package let namespace: String?
-    package let name: String
-    package let version: String?
-    package let qualifiers: [String: String]?
-    package let subpath: String?
+internal struct PURL: Codable, Equatable, CustomStringConvertible {
+    internal let scheme: String
+    internal let type: String
+    internal let namespace: String?
+    internal let name: String
+    internal let version: String?
+    internal let qualifiers: [String: String]?
+    internal let subpath: String?
 
-    package init(
+    internal init(
         scheme: String,
         type: String,
         namespace: String? = nil,
@@ -43,7 +43,7 @@ package struct PURL: Codable, Equatable, CustomStringConvertible {
         self.subpath = subpath
     }
 
-    package var description: String {
+    internal var description: String {
         var result = "\(scheme):\(type)"
         if let namespace {
             result += "/\(namespace)"
@@ -64,7 +64,7 @@ package struct PURL: Codable, Equatable, CustomStringConvertible {
 }
 
 extension PURL {
-    package static func from(package: ResolvedPackage, version: SBOMComponent.Version) async -> PURL {
+    internal static func from(package: ResolvedPackage, version: SBOMComponent.Version) async -> PURL {
         let namespace = await extractNamespace(from: version.commit)
         let qualifiers = await extractQualifiers(from: version.commit)
         return PURL(
@@ -77,7 +77,7 @@ extension PURL {
         )
     }
 
-    package static func from(product: ResolvedProduct, version: SBOMComponent.Version) async -> PURL {
+    internal static func from(product: ResolvedProduct, version: SBOMComponent.Version) async -> PURL {
         let namespace = await extractNamespace(from: version.commit)
         let qualifiers = await extractQualifiers(from: version.commit)
 
@@ -91,7 +91,7 @@ extension PURL {
         )
     }
 
-    package static func extractNamespace(from commit: SBOMCommit?) async -> String? {
+    internal static func extractNamespace(from commit: SBOMCommit?) async -> String? {
         guard let packageLocation = commit?.repository else {
             return nil
         }
@@ -139,7 +139,7 @@ extension PURL {
         return nil
     }
 
-    package static func extractQualifiers(from commit: SBOMCommit?) async -> [String: String]? {
+    internal static func extractQualifiers(from commit: SBOMCommit?) async -> [String: String]? {
         guard let packageLocation = commit?.repository else {
             return nil
         }

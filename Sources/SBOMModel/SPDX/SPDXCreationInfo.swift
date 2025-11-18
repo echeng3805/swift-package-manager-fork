@@ -10,14 +10,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SPDXCreationInfo: Codable, Equatable {
-    package let id: String
-    package let type: SPDXType
-    package let specVersion: String?
-    package let createdBy: [String]
-    package let created: String
+internal struct SPDXCreationInfo: Codable, Equatable {
+    internal let id: String
+    internal let type: SPDXType
+    internal let specVersion: String?
+    internal let createdBy: [String]
+    internal let created: String
 
-    package init(
+    internal init(
         id: String,
         type: SPDXType,
         specVersion: String? = nil,

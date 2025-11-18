@@ -10,17 +10,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SPDXExternalIdentifier: Codable, Equatable {
-    package enum Category: String, Codable, Equatable {
+internal struct SPDXExternalIdentifier: Codable, Equatable {
+    internal enum Category: String, Codable, Equatable {
         case gitoid
     }
 
-    package let identifier: String
-    package let identifierLocator: [String]
-    package let type: SPDXType
-    package let category: Category
+    internal let identifier: String
+    internal let identifierLocator: [String]
+    internal let type: SPDXType
+    internal let category: Category
 
-    package init(
+    internal init(
         identifier: String,
         identifierLocator: [String],
         type: SPDXType,

@@ -29,7 +29,7 @@ extension SBOMExtractor {
         case module(ResolvedModule)
     }
 
-    package func extractDependencies(product: String? = nil, filter: Filter = .all) async throws -> SBOMDependencies {
+    internal func extractDependencies(product: String? = nil, filter: Filter = .all) async throws -> SBOMDependencies {
         guard let rootPackage = modulesGraph.rootPackages.first else {
             throw SBOMExtractorError.noRootPackage(context: "extract dependencies")
         }
@@ -223,7 +223,7 @@ extension SBOMExtractor {
             let bothInRootPackage = product.packageIdentity == rootPackage.identity &&
                 dependentProduct.packageIdentity == rootPackage.identity
 
-            // only track dependency if not both in root package (skip internal-to-internal relationships)
+            // only track dependency if not both in root package
             if !bothInRootPackage {
                 // add product -> dependentProduct dependency
                 trackRelationship(parent: processedProductComponent, child: dependentProductComponent)

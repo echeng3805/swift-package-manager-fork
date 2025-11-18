@@ -14,14 +14,14 @@ import Basics
 import Foundation
 import TSCUtility
 
-package struct SBOMEncoder {
-    package let sbom: SBOMDocument
+internal struct SBOMEncoder {
+    internal let sbom: SBOMDocument
 
-    package init(sbom: SBOMDocument) {
+    internal init(sbom: SBOMDocument) {
         self.sbom = sbom
     }
 
-    package func writeSBOMs(specs: [Spec], outputDir: AbsolutePath, filter: Filter = .all) async throws {
+    internal func writeSBOMs(specs: [Spec], outputDir: AbsolutePath, filter: Filter = .all) async throws {
         try localFileSystem.createDirectory(outputDir, recursive: true)
         let specs = await Self.getSpecs(from: specs)
         for spec in specs {
@@ -29,7 +29,7 @@ package struct SBOMEncoder {
         }
     }
 
-    package func encodeSBOM(spec: SBOMSpec, outputDir: AbsolutePath?, filter: Filter = .all) async throws {
+    internal func encodeSBOM(spec: SBOMSpec, outputDir: AbsolutePath?, filter: Filter = .all) async throws {
         let encoded = try await encodeSBOMData(spec: spec)
         if let outputDir {
             let filename = "\(spec.type)-\(spec.version)-\(self.sbom.primaryComponent.name)-\(self.sbom.primaryComponent.version.revision)-\(filter).json"
@@ -38,7 +38,7 @@ package struct SBOMEncoder {
         }
     }
 
-    package func encodeSBOMData(spec: SBOMSpec) async throws -> Data {
+    internal func encodeSBOMData(spec: SBOMSpec) async throws -> Data {
         let data: any Encodable = switch spec.type {
         case .cyclonedx, .cyclonedx1:
             try await CycloneDXConverter.convertToCycloneDXDocument(from: self.sbom, spec: spec)
@@ -60,7 +60,7 @@ package struct SBOMEncoder {
         return encoded
     }
 
-    package static func getSpec(from spec: Spec) async -> SBOMSpec {
+    internal static func getSpec(from spec: Spec) async -> SBOMSpec {
         let concreteSpec = spec.latestSpec
         return SBOMSpec(
             type: concreteSpec.type,
@@ -68,7 +68,7 @@ package struct SBOMEncoder {
         )
     }
 
-    package static func getSpecs(from specs: [Spec]) async -> [SBOMSpec] {
+    internal static func getSpecs(from specs: [Spec]) async -> [SBOMSpec] {
         var result = Set<SBOMSpec>()
         for spec in specs {
             await result.insert(self.getSpec(from: spec))
@@ -76,7 +76,7 @@ package struct SBOMEncoder {
         return Array(result)
     }
 
-    package static func validateSBOM(from encoded: Foundation.Data, spec: SBOMSpec) async throws {
+    internal static func validateSBOM(from encoded: Foundation.Data, spec: SBOMSpec) async throws {
         guard let sbomJSONObject = try (JSONSerialization.jsonObject(with: encoded)) as? [String: Any] else {
             throw SBOMEncoderError
                 .jsonConversionFailed(message: "Could not convert generated SBOM file into JSON object for validation")

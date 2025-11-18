@@ -10,11 +10,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CycloneDXProperty: Codable, Equatable {
-    package let name: String
-    package let value: String
+internal struct CycloneDXProperty: Codable, Equatable {
+    internal let name: String
+    internal let value: String
 
-    package init(
+    internal init(
         name: String,
         value: String
     ) {

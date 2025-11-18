@@ -10,11 +10,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CycloneDXDependency: Codable, Equatable {
-    package let ref: String
-    package let dependsOn: [String]
+internal struct CycloneDXDependency: Codable, Equatable {
+    internal let ref: String
+    internal let dependsOn: [String]
 
-    package init(
+    internal init(
         ref: String,
         dependsOn: [String]
     ) {

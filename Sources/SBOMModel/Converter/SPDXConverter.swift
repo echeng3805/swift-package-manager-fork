@@ -12,7 +12,7 @@
 
 import Foundation
 
-package struct SPDXConverter {
+internal struct SPDXConverter {
     private init() {}
 
     private static func generateSPDXID(_ id: String) -> String {
@@ -33,7 +33,7 @@ package struct SPDXConverter {
         }
     }
 
-    package static func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [any SPDXObject] {
+    internal static func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [any SPDXObject] {
         guard let metadata,
               let creators = metadata.creators,
               !creators.isEmpty
@@ -63,7 +63,7 @@ package struct SPDXConverter {
         return agents
     }
 
-    package static func convertToSPDXDocument(
+    internal static func convertToSPDXDocument(
         from document: SBOMDocument,
         spec: SBOMSpec
     ) async throws -> [any SPDXObject] {
@@ -125,7 +125,7 @@ package struct SPDXConverter {
         return elements
     }
 
-    package static func convertToSPDXPackage(from component: SBOMComponent) async throws -> SPDXPackage {
+    internal static func convertToSPDXPackage(from component: SBOMComponent) async throws -> SPDXPackage {
         await SPDXPackage(
             id: self.generateSPDXID(component.id.value),
             type: .SoftwarePackage,
@@ -139,7 +139,7 @@ package struct SPDXConverter {
         )
     }
 
-    package static func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?) async -> [any SPDXObject] {
+    internal static func convertToSPDXExternalIdentifiers(from components: [SBOMComponent]?) async -> [any SPDXObject] {
         guard let comps = components, !comps.isEmpty else {
             return []
         }
@@ -180,7 +180,7 @@ package struct SPDXConverter {
         return externalIdentifiers
     }
 
-    package static func convertToSPDXRelationships(from dependencies: SBOMDependencies?) async -> [any SPDXObject] {
+    internal static func convertToSPDXRelationships(from dependencies: SBOMDependencies?) async -> [any SPDXObject] {
         guard let dependencies else {
             return []
         }
@@ -245,7 +245,7 @@ package struct SPDXConverter {
         return relationships
     }
 
-    package static func convertToSPDXGraph(from document: SBOMDocument, spec: SBOMSpec) async throws -> SPDXGraph {
+    internal static func convertToSPDXGraph(from document: SBOMDocument, spec: SBOMSpec) async throws -> SPDXGraph {
         guard spec.type.supportsSPDX else {
             throw SBOMError.unexpectedSpecType(expected: "spdx", actual: spec.type)
         }

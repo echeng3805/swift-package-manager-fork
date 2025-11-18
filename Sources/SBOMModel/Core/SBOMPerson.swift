@@ -10,12 +10,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMPerson: Codable, Equatable, Hashable {
-    package let id: SBOMIdentifier
-    package let name: String
-    package let email: String?
+internal struct SBOMPerson: Codable, Equatable, Hashable {
+    internal let id: SBOMIdentifier
+    internal let name: String
+    internal let email: String?
 
-    package init(
+    internal init(
         id: SBOMIdentifier,
         name: String,
         email: String?

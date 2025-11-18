@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-package enum SPDXType: String, Codable, Equatable {
+internal enum SPDXType: String, Codable, Equatable {
     case Agent
     case CreationInfo
     case SpdxDocument

@@ -10,11 +10,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMDependencies: Codable, Equatable {
-    package let components: [SBOMComponent]
-    package let relationships: [SBOMRelationship]?
+internal struct SBOMDependencies: Codable, Equatable {
+    internal let components: [SBOMComponent]
+    internal let relationships: [SBOMRelationship]?
 
-    package init(
+    internal init(
         components: [SBOMComponent],
         relationships: [SBOMRelationship]? = nil
     ) {

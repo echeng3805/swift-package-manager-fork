@@ -19,13 +19,13 @@ import SourceControl
 import TSCUtility
 
 /// Extractor for generating SBOM documents
-package struct SBOMExtractor {
+internal struct SBOMExtractor {
     let modulesGraph: ModulesGraph
     let dependencyGraph: [String: [String]]?
     let store: ResolvedPackagesStore
     let caches: SBOMCaches
 
-    package init(
+    internal init(
         modulesGraph: ModulesGraph,
         dependencyGraph: [String: [String]]? = nil,
         store: ResolvedPackagesStore
@@ -36,7 +36,7 @@ package struct SBOMExtractor {
         self.caches = SBOMCaches()
     }
 
-    package init(
+    internal init(
         modulesGraph: ModulesGraph,
         dependencyGraph: [String: [String]]? = nil,
         store: ResolvedPackagesStore,
@@ -48,7 +48,7 @@ package struct SBOMExtractor {
         self.caches = caches
     }
 
-    package func extractMetadata() async throws -> SBOMMetadata {
+    internal func extractMetadata() async throws -> SBOMMetadata {
         SBOMMetadata(
             timestamp: Date().ISO8601Format(),
             creators: [
@@ -67,7 +67,7 @@ package struct SBOMExtractor {
         )
     }
 
-    package static func extractCategory(from package: ResolvedPackage) throws -> SBOMComponent.Category {
+    internal static func extractCategory(from package: ResolvedPackage) throws -> SBOMComponent.Category {
         let productCategories = package.products.map(\.type)
         if productCategories.contains(.executable) {
             return .application
@@ -75,7 +75,7 @@ package struct SBOMExtractor {
         return .library
     }
 
-    package static func extractCategory(from product: ResolvedProduct) throws -> SBOMComponent.Category {
+    internal static func extractCategory(from product: ResolvedProduct) throws -> SBOMComponent.Category {
         switch product.type {
         case .executable:
             .application
@@ -84,7 +84,7 @@ package struct SBOMExtractor {
         }
     }
 
-    package static func extractScope(from product: ResolvedProduct) throws -> SBOMComponent.Scope {
+    internal static func extractScope(from product: ResolvedProduct) throws -> SBOMComponent.Scope {
         if product.type == .test {
             return .test
         }
@@ -95,7 +95,7 @@ package struct SBOMExtractor {
         return allModulesAreTests ? .test : .runtime
     }
 
-    package static func extractScope(from package: ResolvedPackage) throws -> SBOMComponent.Scope {
+    internal static func extractScope(from package: ResolvedPackage) throws -> SBOMComponent.Scope {
         guard !package.products.isEmpty else {
             return .runtime
         }
@@ -180,11 +180,11 @@ package struct SBOMExtractor {
         )
     }
 
-    package static func extractComponentID(from package: ResolvedPackage) -> SBOMIdentifier {
+    internal static func extractComponentID(from package: ResolvedPackage) -> SBOMIdentifier {
         SBOMIdentifier(value: package.identity.description)
     }
 
-    package static func extractComponentID(from product: ResolvedProduct) -> SBOMIdentifier {
+    internal static func extractComponentID(from product: ResolvedProduct) -> SBOMIdentifier {
         SBOMIdentifier(value: "\(product.packageIdentity):\(product.name)")
     }
 
@@ -197,7 +197,7 @@ package struct SBOMExtractor {
         return productComponents
     }
 
-    package func extractComponent(package: ResolvedPackage) async throws -> SBOMComponent {
+    internal func extractComponent(package: ResolvedPackage) async throws -> SBOMComponent {
         if let cached = await caches.component.getPackage(package.identity) {
             return cached
         }
@@ -222,7 +222,7 @@ package struct SBOMExtractor {
         return component
     }
 
-    package func extractComponent(product: ResolvedProduct) async throws -> SBOMComponent {
+    internal func extractComponent(product: ResolvedProduct) async throws -> SBOMComponent {
         if let cached = await caches.component.getProduct(product.packageIdentity, productName: product.name) {
             return cached
         }
@@ -245,7 +245,7 @@ package struct SBOMExtractor {
         return component
     }
 
-    package func extractPrimaryComponent(product: String? = nil) async throws -> SBOMComponent {
+    internal func extractPrimaryComponent(product: String? = nil) async throws -> SBOMComponent {
         guard let rootPackage = modulesGraph.rootPackages.first else {
             throw SBOMExtractorError.noRootPackage(context: "determine primary component for SBOM")
         }
@@ -263,7 +263,7 @@ package struct SBOMExtractor {
         return try await self.extractComponent(package: rootPackage)
     }
 
-    package func extractSBOM(product: String? = nil, filter: Filter = .all) async throws -> SBOMDocument {
+    internal func extractSBOM(product: String? = nil, filter: Filter = .all) async throws -> SBOMDocument {
         try await SBOMDocument(
             id: SBOMIdentifier.generate(),
             metadata: self.extractMetadata(),

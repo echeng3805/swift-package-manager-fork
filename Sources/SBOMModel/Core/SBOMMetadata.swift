@@ -10,11 +10,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMMetadata: Codable, Equatable {
-    package let timestamp: String?
-    package let creators: [SBOMTool]?
+internal struct SBOMMetadata: Codable, Equatable {
+    internal let timestamp: String?
+    internal let creators: [SBOMTool]?
 
-    package init(
+    internal init(
         timestamp: String?,
         creators: [SBOMTool]? = nil
     ) {

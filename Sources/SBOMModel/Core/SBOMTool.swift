@@ -10,13 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMTool: Codable, Equatable {
-    package let id: SBOMIdentifier
-    package let name: String
-    package let version: String
-    package let licenses: [SBOMLicense]?
+internal struct SBOMTool: Codable, Equatable {
+    internal let id: SBOMIdentifier
+    internal let name: String
+    internal let version: String
+    internal let licenses: [SBOMLicense]?
 
-    package init(
+    internal init(
         id: SBOMIdentifier,
         name: String,
         version: String,

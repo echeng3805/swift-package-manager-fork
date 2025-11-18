@@ -10,31 +10,31 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CycloneDXComponent: Codable, Equatable {
-    package enum Category: String, Codable, Equatable {
+internal struct CycloneDXComponent: Codable, Equatable {
+    internal enum Category: String, Codable, Equatable {
         case application
         case framework
         case library
         case file
     }
 
-    package enum Scope: String, Codable, Equatable {
+    internal enum Scope: String, Codable, Equatable {
         case required
         case optional
         case excluded
     }
 
-    package let type: Category
-    package let bomRef: String
-    package let name: String
-    package let version: String
-    package let scope: Scope
-    package let purl: String
-    package let components: [CycloneDXComponent]?
-    package let pedigree: CycloneDXPedigree?
-    package let properties: [CycloneDXProperty]?
+    internal let type: Category
+    internal let bomRef: String
+    internal let name: String
+    internal let version: String
+    internal let scope: Scope
+    internal let purl: String
+    internal let components: [CycloneDXComponent]?
+    internal let pedigree: CycloneDXPedigree?
+    internal let properties: [CycloneDXProperty]?
 
-    package init(
+    internal init(
         type: Category,
         bomRef: String,
         name: String,

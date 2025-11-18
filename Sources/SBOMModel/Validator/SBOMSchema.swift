@@ -12,10 +12,10 @@
 
 import Foundation
 
-package struct SBOMSchema {
+internal struct SBOMSchema {
     private let schema: [String: Any]
 
-    package init(from schemaFilename: String) throws {
+    internal init(from schemaFilename: String) throws {
         guard let schemaURL = Bundle.module.url(forResource: schemaFilename, withExtension: "json") else {
             throw SBOMSchemaError.schemaFileNotFound(
                 filename: schemaFilename,
@@ -29,7 +29,7 @@ package struct SBOMSchema {
         self.schema = jsonObject
     }
 
-    package func validate(json jsonObject: Any, spec: SBOMSpec) throws {
+    internal func validate(json jsonObject: Any, spec: SBOMSpec) throws {
         let validator = try createValidator(for: spec)
         try validator.validate(jsonObject)
     }

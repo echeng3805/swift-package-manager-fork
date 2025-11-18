@@ -10,17 +10,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CycloneDXDocument: Codable, Equatable {
-    package let schema: String
-    package let bomFormat: String
-    package let specVersion: String
-    package let serialNumber: String
-    package let version: Int
-    package let metadata: CycloneDXMetadata
-    package let components: [CycloneDXComponent]?
-    package let dependencies: [CycloneDXDependency]?
+internal struct CycloneDXDocument: Codable, Equatable {
+    internal let schema: String
+    internal let bomFormat: String
+    internal let specVersion: String
+    internal let serialNumber: String
+    internal let version: Int
+    internal let metadata: CycloneDXMetadata
+    internal let components: [CycloneDXComponent]?
+    internal let dependencies: [CycloneDXDependency]?
 
-    package init(
+    internal init(
         schema: String,
         bomFormat: String,
         specVersion: String,

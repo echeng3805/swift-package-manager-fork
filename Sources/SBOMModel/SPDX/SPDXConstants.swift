@@ -10,9 +10,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SPDXConstants: Codable, Equatable {
-    package static let spdx3Context = "https://spdx.org/rdf/3.0.1/spdx-context.jsonld"
-    package static let spdx3SchemaFile = "spdx-3.0.1.schema"
-    package static let spdx3SpecVersion = "3.0.1"
-    package static let spdxRootCreationInfoID = "_:creationInfo"
+internal struct SPDXConstants: Codable, Equatable {
+    internal static let spdx3Context = "https://spdx.org/rdf/3.0.1/spdx-context.jsonld"
+    internal static let spdx3SchemaFile = "spdx-3.0.1.schema"
+    internal static let spdx3SpecVersion = "3.0.1"
+    internal static let spdxRootCreationInfoID = "_:creationInfo"
 }

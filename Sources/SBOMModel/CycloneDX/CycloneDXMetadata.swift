@@ -10,20 +10,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CycloneDXTools: Codable, Equatable {
-    package let components: [CycloneDXComponent]
+internal struct CycloneDXTools: Codable, Equatable {
+    internal let components: [CycloneDXComponent]
 
-    package init(components: [CycloneDXComponent]) {
+    internal init(components: [CycloneDXComponent]) {
         self.components = components
     }
 }
 
-package struct CycloneDXMetadata: Codable, Equatable {
-    package let timestamp: String?
-    package let component: CycloneDXComponent
-    package let tools: CycloneDXTools?
+internal struct CycloneDXMetadata: Codable, Equatable {
+    internal let timestamp: String?
+    internal let component: CycloneDXComponent
+    internal let tools: CycloneDXTools?
 
-    package init(
+    internal init(
         timestamp: String?,
         component: CycloneDXComponent,
         tools: CycloneDXTools?

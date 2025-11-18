@@ -10,13 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SPDXAgent: Codable, Equatable {
-    package let id: String
-    package let type: SPDXType
-    package let name: String
-    package let creationInfoID: String
+internal struct SPDXAgent: Codable, Equatable {
+    internal let id: String
+    internal let type: SPDXType
+    internal let name: String
+    internal let creationInfoID: String
 
-    package init(
+    internal init(
         id: String,
         type: SPDXType,
         name: String,

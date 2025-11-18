@@ -10,28 +10,28 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMRelationship: Codable, Equatable, Hashable {
-    // package enum Source: String, Codable, Equatable {
+internal struct SBOMRelationship: Codable, Equatable, Hashable {
+    // internal enum Source: String, Codable, Equatable {
     //     case modules // from ModulesGraph
     //     case build // from build dependency graph
     //     case all // appears in all graphs
     // }
 
-    // package struct Metadata: Codable, Equatable {
+    // internal struct Metadata: Codable, Equatable {
     //     let source: Source
 
-    //     package init(
+    //     internal init(
     //         source: Source,
     //     ) {
     //         self.source = source
     //     }
     // }
 
-    package let id: SBOMIdentifier
-    package let parentID: SBOMIdentifier
-    package let childrenID: [SBOMIdentifier]
+    internal let id: SBOMIdentifier
+    internal let parentID: SBOMIdentifier
+    internal let childrenID: [SBOMIdentifier]
 
-    package init(
+    internal init(
         id: SBOMIdentifier,
         parentID: SBOMIdentifier,
         childrenID: [SBOMIdentifier]

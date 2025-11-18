@@ -12,7 +12,7 @@
 
 import Foundation
 
-package struct CycloneDXConverter {
+internal struct CycloneDXConverter {
     private init() {}
 
     private static func convertToCycloneDXScope(from scope: SBOMComponent.Scope) async -> CycloneDXComponent.Scope {
@@ -41,14 +41,14 @@ package struct CycloneDXConverter {
         }
     }
 
-    package static func convertToCycloneDXSchema(from spec: SBOMSpec) async throws -> String {
+    internal static func convertToCycloneDXSchema(from spec: SBOMSpec) async throws -> String {
         guard spec.type.supportsCycloneDX else {
             throw SBOMError.unexpectedSpecType(expected: "cyclonedx", actual: spec.type)
         }
         return CycloneDXConstants.cyclonedx1Schema
     }
 
-    package static func convertToCycloneDXPedigree(from originator: SBOMOriginator) async throws -> CycloneDXPedigree {
+    internal static func convertToCycloneDXPedigree(from originator: SBOMOriginator) async throws -> CycloneDXPedigree {
         guard let sbomCommits = originator.commits else {
             return CycloneDXPedigree(commits: nil)
         }
@@ -72,7 +72,7 @@ package struct CycloneDXConverter {
         return CycloneDXPedigree(commits: cyclonedxCommits)
     }
 
-    package static func convertToCycloneDXComponent(from comp: SBOMComponent) async throws -> CycloneDXComponent {
+    internal static func convertToCycloneDXComponent(from comp: SBOMComponent) async throws -> CycloneDXComponent {
         // Recursively convert nested components
         // var nestedComponents: [CycloneDXComponent]? = nil
         // if let components = comp.components, !components.isEmpty {
@@ -109,14 +109,14 @@ package struct CycloneDXConverter {
         )
     }
 
-    package static func convertToCycloneDXDependency(from dep: SBOMRelationship) async throws -> CycloneDXDependency {
+    internal static func convertToCycloneDXDependency(from dep: SBOMRelationship) async throws -> CycloneDXDependency {
         CycloneDXDependency(
             ref: dep.parentID.value,
             dependsOn: dep.childrenID.map(\.value)
         )
     }
 
-    package static func convertToCycloneDXMetadata(from document: SBOMDocument) async throws -> CycloneDXMetadata {
+    internal static func convertToCycloneDXMetadata(from document: SBOMDocument) async throws -> CycloneDXMetadata {
         var tools: CycloneDXTools? = nil
         if let creators = document.metadata.creators, !creators.isEmpty {
             var toolsComponents: [CycloneDXComponent] = []
@@ -134,7 +134,7 @@ package struct CycloneDXConverter {
         )
     }
 
-    package static func convertToCycloneDXDocument(
+    internal static func convertToCycloneDXDocument(
         from document: SBOMDocument,
         spec: SBOMSpec
     ) async throws -> CycloneDXDocument {

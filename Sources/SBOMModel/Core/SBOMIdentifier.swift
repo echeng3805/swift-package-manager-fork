@@ -12,14 +12,14 @@
 
 import Foundation
 
-package struct SBOMIdentifier: Codable, Equatable, Hashable {
-    package let value: String
+internal struct SBOMIdentifier: Codable, Equatable, Hashable {
+    internal let value: String
 
-    package init(value: String) {
+    internal init(value: String) {
         self.value = value
     }
 
-    package static func generate() -> SBOMIdentifier {
+    internal static func generate() -> SBOMIdentifier {
         SBOMIdentifier(value: "urn:uuid:\(UUID().uuidString.lowercased())")
     }
 }

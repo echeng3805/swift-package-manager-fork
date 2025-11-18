@@ -13,7 +13,7 @@
 /// A protocol representing any object that can be part of an SPDX graph.
 /// All SPDX types (Agent, CreationInfo, Document, Package, Relationship, etc.)
 /// conform to this protocol to provide type safety when building SPDX graphs.
-package protocol SPDXObject: Codable, Equatable {}
+internal protocol SPDXObject: Codable, Equatable {}
 
 // Conformance for all SPDX types
 extension SPDXAgent: SPDXObject {}

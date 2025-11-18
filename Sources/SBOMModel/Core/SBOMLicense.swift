@@ -10,11 +10,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMLicense: Codable, Equatable {
-    package let name: String
-    package let url: String?
+internal struct SBOMLicense: Codable, Equatable {
+    internal let name: String
+    internal let url: String?
 
-    package init(
+    internal init(
         name: String,
         url: String?
     ) {

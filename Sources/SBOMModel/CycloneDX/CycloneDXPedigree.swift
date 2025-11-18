@@ -10,11 +10,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct CycloneDXAction: Codable, Equatable {
-    package let name: String?
-    package let email: String?
+internal struct CycloneDXAction: Codable, Equatable {
+    internal let name: String?
+    internal let email: String?
 
-    package init(
+    internal init(
         name: String? = nil,
         email: String? = nil
     ) {
@@ -23,13 +23,13 @@ package struct CycloneDXAction: Codable, Equatable {
     }
 }
 
-package struct CycloneDXCommit: Codable, Equatable {
-    package let uid: String?
-    package let url: String?
-    package let author: CycloneDXAction?
-    package let message: String?
+internal struct CycloneDXCommit: Codable, Equatable {
+    internal let uid: String?
+    internal let url: String?
+    internal let author: CycloneDXAction?
+    internal let message: String?
 
-    package init(
+    internal init(
         uid: String? = nil,
         url: String? = nil,
         author: CycloneDXAction? = nil,
@@ -42,10 +42,10 @@ package struct CycloneDXCommit: Codable, Equatable {
     }
 }
 
-package struct CycloneDXPedigree: Codable, Equatable {
-    package let commits: [CycloneDXCommit]?
+internal struct CycloneDXPedigree: Codable, Equatable {
+    internal let commits: [CycloneDXCommit]?
 
-    package init(commits: [CycloneDXCommit]? = nil) {
+    internal init(commits: [CycloneDXCommit]? = nil) {
         self.commits = commits
     }
 }

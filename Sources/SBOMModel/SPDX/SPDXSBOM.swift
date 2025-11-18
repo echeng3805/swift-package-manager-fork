@@ -10,14 +10,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SPDXSBOM: Codable, Equatable {
-    package let id: String
-    package let type: SPDXType
-    package let creationInfoID: String
-    package let profileConformance: [String]
-    package let rootElementIDs: [String]
+internal struct SPDXSBOM: Codable, Equatable {
+    internal let id: String
+    internal let type: SPDXType
+    internal let creationInfoID: String
+    internal let profileConformance: [String]
+    internal let rootElementIDs: [String]
 
-    package init(
+    internal init(
         id: String,
         type: SPDXType,
         creationInfoID: String,

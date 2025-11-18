@@ -10,25 +10,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SPDXPackage: Codable, Equatable {
-    package enum Purpose: String, Codable, Equatable {
+internal struct SPDXPackage: Codable, Equatable {
+    internal enum Purpose: String, Codable, Equatable {
         case application
         case framework
         case library
         case file
     }
 
-    package let id: String
-    package let type: SPDXType
-    package let purpose: Purpose
-    package let purl: String
-    package let name: String
-    package let version: String
-    package let creationInfoID: String
-    package let description: String?
-    package let summary: String?
+    internal let id: String
+    internal let type: SPDXType
+    internal let purpose: Purpose
+    internal let purl: String
+    internal let name: String
+    internal let version: String
+    internal let creationInfoID: String
+    internal let description: String?
+    internal let summary: String?
 
-    package init(
+    internal init(
         id: String,
         type: SPDXType,
         purpose: Purpose,
@@ -54,9 +54,9 @@ package struct SPDXPackage: Codable, Equatable {
         case id = "spdxId"
         case type
         case purpose = "software_primaryPurpose"
-        case purl = "packageUrl"
+        case purl = "externalUrl"
         case name
-        case version = "software_packageVersion"
+        case version = "software_internalVersion"
         case creationInfoID = "creationInfo"
         case description
         case summary

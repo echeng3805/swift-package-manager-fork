@@ -10,14 +10,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMCommit: Hashable, Codable, Equatable {
-    package let sha: String
-    package let repository: String
-    package let url: String?
-    package let authors: [SBOMPerson]?
-    package let message: String?
+internal struct SBOMCommit: Hashable, Codable, Equatable {
+    internal let sha: String
+    internal let repository: String
+    internal let url: String?
+    internal let authors: [SBOMPerson]?
+    internal let message: String?
 
-    package init(
+    internal init(
         sha: String,
         repository: String,
         url: String? = nil, // url to the commit

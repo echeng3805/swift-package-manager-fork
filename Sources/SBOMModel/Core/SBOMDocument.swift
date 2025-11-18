@@ -10,14 +10,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMDocument: Codable, Equatable {
-    package let id: SBOMIdentifier
-    package let metadata: SBOMMetadata
-    package let primaryComponent: SBOMComponent
-    package let dependencies: SBOMDependencies
-    package let licenses: [SBOMLicense]?
+internal struct SBOMDocument: Codable, Equatable {
+    internal let id: SBOMIdentifier
+    internal let metadata: SBOMMetadata
+    internal let primaryComponent: SBOMComponent
+    internal let dependencies: SBOMDependencies
+    internal let licenses: [SBOMLicense]?
 
-    package init(
+    internal init(
         id: SBOMIdentifier,
         metadata: SBOMMetadata,
         primaryComponent: SBOMComponent,

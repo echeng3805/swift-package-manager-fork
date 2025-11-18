@@ -10,30 +10,30 @@
 //
 //===----------------------------------------------------------------------===//
 
-package struct SBOMComponent: Codable, Equatable, Hashable {
-    package enum Category: String, Codable, Equatable {
+internal struct SBOMComponent: Codable, Equatable, Hashable {
+    internal enum Category: String, Codable, Equatable {
         case application
         case framework
         case library
         case file
     }
 
-    package enum Scope: String, Codable, Equatable {
+    internal enum Scope: String, Codable, Equatable {
         case runtime
         case optional
         case test
     }
     
-    package enum Entity: String, Codable, Equatable {
+    internal enum Entity: String, Codable, Equatable {
         case product = "swift/product"
         case package = "swift/package"
     }
 
-    package struct Version: Codable, Equatable, Hashable {
-        package let revision: String
-        package let commit: SBOMCommit?
+    internal struct Version: Codable, Equatable, Hashable {
+        internal let revision: String
+        internal let commit: SBOMCommit?
 
-        package init(
+        internal init(
             revision: String,
             commit: SBOMCommit? = nil
         ) {
@@ -42,18 +42,18 @@ package struct SBOMComponent: Codable, Equatable, Hashable {
         }
     }
 
-    package let category: Category
-    package let id: SBOMIdentifier
-    package let purl: String
-    package let name: String
-    package let version: Version
-    package let originator: SBOMOriginator
-    package let description: String?
-    package let scope: Scope?
-    package let components: [SBOMComponent]?
-    package let entity: Entity
+    internal let category: Category
+    internal let id: SBOMIdentifier
+    internal let purl: String
+    internal let name: String
+    internal let version: Version
+    internal let originator: SBOMOriginator
+    internal let description: String?
+    internal let scope: Scope?
+    internal let components: [SBOMComponent]?
+    internal let entity: Entity
 
-    package init(
+    internal init(
         category: Category,
         id: SBOMIdentifier,
         purl: String,
