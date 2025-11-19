@@ -63,13 +63,18 @@ extension SwiftPackageCommand {
                     .appending(component: "sboms")
             )
 
+            let sbomStartTime = ContinuousClock.Instant.now
             let creator = SBOMCreator(input: input)
             let sbomPaths = try await creator.createSBOMs()
+            let duration = ContinuousClock.Instant.now - sbomStartTime
+            let formattedDuration = duration.formatted(.units(allowed: [.seconds], fractionalPart: .show(length: 2, rounded: .up)))
             
+            print("Creating SBOMs...")
             for sbomPath in sbomPaths {
                 // TODO echeng3805 should this be using observabilityScope?
                 print("- created SBOM at \(sbomPath.pathString)")
             }
+            print("SBOMs created  (\(formattedDuration))")
         }
     }
 }
