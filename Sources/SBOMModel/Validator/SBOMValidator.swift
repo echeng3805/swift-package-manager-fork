@@ -694,16 +694,13 @@ struct SBOMValidator: SBOMValidatorProtocol {
     // MARK: - Utility Functions
 
     private func areEqual(_ lhs: Any, _ rhs: Any) -> Bool {
-        if let lhsString = lhs as? String, let rhsString = rhs as? String {
-            return lhsString == rhsString
+        // Use canonical representation for comprehensive equality checking
+        // This handles all types: strings, numbers, booleans, arrays, objects, and null
+        guard let lhsCanonical = try? canonicalRepresentation(of: lhs),
+              let rhsCanonical = try? canonicalRepresentation(of: rhs) else {
+            return false
         }
-        if let lhsNumber = lhs as? NSNumber, let rhsNumber = rhs as? NSNumber {
-            return lhsNumber == rhsNumber
-        }
-        if let lhsBool = lhs as? Bool, let rhsBool = rhs as? Bool {
-            return lhsBool == rhsBool
-        }
-        return false
+        return lhsCanonical == rhsCanonical
     }
 
     /// Extract a concise schema name for error reporting
