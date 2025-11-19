@@ -20,8 +20,6 @@ import Testing
 
 struct SBOMTestTraits {
     
-    
-    
     private func extractSBOM(from graph: ModulesGraph) async throws -> SBOMDependencies {
         // doesn't matter which store is used, so just the simple one
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
