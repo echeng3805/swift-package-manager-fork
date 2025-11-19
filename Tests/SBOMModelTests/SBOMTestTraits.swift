@@ -23,7 +23,7 @@ import Testing
 struct SBOMTestTraits {
     
     @Test("SBOM extraction with packages that have enabled traits")
-    func sbom_whenPackageHasEnabledTraits() async throws {
+    func extractSBOMwhenPackageHasEnabledTraits() async throws {
         // Create a simple package with enabled traits
         let rootIdentity = PackageIdentity.plain("RootPackage")
         
@@ -74,7 +74,7 @@ struct SBOMTestTraits {
     }
     
     @Test("SBOM extraction with no enabled traits")
-    func sbom_whenNoTraitsEnabled() async throws {
+    func extractSBOMwhenNoTraitsEnabled() async throws {
         let rootIdentity = PackageIdentity.plain("RootPackage")
         
         let rootModule = SBOMTestModulesGraph.createSwiftModule(name: "RootModule")
@@ -124,7 +124,7 @@ struct SBOMTestTraits {
     }
     
     @Test("SBOM scope extraction respects package traits")
-    func sbom_whenScopeExtractionWithTraits() throws {
+    func extractSBOMwhenScopeExtractionWithTraits() throws {
         let rootIdentity = PackageIdentity.plain("RootPackage")
         
         let rootModule = SBOMTestModulesGraph.createSwiftModule(name: "RootModule")
@@ -166,7 +166,7 @@ struct SBOMTestTraits {
     }
     
     @Test("SBOM extraction with package dependencies and traits")
-    func sbom_whenPackageDependenciesWithTraits() async throws {
+    func extractSBOMwhenPackageDependenciesWithTraits() async throws {
         let rootIdentity = PackageIdentity.plain("RootPackage")
         let depIdentity = PackageIdentity.plain("DependencyPackage")
         
