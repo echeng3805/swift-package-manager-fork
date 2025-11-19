@@ -18,244 +18,65 @@ import PackageModel
 @testable import SBOMModel
 import Testing
 
-/// Tests for SBOM extraction with trait-enabled dependencies
-/// Based on patterns from WorkspaceTests+Traits.swift and ModulesGraphTests+Traits.swift
 struct SBOMTestTraits {
     
-    @Test("SBOM extraction with packages that have enabled traits")
-    func extractSBOMwhenPackageHasEnabledTraits() async throws {
-        // Create a simple package with enabled traits
-        let rootIdentity = PackageIdentity.plain("RootPackage")
-        
-        let rootModule = SBOMTestModulesGraph.createSwiftModule(name: "RootModule")
-        let rootProduct = try Product(
-            package: rootIdentity,
-            name: "RootProduct",
-            type: .library(.automatic),
-            modules: [rootModule]
-        )
-        let rootPackage = SBOMTestModulesGraph.createPackage(
-            identity: rootIdentity,
-            displayName: "RootPackage",
-            path: "/RootPackage",
-            modules: [rootModule],
-            products: [rootProduct]
-        )
-        let resolvedRootModule = SBOMTestModulesGraph.createResolvedModule(
-            packageIdentity: rootIdentity,
-            module: rootModule
-        )
-        let resolvedRootProduct = SBOMTestModulesGraph.createResolvedProduct(
-            packageIdentity: rootIdentity,
-            product: rootProduct,
-            modules: IdentifiableSet([resolvedRootModule])
-        )
-        let resolvedRoot = SBOMTestModulesGraph.createResolvedPackage(
-            package: rootPackage,
-            modules: IdentifiableSet([resolvedRootModule]),
-            products: [resolvedRootProduct],
-            enabledTraits: ["Trait1", "Trait2"]
-        )
-        
-        let graph = try ModulesGraph(
-            rootPackages: [resolvedRoot],
-            packages: IdentifiableSet([resolvedRoot]),
-            dependencies: [],
-            binaryArtifacts: [:]
-        )
-        
+    
+    
+    private func extractSBOM(from graph: ModulesGraph) async throws -> SBOMDependencies {
+        // doesn't matter which store is used, so just the simple one
         let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
-        let dependencies = try await extractor.extractDependencies()
-        
-        // Verify package is included in SBOM
-        #expect(dependencies.components.count >= 1)
-        #expect(dependencies.components.contains(where: { $0.name == "RootPackage" }))
+        let extractor = SBOMExtractor(
+            modulesGraph: graph,
+            dependencyGraph: nil,
+            store: store
+        )
+        return try await extractor.extractDependencies()
     }
     
-    @Test("SBOM extraction with no enabled traits")
-    func extractSBOMwhenNoTraitsEnabled() async throws {
-        let rootIdentity = PackageIdentity.plain("RootPackage")
+    // MARK: - Tests
+    
+    @Test("SBOM extraction with PackageConditionalDeps fixture - default traits")
+    func extractSBOMwithConditionalDepsFixtureDefaultTraits() async throws {
+        let graph = try await SBOMTestModulesGraph.createConditionalModulesGraph(
+            traitConfiguration: .default
+        )
+        let dependencies = try await extractSBOM(from: graph)
         
-        let rootModule = SBOMTestModulesGraph.createSwiftModule(name: "RootModule")
-        let rootProduct = try Product(
-            package: rootIdentity,
-            name: "RootProduct",
-            type: .library(.automatic),
-            modules: [rootModule]
-        )
-        let rootPackage = SBOMTestModulesGraph.createPackage(
-            identity: rootIdentity,
-            displayName: "RootPackage",
-            path: "/RootPackage",
-            modules: [rootModule],
-            products: [rootProduct]
-        )
-        let resolvedRootModule = SBOMTestModulesGraph.createResolvedModule(
-            packageIdentity: rootIdentity,
-            module: rootModule
-        )
-        let resolvedRootProduct = SBOMTestModulesGraph.createResolvedProduct(
-            packageIdentity: rootIdentity,
-            product: rootProduct,
-            modules: IdentifiableSet([resolvedRootModule])
-        )
-        let resolvedRoot = SBOMTestModulesGraph.createResolvedPackage(
-            package: rootPackage,
-            modules: IdentifiableSet([resolvedRootModule]),
-            products: [resolvedRootProduct],
-            enabledTraits: nil
-        )
+        // Verify: Package1 should be included (default trait enables it)
+        #expect(dependencies.components.contains(where: { $0.name == "package1" }))
         
-        let graph = try ModulesGraph(
-            rootPackages: [resolvedRoot],
-            packages: IdentifiableSet([resolvedRoot]),
-            dependencies: [],
-            binaryArtifacts: [:]
-        )
+        // Verify: Package2 should NOT be included (trait not enabled by default)
+        #expect(!dependencies.components.contains(where: { $0.name == "package2" }))
         
-        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
-        let dependencies = try await extractor.extractDependencies()
-        
-        // Verify package is included in SBOM even without traits
-        #expect(dependencies.components.count >= 1)
-        #expect(dependencies.components.contains(where: { $0.name == "RootPackage" }))
+        // Verify: Root package is included
+        #expect(dependencies.components.contains(where: { $0.name == "packageconditionaldeps" }))
     }
     
-    @Test("SBOM scope extraction respects package traits")
-    func extractSBOMwhenScopeExtractionWithTraits() throws {
-        let rootIdentity = PackageIdentity.plain("RootPackage")
+    @Test("SBOM extraction with PackageConditionalDeps fixture - all traits enabled")
+    func extractSBOMwithConditionalDepsFixtureAllTraits() async throws {
+        let graph = try await SBOMTestModulesGraph.createConditionalModulesGraph(
+            traitConfiguration: .enabledTraits(["EnablePackage1Dep", "EnablePackage2Dep"])
+        )
+        let dependencies = try await extractSBOM(from: graph)
         
-        let rootModule = SBOMTestModulesGraph.createSwiftModule(name: "RootModule")
-        let rootProduct = try Product(
-            package: rootIdentity,
-            name: "RootProduct",
-            type: .library(.automatic),
-            modules: [rootModule]
-        )
-        let rootPackage = SBOMTestModulesGraph.createPackage(
-            identity: rootIdentity,
-            displayName: "RootPackage",
-            path: "/RootPackage",
-            modules: [rootModule],
-            products: [rootProduct]
-        )
-        let resolvedRootModule = SBOMTestModulesGraph.createResolvedModule(
-            packageIdentity: rootIdentity,
-            module: rootModule
-        )
-        let resolvedRootProduct = SBOMTestModulesGraph.createResolvedProduct(
-            packageIdentity: rootIdentity,
-            product: rootProduct,
-            modules: IdentifiableSet([resolvedRootModule])
-        )
-        let resolvedRoot = SBOMTestModulesGraph.createResolvedPackage(
-            package: rootPackage,
-            modules: IdentifiableSet([resolvedRootModule]),
-            products: [resolvedRootProduct],
-            enabledTraits: ["RuntimeTrait"]
-        )
-        
-        // Test scope extraction - traits should not affect scope determination
-        let scope = try SBOMExtractor.extractScope(from: resolvedRoot)
-        #expect(scope == SBOMComponent.Scope.runtime)
-        
-        let productScope = try SBOMExtractor.extractScope(from: resolvedRootProduct)
-        #expect(productScope == SBOMComponent.Scope.runtime)
+        // Verify: Both packages should be included (both traits enabled)
+        #expect(dependencies.components.contains(where: { $0.name == "package1" }))
+        #expect(dependencies.components.contains(where: { $0.name == "package2" }))
+        #expect(dependencies.components.contains(where: { $0.name == "packageconditionaldeps" }))
     }
     
-    @Test("SBOM extraction with package dependencies and traits")
-    func extractSBOMwhenPackageDependenciesWithTraits() async throws {
-        let rootIdentity = PackageIdentity.plain("RootPackage")
-        let depIdentity = PackageIdentity.plain("DependencyPackage")
+    @Test("SBOM extraction with PackageConditionalDeps fixture - no traits enabled")
+    func extractSBOMwithConditionalDepsFixtureNoTraits() async throws {
+        let graph = try await SBOMTestModulesGraph.createConditionalModulesGraph(
+            traitConfiguration: .disableAllTraits
+        )
+        let dependencies = try await extractSBOM(from: graph)
         
-        // Create dependency package with traits
-        let depModule = SBOMTestModulesGraph.createSwiftModule(name: "DepModule")
-        let depProduct = try Product(
-            package: depIdentity,
-            name: "DepProduct",
-            type: .library(.automatic),
-            modules: [depModule]
-        )
-        let depPackage = SBOMTestModulesGraph.createPackage(
-            identity: depIdentity,
-            displayName: "DependencyPackage",
-            path: "/DependencyPackage",
-            modules: [depModule],
-            products: [depProduct]
-        )
-        let resolvedDepModule = SBOMTestModulesGraph.createResolvedModule(
-            packageIdentity: depIdentity,
-            module: depModule
-        )
-        let resolvedDepProduct = SBOMTestModulesGraph.createResolvedProduct(
-            packageIdentity: depIdentity,
-            product: depProduct,
-            modules: IdentifiableSet([resolvedDepModule])
-        )
-        let resolvedDep = SBOMTestModulesGraph.createResolvedPackage(
-            package: depPackage,
-            modules: IdentifiableSet([resolvedDepModule]),
-            products: [resolvedDepProduct],
-            enabledTraits: ["DepTrait1"]
-        )
+        // Verify: Neither dependency package should be included (no traits enabled)
+        #expect(!dependencies.components.contains(where: { $0.name == "package1" }))
+        #expect(!dependencies.components.contains(where: { $0.name == "package2" }))
         
-        // Create root package with dependency and traits
-        let rootModule = SBOMTestModulesGraph.createSwiftModule(
-            name: "RootModule",
-            dependencies: [
-                .product(Module.ProductReference(name: "DepProduct", package: depIdentity.description), conditions: [])
-            ]
-        )
-        let rootProduct = try Product(
-            package: rootIdentity,
-            name: "RootProduct",
-            type: .library(.automatic),
-            modules: [rootModule]
-        )
-        let rootPackage = SBOMTestModulesGraph.createPackage(
-            identity: rootIdentity,
-            displayName: "RootPackage",
-            path: "/RootPackage",
-            modules: [rootModule],
-            products: [rootProduct]
-        )
-        let resolvedRootModule = SBOMTestModulesGraph.createResolvedModule(
-            packageIdentity: rootIdentity,
-            module: rootModule,
-            dependencies: [.product(resolvedDepProduct, conditions: [])]
-        )
-        let resolvedRootProduct = SBOMTestModulesGraph.createResolvedProduct(
-            packageIdentity: rootIdentity,
-            product: rootProduct,
-            modules: IdentifiableSet([resolvedRootModule])
-        )
-        let resolvedRoot = SBOMTestModulesGraph.createResolvedPackage(
-            package: rootPackage,
-            modules: IdentifiableSet([resolvedRootModule]),
-            products: [resolvedRootProduct],
-            dependencies: [depIdentity],
-            enabledTraits: ["RootTrait1"]
-        )
-        
-        let graph = try ModulesGraph(
-            rootPackages: [resolvedRoot],
-            packages: IdentifiableSet([resolvedRoot, resolvedDep]),
-            dependencies: [],
-            binaryArtifacts: [:]
-        )
-        
-        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
-        let dependencies = try await extractor.extractDependencies()
-        
-        // Verify both packages are included
-        #expect(dependencies.components.count >= 2)
-        #expect(dependencies.components.contains(where: { $0.name == "RootPackage" }))
-        #expect(dependencies.components.contains(where: { $0.name == "DependencyPackage" }))
-        
-        // Verify dependency relationship exists
-        #expect(dependencies.relationships?.count ?? 0 >= 1)
+        // Verify: Root package is still included
+        #expect(dependencies.components.contains(where: { $0.name == "packageconditionaldeps" }))
     }
 }

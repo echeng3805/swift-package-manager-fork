@@ -20,11 +20,11 @@ import PackageModel
 import struct TSCUtility.Version
 
 enum SBOMTestStore {
-    package static let swiftPMRevision = "e535ac05e3ec765611044bdafa9703db3f67ac07"
-    package static let swiftPMURL = "https://github.com/swiftlang/swift-package-manager.git"
+    static let swiftPMRevision = "e535ac05e3ec765611044bdafa9703db3f67ac07"
+    static let swiftPMURL = "https://github.com/swiftlang/swift-package-manager.git"
 
-    package static let swiftlyRevision = "985e34f447d55854f2212f5112ef2d344a7e2072"
-    package static let swiftlyURL = "https://github.com/swiftlang/swiftly.git"
+    static let swiftlyRevision = "985e34f447d55854f2212f5112ef2d344a7e2072"
+    static let swiftlyURL = "https://github.com/swiftlang/swiftly.git"
 
     private static let spmDependencies = [
         ("swift-system", "https://github.com/apple/swift-system.git", "1.3.2"),
