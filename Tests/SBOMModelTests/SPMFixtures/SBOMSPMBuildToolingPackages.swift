@@ -233,7 +233,7 @@ extension SBOMTestModulesGraph {
                 resolvedLibllbuildProduct, resolvedLLBuildProduct, resolvedLLBuildAnalysisProduct,
                 resolvedLLBuildSwiftProduct, resolvedLLBuildSwiftDynamicProduct,
             ],
-            dependencies: [PackageIdentity.plain("swift-toolchain-sqlite")]
+            dependencies: [PackageIdentity.plain("swift-toolchain-sqlite")],
         )
 
         // Package reference
@@ -625,6 +625,7 @@ extension SBOMTestModulesGraph {
         )
 
         // Resolved package
+        // swift-driver
         let resolvedPackage = self.createResolvedPackage(
             package: package,
             modules: IdentifiableSet([
@@ -641,7 +642,8 @@ extension SBOMTestModulesGraph {
                 PackageIdentity.plain("swift-argument-parser"),
                 PackageIdentity.plain("swift-llbuild"),
                 PackageIdentity.plain("swift-tools-support-core"),
-            ]
+            ],
+            // enabledTraits: ["SPMTrait1", "SPMTrait2"]
         )
 
         // Package reference
