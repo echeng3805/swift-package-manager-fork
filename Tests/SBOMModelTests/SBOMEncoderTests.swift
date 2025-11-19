@@ -54,9 +54,10 @@ struct SBOMEncoderTests {
         let sbom = try await extractor.extractSBOM()
         let encoder = SBOMEncoder(sbom: sbom)
 
-        try await encoder.writeSBOMs(specs: [.cyclonedx], outputDir: outputDir)
+        let outputs = try await encoder.writeSBOMs(specs: [.cyclonedx], outputDir: outputDir)
 
         #expect(localFileSystem.exists(outputDir), "Output directory should be created")
+        #expect(!outputs.isEmpty, "Output paths should not be empty")
     }
 
     @Test("writeSBOMs generates files for multiple specs")
@@ -70,7 +71,7 @@ struct SBOMEncoderTests {
         let sbom = try await extractor.extractSBOM()
         let encoder = SBOMEncoder(sbom: sbom)
 
-        try await encoder.writeSBOMs(specs: [.cyclonedx, .spdx], outputDir: outputDir)
+        let outputs = try await encoder.writeSBOMs(specs: [.cyclonedx, .spdx], outputDir: outputDir)
 
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 2, "Should generate two files for two specs")
@@ -81,6 +82,7 @@ struct SBOMEncoderTests {
 
         #expect(files.contains(cycloneDXFile), "Should generate CycloneDX file")
         #expect(files.contains(spdxFile), "Should generate SPDX file")
+        #expect(!outputs.isEmpty, "Output paths should not be empty")
 
         try self.verifyJSONFile(at: outputDir.appending(component: cycloneDXFile))
         try self.verifyJSONFile(at: outputDir.appending(component: spdxFile))
@@ -97,10 +99,11 @@ struct SBOMEncoderTests {
         let sbom = try await extractor.extractSBOM()
         let encoder = SBOMEncoder(sbom: sbom)
 
-        try await encoder.writeSBOMs(specs: [.cyclonedx, .cyclonedx1], outputDir: outputDir)
+        let outputs = try await encoder.writeSBOMs(specs: [.cyclonedx, .cyclonedx1], outputDir: outputDir)
 
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 1, "Duplicate specs should result in single file")
+        #expect(!outputs.isEmpty, "Output paths should not be empty")
     }
 
     @Test("writeSBOMs tests cleans up properly on success")
@@ -114,13 +117,14 @@ struct SBOMEncoderTests {
         let sbom = try await extractor.extractSBOM()
         let encoder = SBOMEncoder(sbom: sbom)
 
-        try await encoder.writeSBOMs(specs: [.cyclonedx], outputDir: outputDir)
+        let outputs = try await encoder.writeSBOMs(specs: [.cyclonedx], outputDir: outputDir)
 
         #expect(localFileSystem.exists(outputDir), "Directory should exist after write")
 
         // Cleanup
         try self.cleanupTempDir(outputDir)
         #expect(!localFileSystem.exists(outputDir), "Directory should be removed after cleanup")
+        #expect(!outputs.isEmpty, "Output paths should not be empty")
     }
 
     @Test("writeSBOMs generates correct filename format")
@@ -134,7 +138,7 @@ struct SBOMEncoderTests {
         let sbom = try await extractor.extractSBOM()
         let encoder = SBOMEncoder(sbom: sbom)
 
-        try await encoder.writeSBOMs(specs: [.cyclonedx], outputDir: outputDir)
+        let outputs = try await encoder.writeSBOMs(specs: [.cyclonedx], outputDir: outputDir)
 
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 1)
@@ -146,22 +150,7 @@ struct SBOMEncoderTests {
         #expect(components[0] == "cyclonedx1", "First component should be spec type")
         #expect(components[1] == "1.7", "Second component should be spec version")
         #expect(components[2] == "swiftly", "Third component should be package name")
-    }
-
-    @Test("encodeSBOM with nil outputDir does not write file")
-    func encodeSBOMWithNilOutputDirDoesNotWriteFile() async throws {
-        let graph = try SBOMTestModulesGraph.createSimpleModulesGraph()
-        let store = try SBOMTestStore.createSimpleResolvedPackagesStore()
-        let extractor = SBOMExtractor(modulesGraph: graph, dependencyGraph: nil, store: store)
-        let sbom = try await extractor.extractSBOM()
-        let encoder = SBOMEncoder(sbom: sbom)
-        let spec = SBOMSpec(type: .cyclonedx1, version: "1.7")
-
-        // Should not throw and should not create any files
-        try await encoder.encodeSBOM(spec: spec, outputDir: nil)
-
-        // No files should be created in current directory
-        // This is verified by not passing an outputDir
+        #expect(!outputs.isEmpty, "Output paths should not be empty")
     }
 
     @Test("encodeSBOM with outputDir writes file")
@@ -176,7 +165,7 @@ struct SBOMEncoderTests {
         let encoder = SBOMEncoder(sbom: sbom)
         let spec = SBOMSpec(type: .cyclonedx1, version: "1.7")
 
-        try await encoder.encodeSBOM(spec: spec, outputDir: outputDir)
+        let _ = try await encoder.encodeSBOM(spec: spec, outputDir: outputDir)
 
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 1, "Should write exactly one file")
@@ -193,7 +182,7 @@ struct SBOMEncoderTests {
         let sbom = try await extractor.extractSBOM()
         let encoder = SBOMEncoder(sbom: sbom)
 
-        try await encoder.writeSBOMs(specs: [.cyclonedx, .spdx], outputDir: outputDir)
+        let _ = try await encoder.writeSBOMs(specs: [.cyclonedx, .spdx], outputDir: outputDir)
 
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 2, "Should generate both CycloneDX and SPDX files")
@@ -216,7 +205,7 @@ struct SBOMEncoderTests {
         let sbom = try await extractor.extractSBOM()
         let encoder = SBOMEncoder(sbom: sbom)
 
-        try await encoder.writeSBOMs(specs: [.cyclonedx, .spdx], outputDir: outputDir)
+        let _ = try await encoder.writeSBOMs(specs: [.cyclonedx, .spdx], outputDir: outputDir)
 
         let files = try localFileSystem.getDirectoryContents(outputDir)
         #expect(files.count == 2, "Should generate both CycloneDX and SPDX files")

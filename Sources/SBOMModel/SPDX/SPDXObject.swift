@@ -23,3 +23,4 @@ extension SPDXPackage: SPDXObject {}
 extension SPDXRelationship: SPDXObject {}
 extension SPDXExternalIdentifier: SPDXObject {}
 extension SPDXSBOM: SPDXObject {}
+extension SPDXLicenseExpression: SPDXObject {}

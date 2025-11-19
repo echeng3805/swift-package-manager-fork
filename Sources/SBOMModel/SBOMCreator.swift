@@ -10,6 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Basics
+
 package struct SBOMCreator {
     package let input: SBOMInput
     
@@ -17,7 +19,7 @@ package struct SBOMCreator {
         self.input = input
     }
 
-    package func createSBOMs() async throws {
+    package func createSBOMs() async throws -> [AbsolutePath] {
         let extractor = SBOMExtractor(
             modulesGraph: input.modulesGraph,
             dependencyGraph: input.dependencyGraph,
@@ -30,10 +32,16 @@ package struct SBOMCreator {
         )
         
         let encoder = SBOMEncoder(sbom: sbom)
-        try await encoder.writeSBOMs(
+        let outputPaths = try await encoder.writeSBOMs(
             specs: input.specs,
             outputDir: input.dir,
             filter: input.filter
         )
+
+        guard !outputPaths.isEmpty else {
+            throw SBOMError.failedToWriteSBOM
+        }
+
+        return outputPaths
     }
 }

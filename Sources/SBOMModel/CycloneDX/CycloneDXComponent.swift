@@ -33,6 +33,7 @@ internal struct CycloneDXComponent: Codable, Equatable {
     internal let components: [CycloneDXComponent]?
     internal let pedigree: CycloneDXPedigree?
     internal let properties: [CycloneDXProperty]?
+    internal let licenses: [CycloneDXLicense]?
 
     internal init(
         type: Category,
@@ -43,7 +44,8 @@ internal struct CycloneDXComponent: Codable, Equatable {
         purl: String,
         components: [CycloneDXComponent]? = nil,
         pedigree: CycloneDXPedigree? = nil,
-        properties: [CycloneDXProperty]? = nil
+        properties: [CycloneDXProperty]? = nil,
+        licenses: [CycloneDXLicense]? = nil
     ) {
         self.type = type
         self.bomRef = bomRef
@@ -54,6 +56,7 @@ internal struct CycloneDXComponent: Codable, Equatable {
         self.components = components
         self.pedigree = pedigree
         self.properties = properties
+        self.licenses = licenses
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -66,5 +69,6 @@ internal struct CycloneDXComponent: Codable, Equatable {
         case components
         case pedigree
         case properties
+        case licenses
     }
 }

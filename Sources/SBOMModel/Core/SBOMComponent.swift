@@ -25,8 +25,8 @@ internal struct SBOMComponent: Codable, Equatable, Hashable {
     }
     
     internal enum Entity: String, Codable, Equatable {
-        case product = "swift/product"
-        case package = "swift/package"
+        case product = "swift-product"
+        case package = "swift-package"
     }
 
     internal struct Version: Codable, Equatable, Hashable {

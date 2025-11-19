@@ -43,10 +43,12 @@ struct SPDXConverterTests {
 
     @Test("convertToSPDXAgent with single creator")
     func convertToSPDXAgentWithSingleCreator() async throws {
+        let license = SBOMLicense(name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0")
         let creator = SBOMTool(
             id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
-            version: "3.0.1"
+            version: "3.0.1",
+            licenses: [license]
         )
         let metadata = SBOMMetadata(
             timestamp: "2025-01-01T00:00:00Z",
@@ -54,9 +56,24 @@ struct SPDXConverterTests {
         )
 
         let result = await SPDXConverter.convertToSPDXAgent(from: metadata)
-        #expect(result.count == 2)
+        #expect(result.count == 4) // CreationInfo + Agent + LicenseExpression + Relationship
 
-        let creationInfo = result[0] as? SPDXCreationInfo
+        let relationship = result[0] as? SPDXRelationship
+        let relationshipUnwrapped = try #require(relationship)
+        #expect(relationshipUnwrapped.type == .Relationship)
+        #expect(relationshipUnwrapped.category == .hasDeclaredLicense)
+        #expect(relationshipUnwrapped.parentID == "urn:spdx:tool-1")
+        #expect(relationshipUnwrapped.childrenID.count == 1)
+        #expect(relationshipUnwrapped.childrenID[0] == "urn:spdx:Apache-2.0")
+
+        let licenseExpression = result[1] as? SPDXLicenseExpression
+        let licenseExpressionUnwrapped = try #require(licenseExpression)
+        #expect(licenseExpressionUnwrapped.id == "urn:spdx:Apache-2.0")
+        #expect(licenseExpressionUnwrapped.type == .LicenseExpression)
+        #expect(licenseExpressionUnwrapped.expression == "Apache-2.0")
+        #expect(licenseExpressionUnwrapped.creationInfoID == "urn:spdx:tool-1:creationInfo")
+
+        let creationInfo = result[2] as? SPDXCreationInfo
         let creationInfoUnwrapped = try #require(creationInfo)
         #expect(creationInfoUnwrapped.id == "urn:spdx:tool-1:creationInfo")
         #expect(creationInfoUnwrapped.type == .CreationInfo)
@@ -64,7 +81,7 @@ struct SPDXConverterTests {
         #expect(creationInfoUnwrapped.createdBy == ["urn:spdx:tool-1"])
         #expect(creationInfoUnwrapped.created == "1970-01-01T00:00:00Z")
 
-        let agent = result[1] as? SPDXAgent
+        let agent = result[3] as? SPDXAgent
         let agentUnwrapped = try #require(agent)
         #expect(agentUnwrapped.id == "urn:spdx:tool-1")
         #expect(agentUnwrapped.type == .Agent)
@@ -74,15 +91,19 @@ struct SPDXConverterTests {
 
     @Test("convertToSPDXAgent with multiple creators")
     func convertToSPDXAgentWithMultipleCreators() async throws {
+        let license1 = SBOMLicense(name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0")
+        let license2 = SBOMLicense(name: "MIT", url: nil)
         let creator1 = SBOMTool(
             id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
-            version: "3.0.1"
+            version: "3.0.1",
+            licenses: [license1]
         )
         let creator2 = SBOMTool(
             id: SBOMIdentifier(value: "tool-2"),
             name: "CustomTool",
-            version: "1.0.0"
+            version: "1.0.0",
+            licenses: [license2]
         )
         let metadata = SBOMMetadata(
             timestamp: "2025-01-01T00:00:00Z",
@@ -90,24 +111,50 @@ struct SPDXConverterTests {
         )
 
         let result = await SPDXConverter.convertToSPDXAgent(from: metadata)
-        #expect(result.count == 4) // 2 CreationInfos and 2 Agents
+        #expect(result.count == 8) // 2 * (Relationship + LicenseExpression + CreationInfo + Agent)
 
-        let creationInfo1 = result[0] as? SPDXCreationInfo
+        // First creator's license relationship
+        let relationship1 = result[0] as? SPDXRelationship
+        let relationship1Unwrapped = try #require(relationship1)
+        #expect(relationship1Unwrapped.category == .hasDeclaredLicense)
+        #expect(relationship1Unwrapped.parentID == "urn:spdx:tool-1")
+        #expect(relationship1Unwrapped.childrenID == ["urn:spdx:Apache-2.0"])
+
+        // First creator's license expression
+        let licenseExpression1 = result[1] as? SPDXLicenseExpression
+        let licenseExpression1Unwrapped = try #require(licenseExpression1)
+        #expect(licenseExpression1Unwrapped.id == "urn:spdx:Apache-2.0")
+        #expect(licenseExpression1Unwrapped.expression == "Apache-2.0")
+
+        let creationInfo1 = result[2] as? SPDXCreationInfo
         let creationInfo1Unwrapped = try #require(creationInfo1)
         #expect(creationInfo1Unwrapped.id == "urn:spdx:tool-1:creationInfo")
         #expect(creationInfo1Unwrapped.createdBy == ["urn:spdx:tool-1"])
 
-        let agent1 = result[1] as? SPDXAgent
+        let agent1 = result[3] as? SPDXAgent
         let agent1Unwrapped = try #require(agent1)
         #expect(agent1Unwrapped.id == "urn:spdx:tool-1")
         #expect(agent1Unwrapped.name == "SwiftPM")
 
-        let creationInfo2 = result[2] as? SPDXCreationInfo
+        // Second creator's license relationship
+        let relationship2 = result[4] as? SPDXRelationship
+        let relationship2Unwrapped = try #require(relationship2)
+        #expect(relationship2Unwrapped.category == .hasDeclaredLicense)
+        #expect(relationship2Unwrapped.parentID == "urn:spdx:tool-2")
+        #expect(relationship2Unwrapped.childrenID == ["urn:spdx:MIT"])
+
+        // Second creator's license expression
+        let licenseExpression2 = result[5] as? SPDXLicenseExpression
+        let licenseExpression2Unwrapped = try #require(licenseExpression2)
+        #expect(licenseExpression2Unwrapped.id == "urn:spdx:MIT")
+        #expect(licenseExpression2Unwrapped.expression == "MIT")
+
+        let creationInfo2 = result[6] as? SPDXCreationInfo
         let creationInfo2Unwrapped = try #require(creationInfo2)
         #expect(creationInfo2Unwrapped.id == "urn:spdx:tool-2:creationInfo")
         #expect(creationInfo2Unwrapped.createdBy == ["urn:spdx:tool-2"])
 
-        let agent2 = result[3] as? SPDXAgent
+        let agent2 = result[7] as? SPDXAgent
         let agent2Unwrapped = try #require(agent2)
         #expect(agent2Unwrapped.id == "urn:spdx:tool-2")
         #expect(agent2Unwrapped.name == "CustomTool")

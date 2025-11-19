@@ -10,6 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Basics
 import Foundation
 
 // MARK: - General SBOM Errors
@@ -18,11 +19,14 @@ import Foundation
 internal enum SBOMError: Error, LocalizedError, CustomStringConvertible {
     /// Expected a specific SBOM spec type but got another
     case unexpectedSpecType(expected: String, actual: Spec)
+    case failedToWriteSBOM
 
     internal var errorDescription: String? {
         switch self {
         case .unexpectedSpecType(let expected, let actual):
             "Expected \(expected) spec but got \(actual)"
+        case .failedToWriteSBOM:
+            "Failed to write SBOM"
         }
     }
 

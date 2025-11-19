@@ -10,45 +10,28 @@
 //
 //===----------------------------------------------------------------------===//
 
-internal struct SPDXRelationship: Codable, Equatable {
-    internal enum Category: String, Codable, Equatable {
-        case describes
-        case dependsOn
-        case hasOptionalDependency
-        case hasTest
-        case generates
-        case hasDeclaredLicense
-    }
-
+internal struct SPDXLicenseExpression: Codable, Equatable {
     internal let id: String
     internal let type: SPDXType
-    internal let category: Category
+    internal let expression: String
     internal let creationInfoID: String
-    internal let parentID: String
-    internal let childrenID: [String]
 
     internal init(
         id: String,
         type: SPDXType,
-        category: Category,
+        expression: String,
         creationInfoID: String,
-        parentID: String,
-        childrenID: [String]
     ) {
         self.id = id
         self.type = type
-        self.category = category
+        self.expression = expression
         self.creationInfoID = creationInfoID
-        self.parentID = parentID
-        self.childrenID = childrenID
     }
 
     private enum CodingKeys: String, CodingKey {
         case id = "spdxId"
         case type
-        case category = "relationshipType"
+        case expression = "simplelicensing_licenseExpression"
         case creationInfoID = "creationInfo"
-        case parentID = "from"
-        case childrenID = "to"
     }
 }

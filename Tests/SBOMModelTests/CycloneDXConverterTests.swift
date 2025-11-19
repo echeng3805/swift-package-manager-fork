@@ -580,15 +580,19 @@ struct CycloneDXConverterTests {
 
     @Test("convertToCycloneDXMetadata with creators/tools")
     func convertToCycloneDXMetadataWithCreators() async throws {
+        let license1 = SBOMLicense(name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0")
+        let license2 = SBOMLicense(name: "MIT", url: nil)
         let tool1 = SBOMTool(
             id: SBOMIdentifier(value: "tool-1"),
             name: "SwiftPM",
-            version: "6.0.0"
+            version: "6.0.0",
+            licenses: [license1]
         )
         let tool2 = SBOMTool(
             id: SBOMIdentifier(value: "tool-2"),
             name: "Swift",
-            version: "5.9.0"
+            version: "5.9.0",
+            licenses: [license2]
         )
         let metadata = SBOMMetadata(
             timestamp: "2025-01-01T00:00:00Z",
@@ -627,6 +631,11 @@ struct CycloneDXConverterTests {
         #expect(cdxTool1.type == .application)
         #expect(cdxTool1.scope == .excluded)
         #expect(cdxTool1.purl == "pkg:swift/github.com/swiftlang/SwiftPM@6.0.0")
+        
+        let cdxTool1Licenses = try #require(cdxTool1.licenses)
+        #expect(cdxTool1Licenses.count == 1)
+        #expect(cdxTool1Licenses[0].license.id == "Apache-2.0")
+        #expect(cdxTool1Licenses[0].license.url == "https://www.apache.org/licenses/LICENSE-2.0")
 
         let cdxTool2 = tools.components[1]
         #expect(cdxTool2.bomRef == "tool-2")
@@ -635,6 +644,11 @@ struct CycloneDXConverterTests {
         #expect(cdxTool2.type == .application)
         #expect(cdxTool2.scope == .excluded)
         #expect(cdxTool2.purl == "pkg:swift/github.com/swiftlang/Swift@5.9.0")
+        
+        let cdxTool2Licenses = try #require(cdxTool2.licenses)
+        #expect(cdxTool2Licenses.count == 1)
+        #expect(cdxTool2Licenses[0].license.id == "MIT")
+        #expect(cdxTool2Licenses[0].license.url == nil)
     }
 
     @Test("convertToCycloneDXMetadata with empty creators")

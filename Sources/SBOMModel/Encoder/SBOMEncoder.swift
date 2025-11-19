@@ -21,21 +21,25 @@ internal struct SBOMEncoder {
         self.sbom = sbom
     }
 
-    internal func writeSBOMs(specs: [Spec], outputDir: AbsolutePath, filter: Filter = .all) async throws {
-        try localFileSystem.createDirectory(outputDir, recursive: true)
-        let specs = await Self.getSpecs(from: specs)
-        for spec in specs {
-            try await self.encodeSBOM(spec: spec, outputDir: outputDir, filter: filter)
+    internal func writeSBOMs(specs: [Spec], outputDir: AbsolutePath, filter: Filter = .all) async throws -> [AbsolutePath] {
+        if !localFileSystem.exists(outputDir) {
+            try localFileSystem.createDirectory(outputDir, recursive: true)
         }
+        let specs = await Self.getSpecs(from: specs)
+        var outputPaths: [AbsolutePath] = []
+        for spec in specs {
+            let outputPath = try await self.encodeSBOM(spec: spec, outputDir: outputDir, filter: filter)
+            outputPaths.append(outputPath)
+        }
+        return outputPaths
     }
 
-    internal func encodeSBOM(spec: SBOMSpec, outputDir: AbsolutePath?, filter: Filter = .all) async throws {
+    internal func encodeSBOM(spec: SBOMSpec, outputDir: AbsolutePath, filter: Filter = .all) async throws -> AbsolutePath {
+        let filename = "\(spec.type)-\(spec.version)-\(self.sbom.primaryComponent.name)-\(self.sbom.primaryComponent.version.revision)-\(filter).json"
+        let outputPath = outputDir.appending(component: filename)
         let encoded = try await encodeSBOMData(spec: spec)
-        if let outputDir {
-            let filename = "\(spec.type)-\(spec.version)-\(self.sbom.primaryComponent.name)-\(self.sbom.primaryComponent.version.revision)-\(filter).json"
-            let outputPath = outputDir.appending(component: filename)
-            try localFileSystem.writeFileContents(outputPath, data: encoded)
-        }
+        try localFileSystem.writeFileContents(outputPath, data: encoded)
+        return outputPath
     }
 
     internal func encodeSBOMData(spec: SBOMSpec) async throws -> Data {

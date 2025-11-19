@@ -41,6 +41,15 @@ internal struct CycloneDXConverter {
         }
     }
 
+    internal static func convertToCycloneDXLicense(from license: SBOMLicense) -> CycloneDXLicense {
+        return CycloneDXLicense(
+            license: CycloneDXLicenseInfo(
+                id: license.name,
+                url: license.url
+            ),
+        )
+    }
+
     internal static func convertToCycloneDXSchema(from spec: SBOMSpec) async throws -> String {
         guard spec.type.supportsCycloneDX else {
             throw SBOMError.unexpectedSpecType(expected: "cyclonedx", actual: spec.type)
@@ -73,17 +82,6 @@ internal struct CycloneDXConverter {
     }
 
     internal static func convertToCycloneDXComponent(from comp: SBOMComponent) async throws -> CycloneDXComponent {
-        // Recursively convert nested components
-        // var nestedComponents: [CycloneDXComponent]? = nil
-        // if let components = comp.components, !components.isEmpty {
-        //     var convertedComponents: [CycloneDXComponent] = []
-        //     for nestedComp in components {
-        //         let cyclonedxComp = try await convertToCycloneDXComponent(from: nestedComp)
-        //         convertedComponents.append(cyclonedxComp)
-        //     }
-        //     nestedComponents = convertedComponents
-        // }
-
         try await CycloneDXComponent(
             type: self.convertToCycloneDXCategory(from: comp.category),
             bomRef: comp.id.value,
@@ -91,14 +89,17 @@ internal struct CycloneDXConverter {
             version: comp.version.revision,
             scope: self.convertToCycloneDXScope(from: comp.scope ?? .runtime),
             purl: comp.purl,
-            // components: nestedComponents,
             pedigree: self.convertToCycloneDXPedigree(from: comp.originator),
             properties: [CycloneDXProperty(name: "swift-entity", value: comp.entity.rawValue)]
         )
     }
 
     private static func convertToCycloneDXComponent(from tool: SBOMTool) async throws -> CycloneDXComponent {
-        CycloneDXComponent(
+        let licenses = tool.licenses?.map { license in
+            convertToCycloneDXLicense(from: license)
+        }
+        
+        return CycloneDXComponent(
             type: .application,
             bomRef: tool.id.value,
             name: tool.name,
@@ -106,6 +107,7 @@ internal struct CycloneDXConverter {
             scope: .excluded,
             purl: "pkg:swift/github.com/swiftlang/\(tool.name)@\(tool.version)",
             pedigree: nil,
+            licenses: licenses
         )
     }
 

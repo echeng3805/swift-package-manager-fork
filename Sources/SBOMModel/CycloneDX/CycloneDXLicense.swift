@@ -10,13 +10,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-internal enum SPDXType: String, Codable, Equatable {
-    case Agent
-    case CreationInfo
-    case SpdxDocument
-    case SoftwareSBOM = "software_Sbom"
-    case SoftwarePackage = "software_Package"
-    case Relationship
-    case ExternalIdentifier
-    case LicenseExpression = "simplelicensing_LicenseExpression"
+internal struct CycloneDXLicenseInfo: Codable, Equatable {
+    internal let id: String
+    internal let url: String?
+
+    internal init(
+        id: String,
+        url: String?
+    ) {
+        self.id = id
+        self.url = url
+    }
+}
+
+internal struct CycloneDXLicense: Codable, Equatable {
+    internal let license: CycloneDXLicenseInfo
+
+    internal init(
+        license: CycloneDXLicenseInfo,
+    ) {
+        self.license = license
+    }
 }

@@ -12,6 +12,9 @@
 
 import Foundation
 
+
+// TODO: echeng3805
+// use a library?
 // MARK: - Base Validator
 
 struct SBOMValidator: SBOMValidatorProtocol {
@@ -29,22 +32,22 @@ struct SBOMValidator: SBOMValidatorProtocol {
             switch self {
             case .dateTime:
                 if ISO8601DateFormatter().date(from: value) == nil {
-                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid date-time format")
+                    throw SBOMValidatorError.invalidValue(path: path, message: "invalid date-time format")
                 }
             case .date:
                 let formatter = DateFormatter()
                 formatter.dateFormat = "yyyy-MM-dd"
                 if formatter.date(from: value) == nil {
-                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid date format")
+                    throw SBOMValidatorError.invalidValue(path: path, message: "invalid date format")
                 }
             case .email, .idnEmail:
                 let emailRegex = #/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/#
                 if value.wholeMatch(of: emailRegex) == nil {
-                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid email format")
+                    throw SBOMValidatorError.invalidValue(path: path, message: "invalid email format")
                 }
             case .uri, .iriReference:
                 if URL(string: value) == nil {
-                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid URI format")
+                    throw SBOMValidatorError.invalidValue(path: path, message: "invalid URI format")
                 }
             }
         }
@@ -450,8 +453,6 @@ struct SBOMValidator: SBOMValidatorProtocol {
     }
 
     private func validateUniqueItems(_ array: [Any], path: String) throws {
-        // For uniqueness checking, we need to compare items
-        // We'll use a simple approach: serialize each item to JSON and compare strings
         var seen = Set<String>()
 
         for (index, item) in array.enumerated() {
@@ -511,18 +512,16 @@ struct SBOMValidator: SBOMValidatorProtocol {
         let minLength = schema[SchemaKeys.minLength] as? Int
         let maxLength = schema[SchemaKeys.maxLength] as? Int
         let length = value.count
-        // Check minimum length
         if let min = minLength, length < min {
             throw SBOMValidatorError.constraintViolation(
                 path: path,
-                message: "String is shorter than minimum length. Expected at least \(min), got \(length)"
+                message: "String \(value) is shorter than minimum length. Expected at least \(min), got \(length)"
             )
         }
-        // Check maximum length
         if let max = maxLength, length > max {
             throw SBOMValidatorError.constraintViolation(
                 path: path,
-                message: "String is longer than maximum length. Expected at most \(max), got \(length)"
+                message: "String \(value) is longer than maximum length. Expected at most \(max), got \(length)"
             )
         }
     }
@@ -541,7 +540,6 @@ struct SBOMValidator: SBOMValidatorProtocol {
             )
         }
 
-        // Verify the match covers the entire string (JSON Schema pattern must match the whole string)
         guard match.range.location == 0 && match.range.length == value.utf16.count else {
             throw SBOMValidatorError.constraintViolation(
                 path: path,
@@ -552,7 +550,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
     private func validateFormat(_ value: String, format: String, path: String) throws {
         guard let stringFormat = StringFormat(rawValue: format) else {
-            // Unknown format - skip validation (JSON Schema allows unknown formats)
+            // JSON Schema allows unknown formats
             return
         }
         try stringFormat.validate(value, path: path)
@@ -694,8 +692,6 @@ struct SBOMValidator: SBOMValidatorProtocol {
     // MARK: - Utility Functions
 
     private func areEqual(_ lhs: Any, _ rhs: Any) -> Bool {
-        // Use canonical representation for comprehensive equality checking
-        // This handles all types: strings, numbers, booleans, arrays, objects, and null
         guard let lhsCanonical = try? canonicalRepresentation(of: lhs),
               let rhsCanonical = try? canonicalRepresentation(of: rhs) else {
             return false

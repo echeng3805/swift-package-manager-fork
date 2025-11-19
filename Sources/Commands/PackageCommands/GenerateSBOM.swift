@@ -49,6 +49,7 @@ extension SwiftPackageCommand {
                 subset: self.product.map { .product($0) } ?? .allExcludingTests,
                 buildOutputs: [.dependencyGraph]
             )
+            // swiftCommandState.observabilityScope.emit(warning: "`sbom` subcommand creates SBOMs based on modules graph only")
 
             let input = SBOMInput(
                 modulesGraph: packageGraph,
@@ -57,12 +58,18 @@ extension SwiftPackageCommand {
                 filter: self.globalOptions.sbom.sbomFilter,
                 product: self.product,
                 specs: self.globalOptions.sbom.sbomSpecs,
+                // TODO: set this elsewhere?
                 dir: try self.globalOptions.sbom.sbomDirectory ?? swiftCommandState.productsBuildParameters.buildPath
                     .appending(component: "sboms")
             )
 
             let creator = SBOMCreator(input: input)
-            try await creator.createSBOMs()
+            let sbomPaths = try await creator.createSBOMs()
+            
+            for sbomPath in sbomPaths {
+                // TODO echeng3805 should this be using observabilityScope?
+                print("- created SBOM at \(sbomPath.pathString)")
+            }
         }
     }
 }

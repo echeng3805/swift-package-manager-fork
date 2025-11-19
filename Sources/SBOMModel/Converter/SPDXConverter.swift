@@ -33,6 +33,17 @@ internal struct SPDXConverter {
         }
     }
 
+    private static func convertToSPDXLicenseExpression(from license: SBOMLicense, creationInfoID: String) async -> SPDXLicenseExpression {
+        let id = generateSPDXID(license.name)
+        return SPDXLicenseExpression(
+            id: id,
+            type: SPDXType.LicenseExpression,
+            expression: license.name,
+            creationInfoID: creationInfoID,
+        )
+    }
+    
+
     internal static func convertToSPDXAgent(from metadata: SBOMMetadata?) async -> [any SPDXObject] {
         guard let metadata,
               let creators = metadata.creators,
@@ -40,6 +51,7 @@ internal struct SPDXConverter {
         else {
             return []
         }
+                
         var agents: [any SPDXObject] = []
         for creator in creators {
             let creatorID = self.generateSPDXID(creator.id.value)
@@ -57,6 +69,22 @@ internal struct SPDXConverter {
                 name: creator.name,
                 creationInfoID: toolCreationInfoID
             )
+            if let licenses = creator.licenses {
+                for license in licenses {
+                    let spdxLicense = await convertToSPDXLicenseExpression(from: license, creationInfoID: toolCreationInfoID)
+                    let relationship = SPDXRelationship(
+                        id: generateSPDXID("\(creatorID)-hasDeclaredLicense-\(spdxLicense.id)"),
+                        type: .Relationship,
+                        category: .hasDeclaredLicense,
+                        creationInfoID: toolCreationInfoID,
+                        parentID: creatorID,
+                        childrenID: [spdxLicense.id]
+                    )
+                    agents.append(relationship)
+                    agents.append(spdxLicense)
+                }
+            }
+            
             agents.append(toolCreationInfo)
             agents.append(tool)
         }
