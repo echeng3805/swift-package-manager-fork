@@ -15,7 +15,7 @@ import PackageModel
 
 /// Utilities for converting between ModulesGraph and dependency graph naming conventions.
 internal struct SBOMGraphsConverter {
-    // TODO: ev_cheng, there has to be a better way to do all these conversions
+    // TODO: echeng3805, there has to be a better way to do all these conversions
 
     /// Converts a ModulesGraph product name to a dependency graph target name.
     internal static func getTargetName(fromProduct name: String) -> String {

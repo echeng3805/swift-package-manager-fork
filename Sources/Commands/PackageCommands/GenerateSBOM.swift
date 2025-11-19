@@ -41,7 +41,7 @@ extension SwiftPackageCommand {
             )
             let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
 
-            // TODO ev_cheng: remove build graph and instead print a warning that build graph isn't used
+            // TODO echeng3805: remove build graph and instead print a warning that build graph isn't used
             let buildSystem = try await swiftCommandState.createBuildSystem(
                 explicitProduct: self.product
             )

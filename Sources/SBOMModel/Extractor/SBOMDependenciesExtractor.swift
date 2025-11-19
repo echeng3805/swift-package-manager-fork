@@ -124,7 +124,7 @@ extension SBOMExtractor {
                 } else if let module = SBOMGraphsConverter.toModule(fromTarget: targetDep, modulesGraph: modulesGraph) {
                     return .module(module)
                 }
-                // TODO: ev_cheng, print a warning for targets not in modules graph?
+                // TODO: echeng3805, print a warning for targets not in modules graph?
                 return nil
             }
         }
@@ -168,7 +168,7 @@ extension SBOMExtractor {
                 } else if let module = SBOMGraphsConverter.toModule(fromTarget: targetDep, modulesGraph: modulesGraph) {
                     return .module(module)
                 }
-                // TODO: ev_cheng, print a warning for targets not in modules graph?
+                // TODO: echeng3805, print a warning for targets not in modules graph?
                 return nil
             }
         }
