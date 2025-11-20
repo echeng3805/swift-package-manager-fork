@@ -649,6 +649,7 @@ public final class SwiftBuildSystem: SPMBuildCore.BuildSystem {
                             buildParameters: request.parameters,
                             includeImplicitDependencies: true
                         )
+                        // SWBTargetGUID wraps the GUID that PIFBuilder generates
                         var result: [String: [String]] = [:]
                         for (target, dependencies) in depGraph {
                             let targetInfo = workspaceInfo.targetInfos.first { $0.guid == target.rawValue }

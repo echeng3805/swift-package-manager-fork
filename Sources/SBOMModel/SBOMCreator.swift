@@ -19,6 +19,13 @@ package struct SBOMCreator {
         self.input = input
     }
 
+    package static func getSBOMDirectory(from configPath: AbsolutePath?, withDefault defaultPath: AbsolutePath) async -> AbsolutePath {
+        guard let configPath = configPath else {
+            return defaultPath.appending(component: "sboms")
+        }
+        return configPath
+    }
+
     package func createSBOMs() async throws -> [AbsolutePath] {
         let extractor = SBOMExtractor(
             modulesGraph: input.modulesGraph,

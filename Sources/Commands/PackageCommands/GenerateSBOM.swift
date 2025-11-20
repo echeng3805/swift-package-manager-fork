@@ -58,9 +58,7 @@ extension SwiftPackageCommand {
                 filter: self.globalOptions.sbom.sbomFilter,
                 product: self.product,
                 specs: self.globalOptions.sbom.sbomSpecs,
-                // TODO: set this elsewhere?
-                dir: try self.globalOptions.sbom.sbomDirectory ?? swiftCommandState.productsBuildParameters.buildPath
-                    .appending(component: "sboms")
+                dir: await SBOMCreator.getSBOMDirectory(from: self.globalOptions.sbom.sbomDirectory, withDefault: try swiftCommandState.productsBuildParameters.buildPath)
             )
 
             let sbomStartTime = ContinuousClock.Instant.now
