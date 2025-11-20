@@ -57,86 +57,50 @@ struct SBOMGraphsConverterTests {
         #expect(SBOMGraphsConverter.getProductName(fromTarget: "my-product-product") == "my-product")
     }
 
-    @Test("getPackageAndModuleNames(fromTarget:) converts target names correctly")
-    func getPackageAndModuleNamesFromTarget() {
+    @Test("getModuleName(fromTarget:) converts target names correctly")
+    func getModuleNameFromTarget() {
         // Test simple module names (no package prefix)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "Swiftly")?.moduleName == "Swiftly")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "Swiftly")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "TestSwiftly")?.moduleName == "TestSwiftly")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "TestSwiftly")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "ArgumentParser")?.moduleName == "ArgumentParser")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "ArgumentParser")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "SwiftlyCore")?.moduleName == "SwiftlyCore")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "SwiftlyCore")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "MacOSPlatform")?.moduleName == "MacOSPlatform")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "MacOSPlatform")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "LinuxPlatform")?.moduleName == "LinuxPlatform")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "LinuxPlatform")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "SwiftlyWebsiteAPI")?
-            .moduleName == "SwiftlyWebsiteAPI")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "SwiftlyWebsiteAPI")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "SwiftlyDownloadAPI")?
-            .moduleName == "SwiftlyDownloadAPI")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "SwiftlyDownloadAPI")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "AsyncHTTPClient")?.moduleName == "AsyncHTTPClient")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "AsyncHTTPClient")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "OpenAPIRuntime")?.moduleName == "OpenAPIRuntime")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "OpenAPIRuntime")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "SPMSQLite3")?.moduleName == "SPMSQLite3")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "SPMSQLite3")?.packageName == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "Swiftly") == "Swiftly")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "TestSwiftly") == "TestSwiftly")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "ArgumentParser") == "ArgumentParser")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "SwiftlyCore") == "SwiftlyCore")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "MacOSPlatform") == "MacOSPlatform")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "LinuxPlatform") == "LinuxPlatform")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "SwiftlyWebsiteAPI") == "SwiftlyWebsiteAPI")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "SwiftlyDownloadAPI") == "SwiftlyDownloadAPI")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "AsyncHTTPClient") == "AsyncHTTPClient")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "OpenAPIRuntime") == "OpenAPIRuntime")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "SPMSQLite3") == "SPMSQLite3")
 
         // Modules that start with underscores
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "_CryptoExtras")?.moduleName == "_CryptoExtras")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "_CryptoExtras")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "_AsyncFileSystem")?
-            .moduleName == "_AsyncFileSystem")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "_AsyncFileSystem")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "_CertificateInternals")?
-            .moduleName == "_CertificateInternals")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "_CertificateInternals")?.packageName == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "_CryptoExtras") == "_CryptoExtras")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "_AsyncFileSystem") == "_AsyncFileSystem")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "_CertificateInternals") == "_CertificateInternals")
 
         // Test product names (should return nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swiftly-product") == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "test-swiftly-product") == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "ArgumentParser-product") == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "AsyncHTTPClient-product") == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "OpenAPIRuntime-product") == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "SystemPackage-product") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swiftly-product") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "test-swiftly-product") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "ArgumentParser-product") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "AsyncHTTPClient-product") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "OpenAPIRuntime-product") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "SystemPackage-product") == nil)
 
         // Test edge cases
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "")?.moduleName == "")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "A")?.moduleName == "A")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "A")?.packageName == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "-product") == nil)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "my-product-product") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "") == "")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "A") == "A")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "-product") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "my-product-product") == nil)
 
-        // Test package_module format (with underscores)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-nio_NIOPosix")?.packageName == "swift-nio")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-nio_NIOPosix")?.moduleName == "NIOPosix")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-nio-ssl_NIOSSL")?
-            .packageName == "swift-nio-ssl")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-nio-ssl_NIOSSL")?.moduleName == "NIOSSL")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-crypto_Crypto")?
-            .packageName == "swift-crypto")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-crypto_Crypto")?.moduleName == "Crypto")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-crypto__CryptoExtras")?
-            .packageName == "swift-crypto")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-crypto__CryptoExtras")?
-            .moduleName == "_CryptoExtras")
-
-        // Test modules with leading underscores (like _NIOBase64, _NIODataStructures)
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-nio__NIOBase64")?.packageName == "swift-nio")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-nio__NIOBase64")?.moduleName == "_NIOBase64")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-nio__NIODataStructures")?
-            .packageName == "swift-nio")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "swift-nio__NIODataStructures")?
-            .moduleName == "_NIODataStructures")
+        // Test resource bundle package_module target format (with underscores)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-nio_NIOPosix") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-nio-ssl_NIOSSL") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-crypto_Crypto") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-crypto__CryptoExtras") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-nio__NIOBase64") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-nio__NIODataStructures") == nil)
 
         // Test modules with multiple leading underscores
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "package___ModuleName")?.packageName == "package")
-        #expect(SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: "package___ModuleName")?
-            .moduleName == "__ModuleName")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "___ModuleName") == "___ModuleName")
     }
 
     @Test("name mapping functions are inverses for products")
@@ -156,7 +120,7 @@ struct SBOMGraphsConverterTests {
         let productTargetNames = ["swiftly-product", "ArgumentParser-product", "AsyncHTTPClient-product"]
         for targetName in productTargetNames {
             #expect(
-                SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: targetName) == nil,
+                SBOMGraphsConverter.getModuleName(fromTarget: targetName) == nil,
                 "Product target '\(targetName)' should not be recognized as a module"
             )
             #expect(
@@ -173,7 +137,7 @@ struct SBOMGraphsConverterTests {
                 "Module target '\(targetName)' should not be recognized as a product"
             )
             #expect(
-                SBOMGraphsConverter.getPackageAndModuleNames(fromTarget: targetName) != nil,
+                SBOMGraphsConverter.getModuleName(fromTarget: targetName) != nil,
                 "Module target '\(targetName)' should be recognized as a module"
             )
         }
@@ -272,39 +236,25 @@ struct SBOMGraphsConverterTests {
         #expect(subprocessCShimsModule?.name == "_SubprocessCShims", "Module name should be '_SubprocessCShims'")
     }
 
-    @Test("toModule(fromTarget:) returns correct module for package_module format")
+    @Test("toModule(fromTarget:) returns nil for package_module format (because they're resource bundles)")
     func toModuleWithPackageModuleFormat() async throws {
         let graph = try SBOMTestModulesGraph.createSwiftlyModulesGraph()
 
         let nioPosixModule = SBOMGraphsConverter.toModule(fromTarget: "swift-nio_NIOPosix", modulesGraph: graph)
-        #expect(nioPosixModule?.name == "NIOPosix", "Module name should be 'NIOPosix'")
-        #expect(nioPosixModule?.packageIdentity.description == "swift-nio", "Package identity should be 'swift-nio'")
+        #expect(nioPosixModule == nil)
 
         let nioSSLModule = SBOMGraphsConverter.toModule(fromTarget: "swift-nio-ssl_NIOSSL", modulesGraph: graph)
-        #expect(nioSSLModule?.name == "NIOSSL", "Module name should be 'NIOSSL'")
-        #expect(
-            nioSSLModule?.packageIdentity.description == "swift-nio-ssl",
-            "Package identity should be 'swift-nio-ssl'"
-        )
+        #expect(nioSSLModule == nil)
 
         // Test modules with leading underscores in package_module format
         let nioBase64Module = SBOMGraphsConverter.toModule(fromTarget: "swift-nio__NIOBase64", modulesGraph: graph)
-        #expect(nioBase64Module?.name == "_NIOBase64", "Module name should be '_NIOBase64'")
-        #expect(nioBase64Module?.packageIdentity.description == "swift-nio", "Package identity should be 'swift-nio'")
+        #expect(nioBase64Module == nil)
 
         let nioDataStructuresModule = SBOMGraphsConverter.toModule(fromTarget: "swift-nio__NIODataStructures", modulesGraph: graph)
-        #expect(nioDataStructuresModule?.name == "_NIODataStructures", "Module name should be '_NIODataStructures'")
-        #expect(
-            nioDataStructuresModule?.packageIdentity.description == "swift-nio",
-            "Package identity should be 'swift-nio'"
-        )
+        #expect(nioDataStructuresModule == nil)
 
         let cryptoExtrasModule = SBOMGraphsConverter.toModule(fromTarget: "swift-crypto__CryptoExtras", modulesGraph: graph)
-        #expect(cryptoExtrasModule?.name == "_CryptoExtras", "Module name should be '_CryptoExtras'")
-        #expect(
-            cryptoExtrasModule?.packageIdentity.description == "swift-crypto",
-            "Package identity should be 'swift-crypto'"
-        )
+        #expect(cryptoExtrasModule == nil)
     }
 
     @Test("toModule(fromTarget:) returns nil for product targets")
