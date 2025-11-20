@@ -15,8 +15,8 @@ package enum Spec: String, Codable, Equatable, CaseIterable, Comparable {
     case spdx
     case cyclonedx1
     case spdx3
-    // case cyclonedx2, for future major versions of CycloneDX
-    // case spdx4, for future major versions of SPDX
+    // case .cyclonedx2, for future major versions of CycloneDX
+    // case .spdx4, for future major versions of SPDX
 
     package var defaultValueDescription: String {
         let (_, version) = self.latestSpec
@@ -25,6 +25,8 @@ package enum Spec: String, Codable, Equatable, CaseIterable, Comparable {
         case .spdx: return "Most recent major version of SPDX supported by SwiftPM (currently: \(version))"
         case .cyclonedx1: return "Most recent minor version of CycloneDX v1 supported by SSwiftPMPM  (currently: \(version))"
         case .spdx3: return "Most recent minor version of SPDX v3 supported by SwiftPM (currently: \(version))"
+        // case .cyclonedx2
+        // case .spdx4
         }
     }
 
@@ -32,50 +34,40 @@ package enum Spec: String, Codable, Equatable, CaseIterable, Comparable {
         lhs.rawValue < rhs.rawValue
     }
 
-    package var supportsCycloneDX: Bool {
+    internal var supportsCycloneDX: Bool {
         switch self {
-        case .cyclonedx, .cyclonedx1:
+        case .cyclonedx, .cyclonedx1: // cyclonedx2
             true
-        case .spdx, .spdx3:
+        case .spdx, .spdx3: // spdx4
             false
         }
     }
 
-    package var supportsSPDX: Bool {
+    internal var supportsSPDX: Bool {
         switch self {
-        case .spdx, .spdx3:
+        case .spdx, .spdx3: // spdx 4
             true
-        case .cyclonedx, .cyclonedx1:
+        case .cyclonedx, .cyclonedx1: // cyclonedx2
             false
         }
     }
 
     /// Returns the concrete spec type and version for generic spec cases.
-    /// For versioned cases (e.g., .cyclonedx1, .spdx3), returns self.
-    /// For generic cases (e.g., .cyclonedx, .spdx), returns the latest supported version.
-    package var latestSpec: (type: Spec, version: String) {
+    internal var latestSpec: (type: Spec, version: String) {
         switch self {
-        case .cyclonedx:
+        case .cyclonedx, .cyclonedx1: // cyclonedx2
             (.cyclonedx1, CycloneDXConstants.cyclonedx1SpecVersion)
-        case .spdx:
+        case .spdx, .spdx3: // spdx4
             (.spdx3, SPDXConstants.spdx3SpecVersion)
-        case .cyclonedx1:
-            (.cyclonedx1, CycloneDXConstants.cyclonedx1SpecVersion)
-        case .spdx3:
-            (.spdx3, SPDXConstants.spdx3SpecVersion)
-            // When adding new major versions (e.g., .cyclonedx2, .spdx4):
-            // 1. Add the new case to the enum
-            // 2. Update the .cyclonedx or .spdx case above to return the new version
-            // 3. Add a case for the new version that returns itself
         }
     }
 }
 
-package struct SBOMSpec: Codable, Equatable, Hashable {
-    package let type: Spec
-    package let version: String
+internal struct SBOMSpec: Codable, Equatable, Hashable {
+    internal let type: Spec
+    internal let version: String
 
-    package init(
+    internal init(
         type: Spec,
         version: String
     ) {

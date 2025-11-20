@@ -77,15 +77,19 @@ struct SBOMEncoderTests {
         #expect(files.count == 2, "Should generate two files for two specs")
 
         // Since test packages don't have real Git repos, the revision will be "unknown"
-        let cycloneDXFile = "cyclonedx1-1.7-MyApp-unknown-all.json"
-        let spdxFile = "spdx3-3.0.1-MyApp-unknown-all.json"
+        // Filenames include timestamps, so we need to check for patterns
+        let cycloneDXPattern = "cyclonedx1-1.7-MyApp-unknown-all-"
+        let spdxPattern = "spdx3-3.0.1-MyApp-unknown-all-"
 
-        #expect(files.contains(cycloneDXFile), "Should generate CycloneDX file")
-        #expect(files.contains(spdxFile), "Should generate SPDX file")
+        let cycloneDXFile = files.first { $0.hasPrefix(cycloneDXPattern) && $0.hasSuffix(".json") }
+        let spdxFile = files.first { $0.hasPrefix(spdxPattern) && $0.hasSuffix(".json") }
+
+        #expect(cycloneDXFile != nil, "Should generate CycloneDX file")
+        #expect(spdxFile != nil, "Should generate SPDX file")
         #expect(!outputs.isEmpty, "Output paths should not be empty")
 
-        try self.verifyJSONFile(at: outputDir.appending(component: cycloneDXFile))
-        try self.verifyJSONFile(at: outputDir.appending(component: spdxFile))
+        try self.verifyJSONFile(at: outputDir.appending(component: cycloneDXFile!))
+        try self.verifyJSONFile(at: outputDir.appending(component: spdxFile!))
     }
 
     @Test("writeSBOMs with duplicate specs generates single file")

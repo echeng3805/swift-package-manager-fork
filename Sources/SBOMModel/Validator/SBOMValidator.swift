@@ -14,7 +14,7 @@ import Foundation
 
 
 // TODO: echeng3805
-// use a library?
+// use a library? or maybe move this all to test code?
 // MARK: - Base Validator
 
 struct SBOMValidator: SBOMValidatorProtocol {
