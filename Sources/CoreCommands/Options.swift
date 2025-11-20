@@ -70,7 +70,7 @@ public struct GlobalOptions: ParsableArguments {
     @OptionGroup(title: "Trait Options")
     public var traits: TraitOptions
 
-    @OptionGroup(title: "SBOM")
+    @OptionGroup(title: "SBOM") // can be used with build command and package subcommand
     public var sbom: SBOMOptions
 }
 

@@ -124,7 +124,7 @@ extension SBOMExtractor {
                 } else if let module = SBOMGraphsConverter.toModule(fromTarget: targetDep, modulesGraph: modulesGraph) {
                     return .module(module)
                 }
-                // TODO: echeng3805, print a warning for targets not in modules graph?
+                // TODO: echeng3805, print a warning for targets not in modules graph (ignoring resource bundles)
                 return nil
             }
         }

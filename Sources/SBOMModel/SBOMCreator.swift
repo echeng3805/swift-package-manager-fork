@@ -19,11 +19,8 @@ package struct SBOMCreator {
         self.input = input
     }
 
-    package static func getSBOMDirectory(from configPath: AbsolutePath?, withDefault defaultPath: AbsolutePath) async -> AbsolutePath {
-        guard let configPath = configPath else {
-            return defaultPath.appending(component: "sboms")
-        }
-        return configPath
+    package static func resolveSBOMDirectory(from configPath: AbsolutePath?, withDefault defaultPath: AbsolutePath) async -> AbsolutePath {
+        return configPath ?? defaultPath.appending(component: "sboms")
     }
 
     package func createSBOMs() async throws -> [AbsolutePath] {

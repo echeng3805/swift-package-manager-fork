@@ -57,6 +57,33 @@ struct SBOMGraphsConverterTests {
         #expect(SBOMGraphsConverter.getProductName(fromTarget: "my-product-product") == "my-product")
     }
 
+    @Test("getProductName(fromTarget:) removes TargetSuffix patterns correctly")
+    func getProductNameRemovesSuffixes() {
+        // Test -dynamic suffix removal from PACKAGE-PRODUCT GUIDs
+        // PACKAGE-PRODUCT:swift-build_SwiftBuild.SwiftBuild-6FA70E1059D35307-dynamic
+        #expect(SBOMGraphsConverter.getProductName(fromTarget: "SwiftBuild-dynamic-product") == "SwiftBuild")
+        
+        // PACKAGE-PRODUCT:swift-build_SWBProtocol.SWBProtocol-479FEB9464127B49-dynamic
+        #expect(SBOMGraphsConverter.getProductName(fromTarget: "SWBProtocol-dynamic-product") == "SWBProtocol")
+        
+        // Test -testable suffix removal
+        // snippet-extract-4D525650E9464C3A-testable
+        #expect(SBOMGraphsConverter.getProductName(fromTarget: "snippet-extract-testable-product") == "snippet-extract")
+        
+        // swift-run--4E81F76B4FDE3E48-testable
+        #expect(SBOMGraphsConverter.getProductName(fromTarget: "swift-run-testable-product") == "swift-run")
+        
+        // swift-experimental-sdk--453A89A57E5CD913-testable
+        #expect(SBOMGraphsConverter.getProductName(fromTarget: "swift-experimental-sdk-testable-product") == "swift-experimental-sdk")
+        
+        // swift-bootstrap-19E6669016298B47-testable
+        #expect(SBOMGraphsConverter.getProductName(fromTarget: "swift-bootstrap-testable-product") == "swift-bootstrap")
+        
+        // Test products without suffixes
+        #expect(SBOMGraphsConverter.getProductName(fromTarget: "SwiftBuild-product") == "SwiftBuild")
+        #expect(SBOMGraphsConverter.getProductName(fromTarget: "ArgumentParser-product") == "ArgumentParser")
+    }
+
     @Test("getModuleName(fromTarget:) converts target names correctly")
     func getModuleNameFromTarget() {
         // Test simple module names (no package prefix)
@@ -101,6 +128,44 @@ struct SBOMGraphsConverterTests {
 
         // Test modules with multiple leading underscores
         #expect(SBOMGraphsConverter.getModuleName(fromTarget: "___ModuleName") == "___ModuleName")
+    }
+
+    @Test("getModuleName(fromTarget:) removes TargetSuffix patterns correctly")
+    func getModuleNameRemovesSuffixes() {
+        // Test -dynamic suffix removal from PACKAGE-TARGET GUIDs
+        // PACKAGE-TARGET:SWBTaskConstruction--13A05A6A6704C663-dynamic
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "SWBTaskConstruction-dynamic") == "SWBTaskConstruction")
+        
+        // PACKAGE-TARGET:_IntegrationTestSupport-1FB010E086040497-dynamic
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "_IntegrationTestSupport-dynamic") == "_IntegrationTestSupport")
+        
+        // PACKAGE-TARGET:_AsyncFileSystem--4E4E671E738B868E-dynamic
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "_AsyncFileSystem-dynamic") == "_AsyncFileSystem")
+        
+        // PACKAGE-TARGET:PackageSigning--7F242844F5C56277-dynamic
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "PackageSigning-dynamic") == "PackageSigning")
+        
+        // Test -testable suffix removal
+        // snippet-extract-4D525650E9464C3A-testable
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "snippet-extract-testable") == "snippet-extract")
+        
+        // swift-run--4E81F76B4FDE3E48-testable
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-run-testable") == "swift-run")
+        
+        // swift-experimental-sdk--453A89A57E5CD913-testable
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-experimental-sdk-testable") == "swift-experimental-sdk")
+        
+        // swift-bootstrap-19E6669016298B47-testable
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-bootstrap-testable") == "swift-bootstrap")
+        
+        // Test modules without suffixes
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "SwiftBuild") == "SwiftBuild")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "_AsyncFileSystem") == "_AsyncFileSystem")
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "ArgumentParser") == "ArgumentParser")
+        
+        // Test that product targets still return nil even with suffixes
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "SwiftBuild-dynamic-product") == nil)
+        #expect(SBOMGraphsConverter.getModuleName(fromTarget: "swift-run-testable-product") == nil)
     }
 
     @Test("name mapping functions are inverses for products")
