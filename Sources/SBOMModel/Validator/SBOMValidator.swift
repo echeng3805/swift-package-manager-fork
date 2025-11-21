@@ -12,6 +12,19 @@
 
 import Foundation
 
+/// Cache for storing compiled regex patterns (to avoid redundant compilation)
+internal actor SBOMRegexCache {
+    private var cache: [String: NSRegularExpression] = [:]
+    
+    internal func get(_ pattern: String) -> NSRegularExpression? {
+        self.cache[pattern]
+    }
+    
+    internal func set(_ pattern: String, regex: NSRegularExpression) {
+        self.cache[pattern] = regex
+    }
+}
+
 
 // TODO: echeng3805
 // use a library? or maybe move this all to test code?
@@ -19,6 +32,18 @@ import Foundation
 
 struct SBOMValidator: SBOMValidatorProtocol {
     // MARK: - Constants
+    
+    // Cached formatters for performance (thread-safe for reading)
+    private static let iso8601Formatter = ISO8601DateFormatter()
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
+    
+    // Cached regex patterns for performance
+    private static let emailRegex = #/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/#
+    private static let regexCache = SBOMRegexCache()
 
     enum StringFormat: String {
         case dateTime = "date-time"
@@ -31,18 +56,15 @@ struct SBOMValidator: SBOMValidatorProtocol {
         func validate(_ value: String, path: String) throws {
             switch self {
             case .dateTime:
-                if ISO8601DateFormatter().date(from: value) == nil {
+                if SBOMValidator.iso8601Formatter.date(from: value) == nil {
                     throw SBOMValidatorError.invalidValue(path: path, message: "invalid date-time format")
                 }
             case .date:
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd"
-                if formatter.date(from: value) == nil {
+                if SBOMValidator.dateFormatter.date(from: value) == nil {
                     throw SBOMValidatorError.invalidValue(path: path, message: "invalid date format")
                 }
             case .email, .idnEmail:
-                let emailRegex = #/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/#
-                if value.wholeMatch(of: emailRegex) == nil {
+                if value.wholeMatch(of: SBOMValidator.emailRegex) == nil {
                     throw SBOMValidatorError.invalidValue(path: path, message: "invalid email format")
                 }
             case .uri, .iriReference:
@@ -527,9 +549,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
     }
 
     private func validatePattern(_ value: String, pattern: String, path: String) throws {
-        guard let regex = try? NSRegularExpression(pattern: pattern) else {
-            throw SBOMValidatorError.invalidValue(path: path, message: "Invalid regex pattern: \(pattern)")
-        }
+        let regex = try Self.getCachedRegex(for: pattern, path: path)
 
         let range = NSRange(location: 0, length: value.utf16.count)
 
@@ -546,6 +566,44 @@ struct SBOMValidator: SBOMValidatorProtocol {
                 message: "String does not match pattern: \(pattern). Value: \"\(value)\""
             )
         }
+    }
+    
+    /// Get a cached compiled regex pattern, or compile and cache it if not present
+    private static func getCachedRegex(for pattern: String, path: String) throws -> NSRegularExpression {
+        // Note: This is a synchronous wrapper around the actor
+        // In a fully async context, this could be made async
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: NSRegularExpression?
+        var compilationError: Error?
+        
+        Task {
+            // Check cache first
+            if let cached = await regexCache.get(pattern) {
+                result = cached
+                semaphore.signal()
+                return
+            }
+            
+            // Compile and cache if not found
+            do {
+                guard let regex = try? NSRegularExpression(pattern: pattern) else {
+                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid regex pattern: \(pattern)")
+                }
+                await regexCache.set(pattern, regex: regex)
+                result = regex
+            } catch let e {
+                compilationError = e
+            }
+            semaphore.signal()
+        }
+        
+        semaphore.wait()
+        
+        if let error = compilationError {
+            throw error
+        }
+        
+        return result!
     }
 
     private func validateFormat(_ value: String, format: String, path: String) throws {
