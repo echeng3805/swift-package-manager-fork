@@ -14,13 +14,13 @@ import Foundation
 
 /// Cache for storing compiled regex patterns (to avoid redundant compilation)
 internal actor SBOMRegexCache {
-    private var cache: [String: NSRegularExpression] = [:]
+    private var cache: [String: Regex<AnyRegexOutput>] = [:]
     
-    internal func get(_ pattern: String) -> NSRegularExpression? {
+    internal func get(_ pattern: String) -> Regex<AnyRegexOutput>? {
         self.cache[pattern]
     }
     
-    internal func set(_ pattern: String, regex: NSRegularExpression) {
+    internal func set(_ pattern: String, regex: Regex<AnyRegexOutput>) {
         self.cache[pattern] = regex
     }
 }
@@ -565,16 +565,14 @@ struct SBOMValidator: SBOMValidatorProtocol {
     private func validatePattern(_ value: String, pattern: String, path: String) async throws {
         let regex = try await Self.getCachedRegex(for: pattern, path: path)
 
-        let range = NSRange(location: 0, length: value.utf16.count)
-
-        guard let match = regex.firstMatch(in: value, options: [], range: range) else {
+        guard let match = try? regex.wholeMatch(in: value) else {
             throw SBOMValidatorError.constraintViolation(
                 path: path,
                 message: "String does not match pattern: \(pattern). Value: \"\(value)\""
             )
         }
-
-        guard match.range.location == 0 && match.range.length == value.utf16.count else {
+        
+        guard match.range == value.startIndex..<value.endIndex else {
             throw SBOMValidatorError.constraintViolation(
                 path: path,
                 message: "String does not match pattern: \(pattern). Value: \"\(value)\""
@@ -583,14 +581,13 @@ struct SBOMValidator: SBOMValidatorProtocol {
     }
     
     /// Get a cached compiled regex pattern, or compile and cache it if not present
-    private static func getCachedRegex(for pattern: String, path: String) async throws -> NSRegularExpression {
+    private static func getCachedRegex(for pattern: String, path: String) async throws -> Regex<AnyRegexOutput> {
         // Check cache first
         if let cached = await regexCache.get(pattern) {
             return cached
         }
         
-        // Compile and cache if not found
-        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+        guard let regex = try? Regex(pattern) else {
             throw SBOMValidatorError.invalidValue(path: path, message: "Invalid regex pattern: \(pattern)")
         }
         await regexCache.set(pattern, regex: regex)
