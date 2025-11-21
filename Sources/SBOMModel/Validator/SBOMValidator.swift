@@ -368,18 +368,22 @@ struct SBOMValidator: SBOMValidatorProtocol {
     private func validateObjectIfNeeded(_ value: Any, schema: [String: Any], path: String) async throws {
         guard let objectValue = value as? [String: Any] else { return }
 
-        let allRequired = await self.collectAllRequired(from: schema)
-        if !allRequired.isEmpty {
-            try self.validateRequiredProperties(objectValue, required: allRequired, path: path)
+        // Collect all schema metadata in a single traversal pass
+        let metadata = await self.collectSchemaMetadata(from: schema)
+        
+        // Validate required properties
+        if !metadata.required.isEmpty {
+            try self.validateRequiredProperties(objectValue, required: metadata.required, path: path)
         }
 
-        let allProperties = await self.collectAllProperties(from: schema)
-        if !allProperties.isEmpty {
-            try await self.validateObjectProperties(objectValue, properties: allProperties, path: path)
+        // Validate object properties
+        if !metadata.properties.isEmpty {
+            try await self.validateObjectProperties(objectValue, properties: metadata.properties, path: path)
         }
 
-        try await self.validateAdditionalProperties(objectValue, schema: schema, path: path)
-        try await self.validateUnevaluatedProperties(objectValue, schema: schema, path: path)
+        // Validate additional and unevaluated properties
+        try await self.validateAdditionalProperties(objectValue, schema: schema, path: path, allowedProperties: metadata.allowedProperties)
+        try await self.validateUnevaluatedProperties(objectValue, schema: schema, path: path, evaluatedProperties: metadata.evaluatedProperties)
     }
 
     private func validateRequiredProperties(_ object: [String: Any], required: [String], path: String) throws {
@@ -403,10 +407,9 @@ struct SBOMValidator: SBOMValidatorProtocol {
         }
     }
 
-    private func validateAdditionalProperties(_ object: [String: Any], schema: [String: Any], path: String) async throws {
+    private func validateAdditionalProperties(_ object: [String: Any], schema: [String: Any], path: String, allowedProperties: Set<String>) async throws {
         guard let additionalProps = schema[SchemaKeys.additionalProperties] else { return }
 
-        let allowedProperties = self.collectAllAllowedProperties(from: schema)
         let extraProperties = Set(object.keys).subtracting(allowedProperties)
 
         if let allowsAdditional = additionalProps as? Bool, !allowsAdditional {
@@ -428,14 +431,13 @@ struct SBOMValidator: SBOMValidatorProtocol {
         }
     }
 
-    private func validateUnevaluatedProperties(_ object: [String: Any], schema: [String: Any], path: String) async throws {
+    private func validateUnevaluatedProperties(_ object: [String: Any], schema: [String: Any], path: String, evaluatedProperties: Set<String>) async throws {
         guard let unevaluatedProps = schema[SchemaKeys.unevaluatedProperties] as? Bool,
               !unevaluatedProps
         else {
             return
         }
 
-        let evaluatedProperties = await self.collectAllEvaluatedProperties(from: schema)
         let unevaluated = Set(object.keys).subtracting(evaluatedProperties)
 
         guard unevaluated.isEmpty else {
@@ -632,106 +634,86 @@ struct SBOMValidator: SBOMValidatorProtocol {
     }
 
     // MARK: - Schema Resolution and Collection Helpers
-
-    private func collectAllRequired(from schema: [String: Any]) async -> [String] {
-        var allRequired: [String] = []
-        await self.collectFromSchema(schema, key: SchemaKeys.required) { (required: [String]) in
-            allRequired.append(contentsOf: required)
-        }
-        return allRequired
+    
+    /// Struct to hold all collected schema metadata in a single pass
+    private struct SchemaMetadata {
+        var required: [String] = []
+        var properties: [String: [String: Any]] = [:]
+        var allowedProperties: Set<String> = []
+        var evaluatedProperties: Set<String> = []
     }
-
-    private func collectAllProperties(from schema: [String: Any]) async -> [String: [String: Any]] {
-        var allProperties: [String: [String: Any]] = [:]
-        await self.collectFromSchema(schema, key: SchemaKeys.properties) { (properties: [String: [String: Any]]) in
-            allProperties.merge(properties) { _, new in new }
-        }
-        return allProperties
+    
+    /// Collect all schema metadata in a single traversal pass for better performance
+    private func collectSchemaMetadata(from schema: [String: Any]) async -> SchemaMetadata {
+        var metadata = SchemaMetadata()
+        await self.collectMetadataFromSchema(schema, metadata: &metadata)
+        return metadata
     }
-
-    private func collectAllAllowedProperties(from schema: [String: Any]) -> Set<String> {
-        var allowedProperties = Set<String>()
-
-        if let properties = schema[SchemaKeys.properties] as? [String: Any] {
-            allowedProperties.formUnion(properties.keys)
-        }
-
-        for compositionKey in [SchemaKeys.allOf, SchemaKeys.anyOf, SchemaKeys.oneOf] {
-            if let schemas = schema[compositionKey] as? [[String: Any]] {
-                for subSchema in schemas {
-                    allowedProperties.formUnion(self.collectAllAllowedProperties(from: subSchema))
-                }
-            }
-        }
-
-        return allowedProperties
-    }
-
-    private func collectAllEvaluatedProperties(from schema: [String: Any]) async -> Set<String> {
-        var evaluatedProperties = Set<String>()
-
-        if let properties = schema[SchemaKeys.properties] as? [String: Any] {
-            evaluatedProperties.formUnion(properties.keys)
-        }
-
+    
+    private func collectMetadataFromSchema(_ schema: [String: Any], metadata: inout SchemaMetadata) async {
+        // Collect required properties
         if let required = schema[SchemaKeys.required] as? [String] {
-            evaluatedProperties.formUnion(required)
+            metadata.required.append(contentsOf: required)
+            metadata.evaluatedProperties.formUnion(required)
         }
-
-        for compositionKey in [SchemaKeys.allOf, SchemaKeys.anyOf, SchemaKeys.oneOf] {
-            if let schemas = schema[compositionKey] as? [[String: Any]] {
-                for subSchema in schemas {
-                    evaluatedProperties.formUnion(await self.collectEvaluatedProperties(from: subSchema))
-                }
-            }
+        
+        // Collect properties
+        if let properties = schema[SchemaKeys.properties] as? [String: [String: Any]] {
+            metadata.properties.merge(properties) { _, new in new }
+            metadata.allowedProperties.formUnion(properties.keys)
+            metadata.evaluatedProperties.formUnion(properties.keys)
         }
-
-        return evaluatedProperties
-    }
-
-    private func collectEvaluatedProperties(from schema: [String: Any]) async -> Set<String> {
-        var properties = Set<String>()
-        await self.collectFromSchema(schema, key: SchemaKeys.properties) { (schemaProperties: [String: Any]) in
-            properties.formUnion(schemaProperties.keys)
-        }
-        return properties
-    }
-
-    /// Generic helper to collect data from schema with $ref and allOf resolution
-    private func collectFromSchema<T>(_ schema: [String: Any], key: String, collector: (T) -> Void) async {
-        // Collect from direct key
-        if let value = schema[key] as? T {
-            collector(value)
-        }
-
+        
         // Resolve and collect from $ref - always resolve from root schema
         if let ref = schema[SchemaKeys.ref] as? String, ref.hasPrefix("#/") {
             let pointer = String(ref.dropFirst(2))
             let components = pointer.components(separatedBy: "/")
             if let referencedSchema = await resolveReference(components: components, in: self.schema) {
-                await self.collectFromSchema(referencedSchema, key: key, collector: collector)
+                await self.collectMetadataFromSchema(referencedSchema, metadata: &metadata)
             }
         }
-
-        // Recursively collect from allOf
+        
+        // Recursively collect from allOf only (not anyOf/oneOf as they represent alternatives)
         if let allOf = schema[SchemaKeys.allOf] as? [[String: Any]] {
             for subSchema in allOf {
-                await self.collectFromSchema(subSchema, key: key, collector: collector)
+                await self.collectMetadataFromSchema(subSchema, metadata: &metadata)
+            }
+        }
+        
+        // For anyOf and oneOf, we need to collect allowed properties for validation purposes
+        // but NOT required properties (since they're alternatives, not all required)
+        for compositionKey in [SchemaKeys.anyOf, SchemaKeys.oneOf] {
+            if let schemas = schema[compositionKey] as? [[String: Any]] {
+                for subSchema in schemas {
+                    // Only collect allowed/evaluated properties, not required
+                    if let properties = subSchema[SchemaKeys.properties] as? [String: [String: Any]] {
+                        metadata.allowedProperties.formUnion(properties.keys)
+                        metadata.evaluatedProperties.formUnion(properties.keys)
+                    }
+                    // Recursively handle nested schemas
+                    if let ref = subSchema[SchemaKeys.ref] as? String, ref.hasPrefix("#/") {
+                        let pointer = String(ref.dropFirst(2))
+                        let components = pointer.components(separatedBy: "/")
+                        if let referencedSchema = await resolveReference(components: components, in: self.schema) {
+                            if let properties = referencedSchema[SchemaKeys.properties] as? [String: [String: Any]] {
+                                metadata.allowedProperties.formUnion(properties.keys)
+                                metadata.evaluatedProperties.formUnion(properties.keys)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
-
+    
     /// Resolve a schema reference with caching
     private func resolveReference(components: [String], in schema: [String: Any]) async -> [String: Any]? {
-        // Create cache key from components
         let referenceKey = components.joined(separator: "/")
         
-        // Check cache first
         if let cached = await Self.referenceCache.get(referenceKey) {
             return cached
         }
         
-        // Resolve reference by traversing schema
         var current: Any = schema
         for component in components {
             guard let dict = current as? [String: Any] else {
@@ -747,9 +729,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
             return nil
         }
         
-        // Cache the resolved reference
         await Self.referenceCache.set(referenceKey, schema: resolvedSchema)
-        
         return resolvedSchema
     }
 
