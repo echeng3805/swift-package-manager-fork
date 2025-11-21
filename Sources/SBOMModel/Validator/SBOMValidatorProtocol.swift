@@ -13,6 +13,6 @@
 import Foundation
 
 protocol SBOMValidatorProtocol {
-    func validate(_ jsonObject: Any) throws
-    func validateValue(_ value: Any, path: String) throws
+    func validate(_ jsonObject: Any) async throws
+    func validateValue(_ value: Any, path: String) async throws
 }

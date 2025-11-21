@@ -28,7 +28,7 @@ struct SPDXValidator: SBOMValidatorProtocol {
         self.graphElementSchema = SPDXValidator.extractGraphElementSchema(from: schema)
     }
 
-    func validate(_ jsonObject: Any) throws {
+    func validate(_ jsonObject: Any) async throws {
         guard let rootDict = jsonObject as? [String: Any] else {
             throw SBOMValidatorError.typeMismatch(
                 path: "$",
@@ -49,18 +49,18 @@ struct SPDXValidator: SBOMValidatorProtocol {
         }
 
         for (index, element) in graph.enumerated() {
-            try self.validateValue(element, path: "$[@graph][\(index)]")
+            try await self.validateValue(element, path: "$[@graph][\(index)]")
         }
     }
 
-    func validateValue(_ value: Any, path: String) throws {
+    func validateValue(_ value: Any, path: String) async throws {
         if let dictObject = value as? [String: Any] {
-            try self.validateObjectWithSPDXRules(dictObject, path: path)
+            try await self.validateObjectWithSPDXRules(dictObject, path: path)
         }
-        try self.validator.validateValue(value, path: path, schema: self.graphElementSchema)
+        try await self.validator.validateValue(value, path: path, schema: self.graphElementSchema)
     }
 
-    private func validateObjectWithSPDXRules(_ object: [String: Any], path: String) throws {
+    private func validateObjectWithSPDXRules(_ object: [String: Any], path: String) async throws {
         let schema = self.validator.schema
 
         if let required = schema["required"] as? [String] {
@@ -93,13 +93,13 @@ struct SPDXValidator: SBOMValidatorProtocol {
                     propertySchema = properties[key]
                 }
                 if let propSchema = propertySchema {
-                    try self.validator.validateValue(value, path: "\(path).\(key)", schema: propSchema)
+                    try await self.validator.validateValue(value, path: "\(path).\(key)", schema: propSchema)
                 }
             }
         }
 
         if let oneOf = schema["oneOf"] as? [[String: Any]] {
-            try self.validator.validateOneOf(object, schemas: oneOf, path: path)
+            try await self.validator.validateOneOf(object, schemas: oneOf, path: path)
         }
     }
 

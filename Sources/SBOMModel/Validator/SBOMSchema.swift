@@ -29,9 +29,9 @@ internal struct SBOMSchema {
         self.schema = jsonObject
     }
 
-    internal func validate(json jsonObject: Any, spec: SBOMSpec) throws {
+    internal func validate(json jsonObject: Any, spec: SBOMSpec) async throws {
         let validator = try createValidator(for: spec)
-        try validator.validate(jsonObject)
+        try await validator.validate(jsonObject)
     }
 
     private func createValidator(for spec: SBOMSpec) throws -> any SBOMValidatorProtocol {

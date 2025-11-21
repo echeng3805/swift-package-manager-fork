@@ -122,15 +122,15 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
     // MARK: - SBOMValidatorProtocol Implementation
 
-    func validate(_ jsonObject: Any) throws {
-        try self.validateValue(jsonObject, path: "$")
+    func validate(_ jsonObject: Any) async throws {
+        try await self.validateValue(jsonObject, path: "$")
     }
 
-    func validateValue(_ value: Any, path: String) throws {
-        try self.validateValue(value, path: path, schema: self.schema)
+    func validateValue(_ value: Any, path: String) async throws {
+        try await self.validateValue(value, path: path, schema: self.schema)
     }
 
-    func validateValue(_ value: Any, path: String, schema: [String: Any]) throws {
+    func validateValue(_ value: Any, path: String, schema: [String: Any]) async throws {
         // Type validation
         if let expectedType = schema[SchemaKeys.type] as? String {
             try self.validateType(value, expectedType: expectedType, path: path)
@@ -138,19 +138,19 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
         // Schema composition keywords
         if let ref = schema[SchemaKeys.ref] as? String {
-            try self.validateReference(value, ref: ref, path: path, schema: schema)
+            try await self.validateReference(value, ref: ref, path: path, schema: schema)
         }
         if let oneOf = schema[SchemaKeys.oneOf] as? [[String: Any]] {
-            try self.validateOneOf(value, schemas: oneOf, path: path)
+            try await self.validateOneOf(value, schemas: oneOf, path: path)
         }
         if let anyOf = schema[SchemaKeys.anyOf] as? [[String: Any]] {
-            try self.validateAnyOf(value, schemas: anyOf, path: path)
+            try await self.validateAnyOf(value, schemas: anyOf, path: path)
         }
         if let allOf = schema[SchemaKeys.allOf] as? [[String: Any]] {
-            try self.validateAllOf(value, schemas: allOf, path: path)
+            try await self.validateAllOf(value, schemas: allOf, path: path)
         }
         if let notSchema = schema[SchemaKeys.not] as? [String: Any] {
-            try self.validateNot(value, schema: notSchema, path: path)
+            try await self.validateNot(value, schema: notSchema, path: path)
         }
 
         // Value-specific validations
@@ -162,9 +162,9 @@ struct SBOMValidator: SBOMValidatorProtocol {
         }
 
         // Type-specific validations
-        try self.validateObjectIfNeeded(value, schema: schema, path: path)
-        try self.validateArrayIfNeeded(value, schema: schema, path: path)
-        try self.validateStringIfNeeded(value, schema: schema, path: path)
+        try await self.validateObjectIfNeeded(value, schema: schema, path: path)
+        try await self.validateArrayIfNeeded(value, schema: schema, path: path)
+        try await self.validateStringIfNeeded(value, schema: schema, path: path)
         try self.validateNumberIfNeeded(value, schema: schema, path: path)
     }
 
@@ -219,7 +219,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
     // MARK: - Schema Composition Validation
 
-    private func validateReference(_ value: Any, ref: String, path: String, schema: [String: Any]) throws {
+    private func validateReference(_ value: Any, ref: String, path: String, schema: [String: Any]) async throws {
         guard ref.hasPrefix("#/") else { return }
 
         let pointer = String(ref.dropFirst(2))
@@ -227,21 +227,21 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
         // References starting with #/ are always resolved from the root schema (self.schema)
         // not from the current schema being validated
-        guard let referencedSchema = resolveReference(components: components, in: self.schema) else {
+        guard let referencedSchema = await resolveReference(components: components, in: self.schema) else {
             throw SBOMValidatorError.invalidValue(path: path, message: "Could not resolve reference '\(ref)'")
         }
 
-        try self.validateValue(value, path: path, schema: referencedSchema)
+        try await self.validateValue(value, path: path, schema: referencedSchema)
     }
 
-    func validateOneOf(_ value: Any, schemas: [[String: Any]], path: String) throws {
+    func validateOneOf(_ value: Any, schemas: [[String: Any]], path: String) async throws {
         var validCount = 0
         var validationErrors: [String] = []
         var matchingSchemas: [Int] = []
 
         for (index, schema) in schemas.enumerated() {
             do {
-                try self.validateValue(value, path: path, schema: schema)
+                try await self.validateValue(value, path: path, schema: schema)
                 validCount += 1
                 matchingSchemas.append(index)
             } catch {
@@ -267,12 +267,12 @@ struct SBOMValidator: SBOMValidatorProtocol {
         }
     }
 
-    private func validateAnyOf(_ value: Any, schemas: [[String: Any]], path: String) throws {
+    private func validateAnyOf(_ value: Any, schemas: [[String: Any]], path: String) async throws {
         var schemaNames: [String] = []
 
         for (index, schema) in schemas.enumerated() {
             do {
-                try self.validateValue(value, path: path, schema: schema)
+                try await self.validateValue(value, path: path, schema: schema)
                 return // Successfully validated against one schema, we're done
             } catch {
                 // Extract just the schema name/type for concise error reporting
@@ -299,12 +299,12 @@ struct SBOMValidator: SBOMValidatorProtocol {
         )
     }
 
-    private func validateAllOf(_ value: Any, schemas: [[String: Any]], path: String) throws {
+    private func validateAllOf(_ value: Any, schemas: [[String: Any]], path: String) async throws {
         var errors: [String] = []
 
         for (index, schema) in schemas.enumerated() {
             do {
-                try self.validateValue(value, path: path, schema: schema)
+                try await self.validateValue(value, path: path, schema: schema)
             } catch {
                 errors.append("Schema \(index): \(error.localizedDescription)")
             }
@@ -320,9 +320,9 @@ struct SBOMValidator: SBOMValidatorProtocol {
         }
     }
 
-    private func validateNot(_ value: Any, schema: [String: Any], path: String) throws {
+    private func validateNot(_ value: Any, schema: [String: Any], path: String) async throws {
         do {
-            try self.validateValue(value, path: path, schema: schema)
+            try await self.validateValue(value, path: path, schema: schema)
             let valueDesc = self.describeValue(value, maxLength: 200)
             throw SBOMValidatorError.notSchemaViolation(path: path, valueDescription: valueDesc)
         } catch let error as SBOMValidatorError { // rethrow notSchemaViolation errors (from nested "not" schemas)
@@ -365,21 +365,21 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
     // MARK: - Type-Specific Validation - Object
 
-    private func validateObjectIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
+    private func validateObjectIfNeeded(_ value: Any, schema: [String: Any], path: String) async throws {
         guard let objectValue = value as? [String: Any] else { return }
 
-        let allRequired = self.collectAllRequired(from: schema)
+        let allRequired = await self.collectAllRequired(from: schema)
         if !allRequired.isEmpty {
             try self.validateRequiredProperties(objectValue, required: allRequired, path: path)
         }
 
-        let allProperties = self.collectAllProperties(from: schema)
+        let allProperties = await self.collectAllProperties(from: schema)
         if !allProperties.isEmpty {
-            try self.validateObjectProperties(objectValue, properties: allProperties, path: path)
+            try await self.validateObjectProperties(objectValue, properties: allProperties, path: path)
         }
 
-        try self.validateAdditionalProperties(objectValue, schema: schema, path: path)
-        try self.validateUnevaluatedProperties(objectValue, schema: schema, path: path)
+        try await self.validateAdditionalProperties(objectValue, schema: schema, path: path)
+        try await self.validateUnevaluatedProperties(objectValue, schema: schema, path: path)
     }
 
     private func validateRequiredProperties(_ object: [String: Any], required: [String], path: String) throws {
@@ -394,16 +394,16 @@ struct SBOMValidator: SBOMValidatorProtocol {
         _ object: [String: Any],
         properties: [String: [String: Any]],
         path: String
-    ) throws {
+    ) async throws {
         for (key, value) in object {
             guard let propertySchema = properties[key] else {
                 continue
             }
-            try self.validateValue(value, path: "\(path).\(key)", schema: propertySchema)
+            try await self.validateValue(value, path: "\(path).\(key)", schema: propertySchema)
         }
     }
 
-    private func validateAdditionalProperties(_ object: [String: Any], schema: [String: Any], path: String) throws {
+    private func validateAdditionalProperties(_ object: [String: Any], schema: [String: Any], path: String) async throws {
         guard let additionalProps = schema[SchemaKeys.additionalProperties] else { return }
 
         let allowedProperties = self.collectAllAllowedProperties(from: schema)
@@ -424,18 +424,18 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
         for key in extraProperties {
             guard let value = object[key] else { continue }
-            try self.validateValue(value, path: "\(path).\(key)", schema: additionalPropsSchema)
+            try await self.validateValue(value, path: "\(path).\(key)", schema: additionalPropsSchema)
         }
     }
 
-    private func validateUnevaluatedProperties(_ object: [String: Any], schema: [String: Any], path: String) throws {
+    private func validateUnevaluatedProperties(_ object: [String: Any], schema: [String: Any], path: String) async throws {
         guard let unevaluatedProps = schema[SchemaKeys.unevaluatedProperties] as? Bool,
               !unevaluatedProps
         else {
             return
         }
 
-        let evaluatedProperties = self.collectAllEvaluatedProperties(from: schema)
+        let evaluatedProperties = await self.collectAllEvaluatedProperties(from: schema)
         let unevaluated = Set(object.keys).subtracting(evaluatedProperties)
 
         guard unevaluated.isEmpty else {
@@ -449,18 +449,18 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
     // MARK: - Type-Specific Validation - Array
 
-    private func validateArrayIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
+    private func validateArrayIfNeeded(_ value: Any, schema: [String: Any], path: String) async throws {
         guard let arrayValue = value as? [Any] else { return }
 
         if let items = schema[SchemaKeys.items] as? [String: Any] {
-            try self.validateArrayItems(arrayValue, itemSchema: items, path: path)
+            try await self.validateArrayItems(arrayValue, itemSchema: items, path: path)
         }
         try self.validateArrayConstraints(arrayValue, schema: schema, path: path)
     }
 
-    private func validateArrayItems(_ array: [Any], itemSchema: [String: Any], path: String) throws {
+    private func validateArrayItems(_ array: [Any], itemSchema: [String: Any], path: String) async throws {
         for (index, item) in array.enumerated() {
-            try self.validateValue(item, path: "\(path)[\(index)]", schema: itemSchema)
+            try await self.validateValue(item, path: "\(path)[\(index)]", schema: itemSchema)
         }
     }
 
@@ -531,13 +531,13 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
     // MARK: - Type-Specific Validation - String
 
-    private func validateStringIfNeeded(_ value: Any, schema: [String: Any], path: String) throws {
+    private func validateStringIfNeeded(_ value: Any, schema: [String: Any], path: String) async throws {
         guard let stringValue = value as? String else { return }
 
         try self.validateStringLength(stringValue, schema: schema, path: path)
 
         if let pattern = schema[SchemaKeys.pattern] as? String {
-            try self.validatePattern(stringValue, pattern: pattern, path: path)
+            try await self.validatePattern(stringValue, pattern: pattern, path: path)
         }
         if let format = schema[SchemaKeys.format] as? String {
             try self.validateFormat(stringValue, format: format, path: path)
@@ -562,8 +562,8 @@ struct SBOMValidator: SBOMValidatorProtocol {
         }
     }
 
-    private func validatePattern(_ value: String, pattern: String, path: String) throws {
-        let regex = try Self.getCachedRegex(for: pattern, path: path)
+    private func validatePattern(_ value: String, pattern: String, path: String) async throws {
+        let regex = try await Self.getCachedRegex(for: pattern, path: path)
 
         let range = NSRange(location: 0, length: value.utf16.count)
 
@@ -583,41 +583,18 @@ struct SBOMValidator: SBOMValidatorProtocol {
     }
     
     /// Get a cached compiled regex pattern, or compile and cache it if not present
-    private static func getCachedRegex(for pattern: String, path: String) throws -> NSRegularExpression {
-        // Note: This is a synchronous wrapper around the actor
-        // In a fully async context, this could be made async
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: NSRegularExpression?
-        var compilationError: Error?
-        
-        Task {
-            // Check cache first
-            if let cached = await regexCache.get(pattern) {
-                result = cached
-                semaphore.signal()
-                return
-            }
-            
-            // Compile and cache if not found
-            do {
-                guard let regex = try? NSRegularExpression(pattern: pattern) else {
-                    throw SBOMValidatorError.invalidValue(path: path, message: "Invalid regex pattern: \(pattern)")
-                }
-                await regexCache.set(pattern, regex: regex)
-                result = regex
-            } catch let e {
-                compilationError = e
-            }
-            semaphore.signal()
+    private static func getCachedRegex(for pattern: String, path: String) async throws -> NSRegularExpression {
+        // Check cache first
+        if let cached = await regexCache.get(pattern) {
+            return cached
         }
         
-        semaphore.wait()
-        
-        if let error = compilationError {
-            throw error
+        // Compile and cache if not found
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            throw SBOMValidatorError.invalidValue(path: path, message: "Invalid regex pattern: \(pattern)")
         }
-        
-        return result!
+        await regexCache.set(pattern, regex: regex)
+        return regex
     }
 
     private func validateFormat(_ value: String, format: String, path: String) throws {
@@ -659,17 +636,17 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
     // MARK: - Schema Resolution and Collection Helpers
 
-    private func collectAllRequired(from schema: [String: Any]) -> [String] {
+    private func collectAllRequired(from schema: [String: Any]) async -> [String] {
         var allRequired: [String] = []
-        self.collectFromSchema(schema, key: SchemaKeys.required) { (required: [String]) in
+        await self.collectFromSchema(schema, key: SchemaKeys.required) { (required: [String]) in
             allRequired.append(contentsOf: required)
         }
         return allRequired
     }
 
-    private func collectAllProperties(from schema: [String: Any]) -> [String: [String: Any]] {
+    private func collectAllProperties(from schema: [String: Any]) async -> [String: [String: Any]] {
         var allProperties: [String: [String: Any]] = [:]
-        self.collectFromSchema(schema, key: SchemaKeys.properties) { (properties: [String: [String: Any]]) in
+        await self.collectFromSchema(schema, key: SchemaKeys.properties) { (properties: [String: [String: Any]]) in
             allProperties.merge(properties) { _, new in new }
         }
         return allProperties
@@ -693,7 +670,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
         return allowedProperties
     }
 
-    private func collectAllEvaluatedProperties(from schema: [String: Any]) -> Set<String> {
+    private func collectAllEvaluatedProperties(from schema: [String: Any]) async -> Set<String> {
         var evaluatedProperties = Set<String>()
 
         if let properties = schema[SchemaKeys.properties] as? [String: Any] {
@@ -707,7 +684,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
         for compositionKey in [SchemaKeys.allOf, SchemaKeys.anyOf, SchemaKeys.oneOf] {
             if let schemas = schema[compositionKey] as? [[String: Any]] {
                 for subSchema in schemas {
-                    evaluatedProperties.formUnion(self.collectEvaluatedProperties(from: subSchema))
+                    evaluatedProperties.formUnion(await self.collectEvaluatedProperties(from: subSchema))
                 }
             }
         }
@@ -715,16 +692,16 @@ struct SBOMValidator: SBOMValidatorProtocol {
         return evaluatedProperties
     }
 
-    private func collectEvaluatedProperties(from schema: [String: Any]) -> Set<String> {
+    private func collectEvaluatedProperties(from schema: [String: Any]) async -> Set<String> {
         var properties = Set<String>()
-        self.collectFromSchema(schema, key: SchemaKeys.properties) { (schemaProperties: [String: Any]) in
+        await self.collectFromSchema(schema, key: SchemaKeys.properties) { (schemaProperties: [String: Any]) in
             properties.formUnion(schemaProperties.keys)
         }
         return properties
     }
 
     /// Generic helper to collect data from schema with $ref and allOf resolution
-    private func collectFromSchema<T>(_ schema: [String: Any], key: String, collector: (T) -> Void) {
+    private func collectFromSchema<T>(_ schema: [String: Any], key: String, collector: (T) -> Void) async {
         // Collect from direct key
         if let value = schema[key] as? T {
             collector(value)
@@ -734,35 +711,26 @@ struct SBOMValidator: SBOMValidatorProtocol {
         if let ref = schema[SchemaKeys.ref] as? String, ref.hasPrefix("#/") {
             let pointer = String(ref.dropFirst(2))
             let components = pointer.components(separatedBy: "/")
-            if let referencedSchema = resolveReference(components: components, in: self.schema) {
-                self.collectFromSchema(referencedSchema, key: key, collector: collector)
+            if let referencedSchema = await resolveReference(components: components, in: self.schema) {
+                await self.collectFromSchema(referencedSchema, key: key, collector: collector)
             }
         }
 
         // Recursively collect from allOf
         if let allOf = schema[SchemaKeys.allOf] as? [[String: Any]] {
             for subSchema in allOf {
-                self.collectFromSchema(subSchema, key: key, collector: collector)
+                await self.collectFromSchema(subSchema, key: key, collector: collector)
             }
         }
     }
 
     /// Resolve a schema reference with caching
-    private func resolveReference(components: [String], in schema: [String: Any]) -> [String: Any]? {
+    private func resolveReference(components: [String], in schema: [String: Any]) async -> [String: Any]? {
         // Create cache key from components
         let referenceKey = components.joined(separator: "/")
         
-        // Check cache first (synchronous wrapper around actor)
-        let semaphore = DispatchSemaphore(value: 0)
-        var cachedSchema: [String: Any]?
-        
-        Task {
-            cachedSchema = await Self.referenceCache.get(referenceKey)
-            semaphore.signal()
-        }
-        semaphore.wait()
-        
-        if let cached = cachedSchema {
+        // Check cache first
+        if let cached = await Self.referenceCache.get(referenceKey) {
             return cached
         }
         
@@ -783,9 +751,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
         }
         
         // Cache the resolved reference
-        Task {
-            await Self.referenceCache.set(referenceKey, schema: resolvedSchema)
-        }
+        await Self.referenceCache.set(referenceKey, schema: resolvedSchema)
         
         return resolvedSchema
     }

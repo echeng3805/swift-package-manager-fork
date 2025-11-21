@@ -17,11 +17,11 @@ struct CycloneDXValidator: SBOMValidatorProtocol {
         self.validator = SBOMValidator(schema: schema)
     }
 
-    func validate(_ jsonObject: Any) throws {
-        try self.validator.validate(jsonObject)
+    func validate(_ jsonObject: Any) async throws {
+        try await self.validator.validate(jsonObject)
     }
 
-    func validateValue(_ value: Any, path: String) throws {
-        try self.validator.validateValue(value, path: path)
+    func validateValue(_ value: Any, path: String) async throws {
+        try await self.validator.validateValue(value, path: path)
     }
 }

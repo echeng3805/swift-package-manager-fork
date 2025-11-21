@@ -87,7 +87,7 @@ internal struct SBOMEncoder {
                 .jsonConversionFailed(message: "Could not convert generated SBOM file into JSON object for validation")
         }
         let schema = try SBOMSchema(from: getSchemaFilename(from: spec.type))
-        try schema.validate(json: sbomJSONObject, spec: spec)
+        try await schema.validate(json: sbomJSONObject, spec: spec)
     }
 
     private static func getSchemaFilename(from spec: Spec) throws -> String {
