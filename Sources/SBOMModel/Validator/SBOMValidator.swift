@@ -25,6 +25,19 @@ internal actor SBOMRegexCache {
     }
 }
 
+/// Cache for storing resolved schema references (to avoid redundant traversals)
+internal actor SBOMSchemaReferenceCache {
+    private var cache: [String: [String: Any]] = [:]
+    
+    internal func get(_ reference: String) -> [String: Any]? {
+        self.cache[reference]
+    }
+    
+    internal func set(_ reference: String, schema: [String: Any]) {
+        self.cache[reference] = schema
+    }
+}
+
 
 // TODO: echeng3805
 // use a library? or maybe move this all to test code?
@@ -44,6 +57,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
     // Cached regex patterns for performance
     private static let emailRegex = #/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/#
     private static let regexCache = SBOMRegexCache()
+    private static let referenceCache = SBOMSchemaReferenceCache()
 
     enum StringFormat: String {
         case dateTime = "date-time"
@@ -733,7 +747,26 @@ struct SBOMValidator: SBOMValidatorProtocol {
         }
     }
 
+    /// Resolve a schema reference with caching
     private func resolveReference(components: [String], in schema: [String: Any]) -> [String: Any]? {
+        // Create cache key from components
+        let referenceKey = components.joined(separator: "/")
+        
+        // Check cache first (synchronous wrapper around actor)
+        let semaphore = DispatchSemaphore(value: 0)
+        var cachedSchema: [String: Any]?
+        
+        Task {
+            cachedSchema = await Self.referenceCache.get(referenceKey)
+            semaphore.signal()
+        }
+        semaphore.wait()
+        
+        if let cached = cachedSchema {
+            return cached
+        }
+        
+        // Resolve reference by traversing schema
         var current: Any = schema
         for component in components {
             guard let dict = current as? [String: Any] else {
@@ -744,7 +777,17 @@ struct SBOMValidator: SBOMValidatorProtocol {
             }
             current = next
         }
-        return current as? [String: Any]
+        
+        guard let resolvedSchema = current as? [String: Any] else {
+            return nil
+        }
+        
+        // Cache the resolved reference
+        Task {
+            await Self.referenceCache.set(referenceKey, schema: resolvedSchema)
+        }
+        
+        return resolvedSchema
     }
 
     // MARK: - Utility Functions
