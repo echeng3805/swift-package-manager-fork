@@ -187,10 +187,14 @@ struct SBOMValidator: SBOMValidatorProtocol {
 
     private func determineActualType(_ value: Any) -> (type: String, debugInfo: String) {
         switch value {
-        case is String:
-            return ("string", "value: \"\(value)\"")
+        case let string as String:
+            return ("string", "value: \"\(string)\"")
+        case let number as NSNumber where number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber:
+            return ("boolean", "value: \(number.boolValue)")
+        case let number as NSNumber where CFNumberIsFloatType(number):
+            return ("number", "value: \(number.doubleValue)")
         case let number as NSNumber:
-            return self.determineNumberType(number)
+            return ("integer", "value: \(number.intValue)")
         case let array as [Any]:
             return ("array", "length: \(array.count)")
         case let dict as [String: Any]:
@@ -201,16 +205,6 @@ struct SBOMValidator: SBOMValidatorProtocol {
         default:
             return ("unknown", "type: \(type(of: value))")
         }
-    }
-
-    private func determineNumberType(_ number: NSNumber) -> (type: String, debugInfo: String) {
-        if self.isBoolean(number) {
-            return ("boolean", "value: \(number.boolValue)")
-        }
-        if CFNumberIsFloatType(number) {
-            return ("number", "value: \(number.doubleValue)")
-        }
-        return ("integer", "value: \(number.intValue)")
     }
 
     private func isBoolean(_ number: NSNumber) -> Bool {
