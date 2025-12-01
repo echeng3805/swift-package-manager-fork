@@ -46,7 +46,6 @@ internal actor SBOMSchemaReferenceCache {
 struct SBOMValidator: SBOMValidatorProtocol {
     // MARK: - Constants
     
-    // Cached formatters for performance (thread-safe for reading)
     private static let iso8601Formatter = ISO8601DateFormatter()
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -54,7 +53,6 @@ struct SBOMValidator: SBOMValidatorProtocol {
         return formatter
     }()
     
-    // Cached regex patterns for performance
     private static let emailRegex = #/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/#
     private static let regexCache = SBOMRegexCache()
     private static let referenceCache = SBOMSchemaReferenceCache()
@@ -131,12 +129,19 @@ struct SBOMValidator: SBOMValidatorProtocol {
     }
 
     func validateValue(_ value: Any, path: String, schema: [String: Any]) async throws {
-        // Type validation
         if let expectedType = schema[SchemaKeys.type] as? String {
             try self.validateType(value, expectedType: expectedType, path: path)
         }
 
-        // Schema composition keywords
+        if let constValue = schema[SchemaKeys.const] {
+            try self.validateConst(value, expectedValue: constValue, path: path)
+        }
+        if let enumValues = schema[SchemaKeys.enumKey] as? [Any] {
+            try self.validateEnum(value, allowedValues: enumValues, path: path)
+        }
+        try self.validateNumberIfNeeded(value, schema: schema, path: path)
+
+
         if let ref = schema[SchemaKeys.ref] as? String {
             try await self.validateReference(value, ref: ref, path: path, schema: schema)
         }
@@ -153,19 +158,9 @@ struct SBOMValidator: SBOMValidatorProtocol {
             try await self.validateNot(value, schema: notSchema, path: path)
         }
 
-        // Value-specific validations
-        if let constValue = schema[SchemaKeys.const] {
-            try self.validateConst(value, expectedValue: constValue, path: path)
-        }
-        if let enumValues = schema[SchemaKeys.enumKey] as? [Any] {
-            try self.validateEnum(value, allowedValues: enumValues, path: path)
-        }
-
-        // Type-specific validations
         try await self.validateObjectIfNeeded(value, schema: schema, path: path)
         try await self.validateArrayIfNeeded(value, schema: schema, path: path)
         try await self.validateStringIfNeeded(value, schema: schema, path: path)
-        try self.validateNumberIfNeeded(value, schema: schema, path: path)
     }
 
     // MARK: - Type Validation
@@ -637,59 +632,58 @@ struct SBOMValidator: SBOMValidatorProtocol {
         var evaluatedProperties: Set<String> = []
     }
     
-    /// Collect all schema metadata in a single traversal pass for better performance
+    /// Collect all schema metadata in a single iterative pass for better performance
+    /// Uses an iterative approach with cycle detection to avoid stack overflow and improve performance
     private func collectSchemaMetadata(from schema: [String: Any]) async -> SchemaMetadata {
         var metadata = SchemaMetadata()
-        await self.collectMetadataFromSchema(schema, metadata: &metadata)
-        return metadata
-    }
-    
-    private func collectMetadataFromSchema(_ schema: [String: Any], metadata: inout SchemaMetadata) async {
-        // Collect required properties
-        if let required = schema[SchemaKeys.required] as? [String] {
-            metadata.required.append(contentsOf: required)
-            metadata.evaluatedProperties.formUnion(required)
-        }
+        var queue: [[String: Any]] = [schema]
+        var visited = Set<String>() // Track by schema identity to avoid reprocessing
         
-        // Collect properties
-        if let properties = schema[SchemaKeys.properties] as? [String: [String: Any]] {
-            metadata.properties.merge(properties) { _, new in new }
-            metadata.allowedProperties.formUnion(properties.keys)
-            metadata.evaluatedProperties.formUnion(properties.keys)
-        }
-        
-        // Resolve and collect from $ref - always resolve from root schema
-        if let ref = schema[SchemaKeys.ref] as? String, ref.hasPrefix("#/") {
-            let pointer = String(ref.dropFirst(2))
-            let components = pointer.components(separatedBy: "/")
-            if let referencedSchema = await resolveReference(components: components, in: self.schema) {
-                await self.collectMetadataFromSchema(referencedSchema, metadata: &metadata)
+        while let current = queue.popLast() {
+            // Create unique identifier for this schema to detect cycles
+            let schemaId = self.createSchemaIdentifier(current)
+            guard !visited.contains(schemaId) else { continue }
+            visited.insert(schemaId)
+            
+            // 1. Collect required properties
+            if let required = current[SchemaKeys.required] as? [String] {
+                metadata.required.append(contentsOf: required)
+                metadata.evaluatedProperties.formUnion(required)
             }
-        }
-        
-        // Recursively collect from allOf only (not anyOf/oneOf as they represent alternatives)
-        if let allOf = schema[SchemaKeys.allOf] as? [[String: Any]] {
-            for subSchema in allOf {
-                await self.collectMetadataFromSchema(subSchema, metadata: &metadata)
+            
+            // 2. Collect properties
+            if let properties = current[SchemaKeys.properties] as? [String: [String: Any]] {
+                metadata.properties.merge(properties) { _, new in new }
+                metadata.allowedProperties.formUnion(properties.keys)
+                metadata.evaluatedProperties.formUnion(properties.keys)
             }
-        }
-        
-        // For anyOf and oneOf, we need to collect allowed properties for validation purposes
-        // but NOT required properties (since they're alternatives, not all required)
-        for compositionKey in [SchemaKeys.anyOf, SchemaKeys.oneOf] {
-            if let schemas = schema[compositionKey] as? [[String: Any]] {
-                for subSchema in schemas {
-                    // Only collect allowed/evaluated properties, not required
-                    if let properties = subSchema[SchemaKeys.properties] as? [String: [String: Any]] {
-                        metadata.allowedProperties.formUnion(properties.keys)
-                        metadata.evaluatedProperties.formUnion(properties.keys)
-                    }
-                    // Recursively handle nested schemas
-                    if let ref = subSchema[SchemaKeys.ref] as? String, ref.hasPrefix("#/") {
-                        let pointer = String(ref.dropFirst(2))
-                        let components = pointer.components(separatedBy: "/")
-                        if let referencedSchema = await resolveReference(components: components, in: self.schema) {
-                            if let properties = referencedSchema[SchemaKeys.properties] as? [String: [String: Any]] {
+            
+            // 3. Handle $ref - resolve once and add to queue
+            if let ref = current[SchemaKeys.ref] as? String, ref.hasPrefix("#/") {
+                if let resolved = await self.resolveAndCacheReference(ref) {
+                    queue.append(resolved)
+                }
+            }
+            
+            // 4. Handle allOf - all schemas must be satisfied
+            if let allOf = current[SchemaKeys.allOf] as? [[String: Any]] {
+                queue.append(contentsOf: allOf)
+            }
+            
+            // 5. Handle anyOf/oneOf - collect allowed properties only
+            for compositionKey in [SchemaKeys.anyOf, SchemaKeys.oneOf] {
+                if let schemas = current[compositionKey] as? [[String: Any]] {
+                    for subSchema in schemas {
+                        // Extract properties without recursing
+                        if let properties = subSchema[SchemaKeys.properties] as? [String: [String: Any]] {
+                            metadata.allowedProperties.formUnion(properties.keys)
+                            metadata.evaluatedProperties.formUnion(properties.keys)
+                        }
+                        
+                        // Handle $ref in composition schemas
+                        if let ref = subSchema[SchemaKeys.ref] as? String, ref.hasPrefix("#/") {
+                            if let resolved = await self.resolveAndCacheReference(ref),
+                               let properties = resolved[SchemaKeys.properties] as? [String: [String: Any]] {
                                 metadata.allowedProperties.formUnion(properties.keys)
                                 metadata.evaluatedProperties.formUnion(properties.keys)
                             }
@@ -698,6 +692,21 @@ struct SBOMValidator: SBOMValidatorProtocol {
                 }
             }
         }
+        
+        return metadata
+    }
+    
+    /// Create a unique identifier for a schema to detect cycles
+    private func createSchemaIdentifier(_ schema: [String: Any]) -> String {
+        // Use memory address for identity-based comparison
+        return String(describing: ObjectIdentifier(schema as AnyObject))
+    }
+    
+    /// Resolve reference with caching helper
+    private func resolveAndCacheReference(_ ref: String) async -> [String: Any]? {
+        let pointer = String(ref.dropFirst(2))
+        let components = pointer.components(separatedBy: "/")
+        return await self.resolveReference(components: components, in: self.schema)
     }
     
     /// Resolve a schema reference with caching
