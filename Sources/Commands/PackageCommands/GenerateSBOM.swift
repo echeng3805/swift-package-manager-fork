@@ -21,6 +21,17 @@ import SPMBuildCore
 import Workspace
 
 extension SwiftPackageCommand {
+    enum SBOMCommandError: Error, LocalizedError {
+        case noSpecArg
+        
+        var errorDescription: String? {
+            switch self {
+            case .noSpecArg:
+                return "No SBOM specification argument provided. Use --sbom-spec to specify the SBOM format."
+            }
+        }
+    }
+    
     struct GenerateSbom: AsyncSwiftCommand {
         static let configuration = CommandConfiguration(
             abstract: "Generate a Software Bill of Materials (SBOM).")
@@ -32,6 +43,10 @@ extension SwiftPackageCommand {
         var product: String?
 
         func run(_ swiftCommandState: SwiftCommandState) async throws {
+            guard !globalOptions.sbom.sbomSpecs.isEmpty else {
+                throw SBOMCommandError.noSpecArg
+            }
+            
             swiftCommandState.observabilityScope.emit(warning: "`generate-sbom` subcommand creates SBOM(s) based on modules graph only")
 
             let workspace = try swiftCommandState.getActiveWorkspace()
