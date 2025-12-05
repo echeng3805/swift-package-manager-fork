@@ -32,24 +32,16 @@ extension SwiftPackageCommand {
         var product: String?
 
         func run(_ swiftCommandState: SwiftCommandState) async throws {
+            swiftCommandState.observabilityScope.emit(warning: "`generate-sbom` subcommand creates SBOM(s) based on modules graph only")
 
             let workspace = try swiftCommandState.getActiveWorkspace()
             let packageGraph = try await workspace.loadPackageGraph(
                 rootInput: swiftCommandState.getWorkspaceRoot(),
                 explicitProduct: self.product,
+                forceResolvedVersions: self.globalOptions.resolver.forceResolvedVersions,
                 observabilityScope: swiftCommandState.observabilityScope
             )
             let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
-
-            // TODO echeng3805: remove build graph and instead print a warning that build graph isn't used
-            // let buildSystem = try await swiftCommandState.createBuildSystem(
-            //     explicitProduct: self.product
-            // )
-            // let buildResult = try await buildSystem.build(
-            //     subset: self.product.map { .product($0) } ?? .allExcludingTests,
-            //     buildOutputs: [.dependencyGraph]
-            // )
-            swiftCommandState.observabilityScope.emit(warning: "`generate-sbom` subcommand creates SBOM(s) based on modules graph only")
 
             let input = SBOMInput(
                 modulesGraph: packageGraph,
@@ -61,14 +53,12 @@ extension SwiftPackageCommand {
                 dir: await SBOMCreator.resolveSBOMDirectory(from: self.globalOptions.sbom.sbomDirectory, withDefault: try swiftCommandState.productsBuildParameters.buildPath)
             )
 
+            print("Creating SBOMs...")
             let sbomStartTime = ContinuousClock.Instant.now
             let creator = SBOMCreator(input: input)
             let sbomPaths = try await creator.createSBOMs()
             let duration = ContinuousClock.Instant.now - sbomStartTime
             let formattedDuration = duration.formatted(.units(allowed: [.seconds], fractionalPart: .show(length: 2, rounded: .up)))
-            
-            print("Creating SBOMs...")
-
             for sbomPath in sbomPaths {
                 // TODO echeng3805 should this be using observabilityScope?
                 print("- created SBOM at \(sbomPath.pathString)")
