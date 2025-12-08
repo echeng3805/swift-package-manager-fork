@@ -7678,6 +7678,7 @@ struct PackageCommandTests {
             .Feature.Command.Package.GenerateSBOM,
         ),
     )
+
     struct GenerateSBOMCommandTests {
         @Test(
             arguments: getBuildData(for: SupportedBuildSystemOnAllPlatforms),
@@ -7708,7 +7709,7 @@ struct PackageCommandTests {
             try await fixture(name: "DependencyResolution/Internal/Simple") { fixturePath in
                 await expectThrowsCommandExecutionError(
                     try await execute(
-                        ["generate-sbom", "--sbom-spec=cyclonedx22"],
+                        ["generate-sbom", "--sbom-spec", "cyclonedx22"],
                         packagePath: fixturePath,
                         configuration: data.config,
                         buildSystem: data.buildSystem,
@@ -7718,7 +7719,6 @@ struct PackageCommandTests {
                 }
             }
         }
-    
 
         @Test(
             arguments: getBuildData(for: SupportedBuildSystemOnAllPlatforms),
@@ -7728,12 +7728,11 @@ struct PackageCommandTests {
         ) async throws {
             try await fixture(name: "DependencyResolution/Internal/Simple") { fixturePath in
                 let (stdout, stderr) = try await execute(
-                    ["generate-sbom", "--sbom-spec=cyclonedx"],
+                    ["generate-sbom", "--sbom-spec", "cyclonedx"],
                     packagePath: fixturePath,
                     configuration: data.config,
                     buildSystem: data.buildSystem,
                 )
-
                 #expect(stdout.contains("SBOMs created"))
 
                 let prefix = "created SBOM at "
@@ -7743,6 +7742,8 @@ struct PackageCommandTests {
                 let sbomPath = try AbsolutePath(validating: pathString)
                 
                 #expect(localFileSystem.exists(sbomPath))
+                let filesInDirectory = try localFileSystem.getDirectoryContents(sbomPath.parentDirectory)
+                #expect(filesInDirectory.count == 1, "should only produce 1 CycloneDX SBOM")
             }
         }
 
@@ -7769,6 +7770,9 @@ struct PackageCommandTests {
                 let sbomPath = try AbsolutePath(validating: pathString)
                 
                 #expect(localFileSystem.exists(sbomPath))
+                 #expect(localFileSystem.exists(sbomPath))
+                let filesInDirectory = try localFileSystem.getDirectoryContents(sbomPath.parentDirectory)
+                #expect(filesInDirectory.count == 1, "should only produce 1 SPDX SBOM")
             }
         }
     
@@ -7809,7 +7813,7 @@ struct PackageCommandTests {
                     buildSystem: data.buildSystem,
                 )
                 #expect(stdout.contains("SBOMs created"))
-                
+
                 let prefix = "created SBOM at "
                 let range = try #require(stdout.range(of: prefix), "Could not find '\(prefix)' in output")
                 let endRange = try #require(stdout[range.upperBound...].range(of: ".json"), "Could not find '.json' in output")
