@@ -224,6 +224,8 @@ extension SBOMExtractor {
                 dependentProduct.packageIdentity == rootPackage.identity
 
             // only track dependency if not both in root package
+            // this is because circular dependencies can be created in the SBOM
+            // because products in the same root package can share or be composed of the same targets
             if !bothInRootPackage {
                 // add product -> dependentProduct dependency
                 trackRelationship(parent: processedProductComponent, child: dependentProductComponent)
