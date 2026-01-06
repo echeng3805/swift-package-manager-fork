@@ -35,6 +35,22 @@ internal enum SBOMError: Error, LocalizedError, CustomStringConvertible {
     }
 }
 
+// MARK: - Command Errors
+
+/// Errors that can occur during the SBOM generation command
+package enum SBOMCommandError: Error, LocalizedError {
+    case noSpecArg
+    case targetFlagNotSupported
+    
+    public var errorDescription: String? {
+        switch self {
+        case .noSpecArg:
+            return "No SBOM specification argument provided. Use --sbom-spec to specify the SBOM format."
+        case .targetFlagNotSupported:
+            return "--sbom-spec cannot be used with --target flag"
+        }
+    }
+}
 // MARK: - Schema Errors
 
 /// Errors that can occur during SBOM schema operations

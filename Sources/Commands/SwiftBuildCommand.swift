@@ -160,6 +160,11 @@ public struct SwiftBuildCommand: AsyncSwiftCommand {
             throw ExitCode.failure
         }
 
+        // --sbom-spec cannot be used with --target flag; validate before the build, to bail out early
+        guard self.globalOptions.sbom.sbomSpecs.isEmpty || options.target == nil else {
+            throw SBOMModel.SBOMCommandError.targetFlagNotSupported
+        }
+
         var productsBuildParameters = try swiftCommandState.productsBuildParameters
         var toolsBuildParameters = try swiftCommandState.toolsBuildParameters
 

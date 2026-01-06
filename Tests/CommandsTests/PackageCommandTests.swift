@@ -7828,6 +7828,26 @@ struct PackageCommandTests {
         @Test(
             arguments: getBuildData(for: SupportedBuildSystemOnAllPlatforms),
         )
+        func generateCycloneDXSBOMWithTarget(
+            data: BuildData,
+        ) async throws {
+            try await fixture(name: "DependencyResolution/Internal/Simple") { fixturePath in
+                await expectThrowsCommandExecutionError(
+                    try await execute(
+                        ["generate-sbom", "--sbom-spec", "cyclonedx", "--target", "Foo"],
+                        packagePath: fixturePath,
+                        configuration: data.config,
+                        buildSystem: data.buildSystem,
+                    )
+                ) { error in
+                    #expect(error.stderr.contains("Unknown option '--target'"))
+                }
+            }
+        }
+
+        @Test(
+            arguments: getBuildData(for: SupportedBuildSystemOnAllPlatforms),
+        )
         func generateSPDXSBOMWithProduct(
             data: BuildData,
         ) async throws {
@@ -7849,6 +7869,26 @@ struct PackageCommandTests {
                 #expect(localFileSystem.exists(sbomPath))
                 let filesInDirectory = try localFileSystem.getDirectoryContents(sbomPath.parentDirectory)
                 #expect(filesInDirectory.count == 1, "should only produce 1 SPDX SBOM")
+            }
+        }
+
+        @Test(
+            arguments: getBuildData(for: SupportedBuildSystemOnAllPlatforms),
+        )
+        func generateSPDXSBOMWithTarget(
+            data: BuildData,
+        ) async throws {
+            try await fixture(name: "DependencyResolution/Internal/Simple") { fixturePath in
+                await expectThrowsCommandExecutionError(
+                    try await execute(
+                        ["generate-sbom", "--sbom-spec", "spdx", "--target", "Foo"],
+                        packagePath: fixturePath,
+                        configuration: data.config,
+                        buildSystem: data.buildSystem,
+                    )
+                ) { error in
+                    #expect(error.stderr.contains("Unknown option '--target'"))
+                }
             }
         }
 
