@@ -136,7 +136,7 @@ extension PackagePIFBuilder {
     ///
     /// This format helps make sure that there is no collision with any other PIF targets,
     /// and in particular that a PIF target and a PIF product can have the same name (as they often do).
-    public static func targetGUID(forProductName name: String, withId id: String, suffix: TargetSuffix? = nil) -> GUID {
+    package static func targetGUID(forProductName name: String, withId id: String, suffix: TargetSuffix? = nil) -> GUID {
         let suffixDescription: String = suffix.uniqueDescription(forName: name)
         return "PACKAGE-PRODUCT:\(id).\(name)\(suffixDescription)"
     }
