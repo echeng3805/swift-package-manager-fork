@@ -184,7 +184,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
         switch value {
         case let string as String:
             return ("string", "value: \"\(string)\"")
-        case let number as NSNumber where number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber:
+        case let number as NSNumber where isBoolean(number):
             return ("boolean", "value: \(number.boolValue)")
         case let number as NSNumber where CFNumberIsFloatType(number):
             return ("number", "value: \(number.doubleValue)")
@@ -203,7 +203,13 @@ struct SBOMValidator: SBOMValidatorProtocol {
     }
 
     private func isBoolean(_ number: NSNumber) -> Bool {
-        number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber
+        #if canImport(Darwin)
+        return number === kCFBooleanTrue as NSNumber || number === kCFBooleanFalse as NSNumber
+        #else
+        // On Linux, check the objCType to determine if it's a boolean
+        let objCType = String(cString: number.objCType)
+        return objCType == "c" || objCType == "B"
+        #endif
     }
 
     // MARK: - Schema Composition Validation
