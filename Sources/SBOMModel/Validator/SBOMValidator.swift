@@ -186,7 +186,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
             return ("string", "value: \"\(string)\"")
         case let number as NSNumber where isBoolean(number):
             return ("boolean", "value: \(number.boolValue)")
-        case let number as NSNumber where CFNumberIsFloatType(number):
+        case let number as NSNumber where isFloatType(number):
             return ("number", "value: \(number.doubleValue)")
         case let number as NSNumber:
             return ("integer", "value: \(number.intValue)")
@@ -209,6 +209,16 @@ struct SBOMValidator: SBOMValidatorProtocol {
         // On Linux, check the objCType to determine if it's a boolean
         let objCType = String(cString: number.objCType)
         return objCType == "c" || objCType == "B"
+        #endif
+    }
+    
+    private func isFloatType(_ number: NSNumber) -> Bool {
+        #if canImport(Darwin)
+        return CFNumberIsFloatType(number)
+        #else
+        // On Linux, check the objCType to determine if it's a floating point type
+        let objCType = String(cString: number.objCType)
+        return objCType == "f" || objCType == "d"
         #endif
     }
 
@@ -789,7 +799,7 @@ struct SBOMValidator: SBOMValidatorProtocol {
         case let num as NSNumber:
             if self.isBoolean(num) {
                 description = "\(num.boolValue) (boolean)"
-            } else if CFNumberIsFloatType(num) {
+            } else if self.isFloatType(num) {
                 description = "\(num.doubleValue) (number)"
             } else {
                 description = "\(num.intValue) (integer)"
