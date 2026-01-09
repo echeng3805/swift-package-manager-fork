@@ -10,6 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import ArgumentParser
+
 package enum Spec: String, Codable, Equatable, CaseIterable, Comparable {
     case cyclonedx
     case spdx
@@ -60,6 +62,12 @@ package enum Spec: String, Codable, Equatable, CaseIterable, Comparable {
         case .spdx, .spdx3: // spdx4
             (.spdx3, SPDXConstants.spdx3SpecVersion)
         }
+    }
+}
+
+extension Spec: ExpressibleByArgument {
+    package init?(argument: String) {
+        self.init(rawValue: argument)
     }
 }
 

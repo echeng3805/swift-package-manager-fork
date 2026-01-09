@@ -861,6 +861,5 @@ extension Sanitizer: ExpressibleByArgument {}
 extension BuildSystemProvider.Kind: ExpressibleByArgument {}
 extension Version: @retroactive ExpressibleByArgument {}
 extension PackageIdentity: ExpressibleByArgument {}
-extension Spec: ExpressibleByArgument {}
-extension Filter: ExpressibleByArgument {}
+// Spec and Filter conformances are now defined in SBOMModel module
 extension URL: @retroactive ExpressibleByArgument {}

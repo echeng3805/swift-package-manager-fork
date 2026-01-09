@@ -10,6 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import ArgumentParser
 import Basics
 import PackageGraph
 import PackageModel
@@ -25,6 +26,12 @@ package enum Filter: String, Codable, Equatable, CaseIterable {
         case .product: "Only include product information and product dependencies"
         case .package: "Only include package information and package dependencies"
         }
+    }
+}
+
+extension Filter: ExpressibleByArgument {
+    package init?(argument: String) {
+        self.init(rawValue: argument)
     }
 }
 
