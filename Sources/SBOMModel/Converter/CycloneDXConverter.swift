@@ -41,7 +41,7 @@ internal struct CycloneDXConverter {
         }
     }
 
-    internal static func convertToLicense(from license: SBOMLicense) -> CycloneDXLicense {
+    private static func convertToLicense(from license: SBOMLicense) -> CycloneDXLicense {
         return CycloneDXLicense(
             license: CycloneDXLicenseInfo(
                 id: license.name,
@@ -50,7 +50,7 @@ internal struct CycloneDXConverter {
         )
     }
 
-    internal static func convertToSchema(from spec: SBOMSpec) async throws -> String {
+    private static func convertToSchema(from spec: SBOMSpec) async throws -> String {
         switch spec.concreteSpec {
         case .cyclonedx1:
             return CycloneDXConstants.cyclonedx1Schema
@@ -61,7 +61,7 @@ internal struct CycloneDXConverter {
         }
     }
 
-    internal static func convertToPedigree(from originator: SBOMOriginator) async throws -> CycloneDXPedigree {
+    private static func convertToPedigree(from originator: SBOMOriginator) async throws -> CycloneDXPedigree {
         guard let sbomCommits = originator.commits else {
             return CycloneDXPedigree(commits: nil)
         }
@@ -84,7 +84,7 @@ internal struct CycloneDXConverter {
         return CycloneDXPedigree(commits: cyclonedxCommits)
     }
 
-    internal static func convertToExternalReferences(from originator: SBOMOriginator) async throws -> [CycloneDXExternalReference] {
+    private static func convertToExternalReferences(from originator: SBOMOriginator) async throws -> [CycloneDXExternalReference] {
         guard let registryEntries = originator.entries else {
             return []
         }
@@ -98,7 +98,7 @@ internal struct CycloneDXConverter {
         return externalReferences
     }
 
-    internal static func convertToComponent(from comp: SBOMComponent) async throws -> CycloneDXComponent {
+    private static func convertToComponent(from comp: SBOMComponent) async throws -> CycloneDXComponent {
         try await CycloneDXComponent(
             type: self.convertToCategory(from: comp.category),
             bomRef: comp.id.value,
@@ -129,14 +129,14 @@ internal struct CycloneDXConverter {
         )
     }
 
-    internal static func convertToDependency(from dep: SBOMRelationship) async throws -> CycloneDXDependency {
+    private static func convertToDependency(from dep: SBOMRelationship) async throws -> CycloneDXDependency {
         CycloneDXDependency(
             ref: dep.parentID.value,
             dependsOn: dep.childrenID.map(\.value)
         )
     }
 
-    internal static func convertToMetadata(from document: SBOMDocument) async throws -> CycloneDXMetadata {
+    private static func convertToMetadata(from document: SBOMDocument) async throws -> CycloneDXMetadata {
         var tools: CycloneDXTools? = nil
         if let creators = document.metadata.creators, !creators.isEmpty {
             var toolsComponents: [CycloneDXComponent] = []
