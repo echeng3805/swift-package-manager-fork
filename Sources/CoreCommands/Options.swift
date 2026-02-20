@@ -782,7 +782,7 @@ public struct SBOMOptions: ParsableArguments {
     /// Filter SBOM components and dependencies by entity.
     @Option(
         name: .customLong("sbom-filter"),
-        help: ArgumentHelp("Filter the SBOM components and dependencies by products and/or packages. Must be used with --sbom-spec.")
+        help: ArgumentHelp("Filter the SBOM components and dependencies by type. Must be used with --sbom-spec.")
     )
     package var _sbomFilter: SBOMModel.Filter? = nil
 
