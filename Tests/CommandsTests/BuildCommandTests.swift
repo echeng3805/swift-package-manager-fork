@@ -1831,7 +1831,8 @@ struct BuildSBOMCommandTests {
     private func verifySBOMCreated(
         in stderr: String,
         expectedDirectory: AbsolutePath? = nil,
-        message: String = "should produce at least 1 SBOM"
+        message: String = "should produce at least 1 SBOM",
+        sourceLocation: SourceLocation = #_sourceLocation,
     ) throws {
         let lines = stderr.split(separator: "\n")
         var sbomPaths: [String] = []
@@ -1853,10 +1854,10 @@ struct BuildSBOMCommandTests {
         
         for pathString in sbomPaths {
             let absolutePath = try AbsolutePath(validating: pathString)
-            #expect(localFileSystem.exists(absolutePath), "Reported SBOM should exist at \(absolutePath)")
+            #expect(localFileSystem.exists(absolutePath), "Reported SBOM should exist at \(absolutePath)", sourceLocation: sourceLocation)
             
             if let expectedDir = expectedDirectory {
-                #expect(absolutePath.parentDirectory == expectedDir, "SBOM should be created in the expected directory: \(expectedDir)")
+                #expect(absolutePath.parentDirectory == expectedDir, "SBOM should be created in the expected directory: \(expectedDir)", sourceLocation: sourceLocation)
             }
         }
     }
