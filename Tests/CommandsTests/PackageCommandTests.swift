@@ -7786,16 +7786,19 @@ struct PackageCommandTests {
             data: BuildData,
         ) async throws {
             try await fixture(name: "DependencyResolution/Internal/Simple") { fixturePath in
-                await expectThrowsCommandExecutionError(
-                    try await execute(
-                        ["generate-sbom"],
-                        packagePath: fixturePath,
-                        configuration: data.config,
-                        buildSystem: data.buildSystem,
-                    )
-                ) { error in
-                    #expect(error.stderr.contains("No SBOM specification argument provided."))
-                }
+                let customSBOMDir = fixturePath.appending("custom-sboms")
+                
+                let (stdout, stderr) = try await execute(
+                    ["generate-sbom", "--sbom-output-dir", customSBOMDir.pathString],
+                    packagePath: fixturePath,
+                    configuration: data.config,
+                    buildSystem: data.buildSystem,
+                )
+                
+                #expect(stderr.contains("SBOMs created"))
+                #expect(localFileSystem.isDirectory(customSBOMDir))
+                let files = try localFileSystem.getDirectoryContents(customSBOMDir)
+                #expect(files.count == 2, "should produce both CycloneDX and SPDX SBOMs by default")
             }
         }
 

@@ -38,10 +38,6 @@ extension SwiftPackageCommand {
 
         func run(_ swiftCommandState: SwiftCommandState) async throws {
             do {
-                guard try !sbom.sbomSpecs.isEmpty else {
-                    throw SBOMModel.SBOMCommandError.noSpecArg
-                }
-                
                 let workspace = try swiftCommandState.getActiveWorkspace()
                 let packageGraph = try await workspace.loadPackageGraph(
                     rootInput: swiftCommandState.getWorkspaceRoot(),
@@ -51,13 +47,14 @@ extension SwiftPackageCommand {
                 )
                 let resolvedPackagesStore = try workspace.resolvedPackagesStore.load()
 
+                let specs = try self.sbom.sbomSpecs
                 let input = SBOMInput(
                     modulesGraph: packageGraph,
                     dependencyGraph: nil,
                     store: resolvedPackagesStore,
                     filter: try self.sbom.sbomFilter,
                     product: self.product,
-                    specs: try self.sbom.sbomSpecs,
+                    specs: specs.isEmpty ? [.cyclonedx, .spdx] : specs,
                     dir: await SBOMCreator.resolveSBOMDirectory(from: self.sbom.sbomDirectory, withDefault: try swiftCommandState.productsBuildParameters.buildPath),
                     observabilityScope: swiftCommandState.observabilityScope
                 )
