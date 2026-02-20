@@ -33,7 +33,7 @@ extension SwiftPackageCommand {
         @Option(help: "The product to generate an SBOM for.")
         var product: String?
 
-        @OptionGroup(title: "SBOM")
+        @OptionGroup(title: "Software Bill of Materials (SBOM)")
         var sbom: SBOMOptions
 
         func run(_ swiftCommandState: SwiftCommandState) async throws {
