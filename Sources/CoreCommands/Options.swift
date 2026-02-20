@@ -774,7 +774,7 @@ public struct SBOMOptions: ParsableArguments {
     /// Directory path to generate SBOM(s) in.
     @Option(
         name: .customLong("sbom-output-dir"),
-        help: ArgumentHelp("The absolute or relative directory path to generate the SBOM(s) in. Must be used with --sbom-spec. (default: <scratch_path>/sboms)."),
+        help: ArgumentHelp("The absolute or relative directory path to generate the SBOM(s) in. Must be used with --sbom-spec."),
         completion: .directory
     )
     package var _sbomDirectory: AbsolutePath?
