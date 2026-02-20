@@ -61,7 +61,7 @@ internal struct CycloneDXConverter {
         }
     }
 
-    private static func convertToPedigree(from originator: SBOMOriginator) async throws -> CycloneDXPedigree {
+    internal static func convertToPedigree(from originator: SBOMOriginator) async throws -> CycloneDXPedigree {
         guard let sbomCommits = originator.commits else {
             return CycloneDXPedigree(commits: nil)
         }
@@ -84,7 +84,7 @@ internal struct CycloneDXConverter {
         return CycloneDXPedigree(commits: cyclonedxCommits)
     }
 
-    private static func convertToExternalReferences(from originator: SBOMOriginator) async throws -> [CycloneDXExternalReference] {
+    internal static func convertToExternalReferences(from originator: SBOMOriginator) async throws -> [CycloneDXExternalReference] {
         guard let registryEntries = originator.entries else {
             return []
         }
@@ -98,7 +98,7 @@ internal struct CycloneDXConverter {
         return externalReferences
     }
 
-    private static func convertToComponent(from comp: SBOMComponent) async throws -> CycloneDXComponent {
+    internal static func convertToComponent(from comp: SBOMComponent) async throws -> CycloneDXComponent {
         try await CycloneDXComponent(
             type: self.convertToCategory(from: comp.category),
             bomRef: comp.id.value,
@@ -129,14 +129,14 @@ internal struct CycloneDXConverter {
         )
     }
 
-    private static func convertToDependency(from dep: SBOMRelationship) async throws -> CycloneDXDependency {
+    internal static func convertToDependency(from dep: SBOMRelationship) async throws -> CycloneDXDependency {
         CycloneDXDependency(
             ref: dep.parentID.value,
             dependsOn: dep.childrenID.map(\.value)
         )
     }
 
-    private static func convertToMetadata(from document: SBOMDocument) async throws -> CycloneDXMetadata {
+    internal static func convertToMetadata(from document: SBOMDocument) async throws -> CycloneDXMetadata {
         var tools: CycloneDXTools? = nil
         if let creators = document.metadata.creators, !creators.isEmpty {
             var toolsComponents: [CycloneDXComponent] = []
