@@ -804,15 +804,15 @@ public struct SBOMOptions: ParsableArguments {
             }
             if let envSpecs = SPMBuildCore.ConfigurableEnvVar.SWIFTPM_BUILD_SBOM_SPEC.getEnvVar() {
                 let specStrings = envSpecs.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                var specs: [SBOMModel.Spec] = []
+                var specs: Set<SBOMModel.Spec> = []
                 for specString in specStrings {
                     guard let spec = SBOMModel.Spec(rawValue: specString) else {
                         throw SBOMModel.SBOMCommandError.invalidSpecValue(value: specString)
                     }
-                    specs.append(spec)
+                    specs.insert(spec)
                 }
                 if !specs.isEmpty {
-                    return specs
+                    return specs.sorted { $0.rawValue < $1.rawValue }
                 }
             }
             return []
