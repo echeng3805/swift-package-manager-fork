@@ -87,7 +87,7 @@ internal struct SBOMEncoder {
 
         do {
             let schema = try await SBOMSchema(spec: spec, bundleName: bundleName)
-            try await schema.validate(json: sbomJSONObject, spec: spec)
+            try await schema.validate(json: sbomJSONObject)
         } catch let error as SBOMSchemaError {
             if case .bundleNotFound(_) = error {
                 self.observabilityScope.emit(warning: "\(error.errorDescription ?? "Bundle with schemas not found") - skipping SBOM validation")

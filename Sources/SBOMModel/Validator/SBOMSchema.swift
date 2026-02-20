@@ -66,8 +66,10 @@ private extension Bundle {
 
 internal struct SBOMSchema {
     private let schema: [String: Any]
+    private let spec: SBOMSpec
 
     internal init(spec: SBOMSpec, bundleName: String = "SwiftPM_SBOMModel") async throws {
+        self.spec = spec
         let schemaFilename = spec.schemaFilename
         if let foundBundle = await Bundle.findBundle(named: bundleName),
            let schemaURL = foundBundle.url(forResource: schemaFilename, withExtension: "json") {
@@ -82,8 +84,8 @@ internal struct SBOMSchema {
         throw SBOMSchemaError.bundleNotFound(bundleName: bundleName)
     }
 
-    internal func validate(json object: Any, spec: SBOMSpec) async throws {
-        let validator = try createValidator(for: spec)
+    internal func validate(json object: Any) async throws {
+        let validator = try createValidator(for: self.spec)
         try await validator.validate(object)
     }
 
