@@ -25,7 +25,9 @@ extension SwiftPackageCommand {
     
     struct GenerateSbom: AsyncSwiftCommand {
         static let configuration = CommandConfiguration(
-            abstract: "Generate a Software Bill of Materials (SBOM).")
+            abstract: "Generate a Software Bill of Materials (SBOM).",
+            helpNames: [.short, .long, .customLong("help", withSingleDash: true)],
+        )
 
         @OptionGroup()
         var globalOptions: GlobalOptions

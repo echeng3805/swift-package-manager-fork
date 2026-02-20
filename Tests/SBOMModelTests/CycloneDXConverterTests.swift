@@ -504,24 +504,27 @@ struct CycloneDXConverterTests {
         let components = try #require(result.components)
         #expect(components.count == 2)
 
+        // Components are sorted by ID, so framework1-id comes before lib1-id
         let cdxComponent1 = components[0]
-        #expect(cdxComponent1.bomRef == "lib1-id")
-        #expect(cdxComponent1.name == "Library1")
-        #expect(cdxComponent1.type == .library)
-        #expect(cdxComponent1.scope == .required)
+        #expect(cdxComponent1.bomRef == "framework1-id")
+        #expect(cdxComponent1.name == "Framework1")
+        #expect(cdxComponent1.type == .framework)
+        #expect(cdxComponent1.scope == .optional)
 
         let cdxComponent2 = components[1]
-        #expect(cdxComponent2.bomRef == "framework1-id")
-        #expect(cdxComponent2.name == "Framework1")
-        #expect(cdxComponent2.type == .framework)
-        #expect(cdxComponent2.scope == .optional)
+        #expect(cdxComponent2.bomRef == "lib1-id")
+        #expect(cdxComponent2.name == "Library1")
+        #expect(cdxComponent2.type == .library)
+        #expect(cdxComponent2.scope == .required)
 
         let dependencies = try #require(result.dependencies)
         #expect(dependencies.count == 2)
 
+        // Dependencies are sorted by relationship ID (dep-1 before dep-2)
+        // Children IDs are also sorted alphabetically for repeatability
         let cdxDependency1 = dependencies[0]
         #expect(cdxDependency1.ref == "primary-id")
-        #expect(cdxDependency1.dependsOn == ["lib1-id", "framework1-id"])
+        #expect(cdxDependency1.dependsOn.sorted() == ["framework1-id", "lib1-id"])
 
         let cdxDependency2 = dependencies[1]
         #expect(cdxDependency2.ref == "lib1-id")

@@ -477,21 +477,25 @@ struct SPDXConverterTests {
         let result = await SPDXConverter.convertToExternalIdentifiers(from: [component])
         #expect(result.count == 2)
 
-        let externalIdentifier = result[0] as? SPDXExternalIdentifier
-        let externalIdentifierUnwrapped = try #require(externalIdentifier)
-        #expect(externalIdentifierUnwrapped.identifier == "urn:spdx:abc123")
-        #expect(externalIdentifierUnwrapped.identifierLocator == ["https://github.com/swiftlang/swift-package-manager"])
-        #expect(externalIdentifierUnwrapped.type == .ExternalIdentifier)
-        #expect(externalIdentifierUnwrapped.category == .gitoid)
+        let externalIdentifiers = result.compactMap { $0 as? SPDXExternalIdentifier }
+        let relationships = result.compactMap { $0 as? SPDXRelationship }
+        
+        #expect(externalIdentifiers.count == 1)
+        #expect(relationships.count == 1)
+        
+        let externalIdentifier = externalIdentifiers[0]
+        #expect(externalIdentifier.identifier == "urn:spdx:abc123")
+        #expect(externalIdentifier.identifierLocator == ["https://github.com/swiftlang/swift-package-manager"])
+        #expect(externalIdentifier.type == .ExternalIdentifier)
+        #expect(externalIdentifier.category == .gitoid)
 
-        let relationship = result[1] as? SPDXRelationship
-        let relationshipUnwrapped = try #require(relationship)
-        #expect(relationshipUnwrapped.id == "urn:spdx:abc123-generates")
-        #expect(relationshipUnwrapped.type == .Relationship)
-        #expect(relationshipUnwrapped.category == .generates)
-        #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
-        #expect(relationshipUnwrapped.parentID == "urn:spdx:abc123")
-        #expect(relationshipUnwrapped.childrenID == ["urn:spdx:test-id"])
+        let relationship = relationships[0]
+        #expect(relationship.id == "urn:spdx:abc123-generates")
+        #expect(relationship.type == .Relationship)
+        #expect(relationship.category == .generates)
+        #expect(relationship.creationInfoID == "_:creationInfo")
+        #expect(relationship.parentID == "urn:spdx:abc123")
+        #expect(relationship.childrenID == ["urn:spdx:test-id"])
     }
 
     @Test("convertToExternalIdentifiers with multiple commits")
@@ -570,23 +574,27 @@ struct SPDXConverterTests {
         let result = await SPDXConverter.convertToExternalIdentifiers(from: [component1, component2])
         #expect(result.count == 2) // 1 ExternalIdentifier and 1 Relationship
 
-        let externalIdentifier = result[0] as? SPDXExternalIdentifier
-        let externalIdentifierUnwrapped = try #require(externalIdentifier)
-        #expect(externalIdentifierUnwrapped.identifier == "urn:spdx:abc123")
-        #expect(externalIdentifierUnwrapped.identifierLocator == ["https://github.com/swiftlang/swift-package-manager"])
-        #expect(externalIdentifierUnwrapped.type == .ExternalIdentifier)
-        #expect(externalIdentifierUnwrapped.category == .gitoid)
+        let externalIdentifiers = result.compactMap { $0 as? SPDXExternalIdentifier }
+        let relationships = result.compactMap { $0 as? SPDXRelationship }
+        
+        #expect(externalIdentifiers.count == 1)
+        #expect(relationships.count == 1)
+        
+        let externalIdentifier = externalIdentifiers[0]
+        #expect(externalIdentifier.identifier == "urn:spdx:abc123")
+        #expect(externalIdentifier.identifierLocator == ["https://github.com/swiftlang/swift-package-manager"])
+        #expect(externalIdentifier.type == .ExternalIdentifier)
+        #expect(externalIdentifier.category == .gitoid)
 
-        let relationship = result[1] as? SPDXRelationship
-        let relationshipUnwrapped = try #require(relationship)
-        #expect(relationshipUnwrapped.type == .Relationship)
-        #expect(relationshipUnwrapped.category == .generates)
-        #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
-        #expect(relationshipUnwrapped.parentID == "urn:spdx:abc123")
+        let relationship = relationships[0]
+        #expect(relationship.type == .Relationship)
+        #expect(relationship.category == .generates)
+        #expect(relationship.creationInfoID == "_:creationInfo")
+        #expect(relationship.parentID == "urn:spdx:abc123")
 
-        #expect(relationshipUnwrapped.childrenID.count == 2)
-        #expect(relationshipUnwrapped.childrenID.contains("urn:spdx:test-id-1"))
-        #expect(relationshipUnwrapped.childrenID.contains("urn:spdx:test-id-2"))
+        #expect(relationship.childrenID.count == 2)
+        #expect(relationship.childrenID.contains("urn:spdx:test-id-1"))
+        #expect(relationship.childrenID.contains("urn:spdx:test-id-2"))
     }
     @Test("convertToExternalIdentifiers with single registry entry")
     func convertToExternalIdentifiersWithSingleRegistryEntry() async throws {
@@ -610,21 +618,25 @@ struct SPDXConverterTests {
         let result = await SPDXConverter.convertToExternalIdentifiers(from: [component])
         #expect(result.count == 2) // 1 ExternalIdentifier + 1 Relationship
 
-        let externalIdentifier = result[0] as? SPDXExternalIdentifier
-        let externalIdentifierUnwrapped = try #require(externalIdentifier)
-        #expect(externalIdentifierUnwrapped.identifier == "urn:spdx:https://registry.example.com/package/1.0.0")
-        #expect(externalIdentifierUnwrapped.identifierLocator == ["https://registry.example.com/package/1.0.0"])
-        #expect(externalIdentifierUnwrapped.type == .ExternalIdentifier)
-        #expect(externalIdentifierUnwrapped.category == .urlScheme)
+        let externalIdentifiers = result.compactMap { $0 as? SPDXExternalIdentifier }
+        let relationships = result.compactMap { $0 as? SPDXRelationship }
+        
+        #expect(externalIdentifiers.count == 1)
+        #expect(relationships.count == 1)
+        
+        let externalIdentifier = externalIdentifiers[0]
+        #expect(externalIdentifier.identifier == "urn:spdx:https://registry.example.com/package/1.0.0")
+        #expect(externalIdentifier.identifierLocator == ["https://registry.example.com/package/1.0.0"])
+        #expect(externalIdentifier.type == .ExternalIdentifier)
+        #expect(externalIdentifier.category == .urlScheme)
 
-        let relationship = result[1] as? SPDXRelationship
-        let relationshipUnwrapped = try #require(relationship)
-        #expect(relationshipUnwrapped.id == "urn:spdx:example-package-1.0.0-availableFrom-urn:spdx:test-id")
-        #expect(relationshipUnwrapped.type == .Relationship)
-        #expect(relationshipUnwrapped.category == .availableFrom)
-        #expect(relationshipUnwrapped.creationInfoID == "_:creationInfo")
-        #expect(relationshipUnwrapped.parentID == "urn:spdx:test-id")
-        #expect(relationshipUnwrapped.childrenID == ["urn:spdx:https://registry.example.com/package/1.0.0"])
+        let relationship = relationships[0]
+        #expect(relationship.id == "urn:spdx:example-package-1.0.0-availableFrom-urn:spdx:test-id")
+        #expect(relationship.type == .Relationship)
+        #expect(relationship.category == .availableFrom)
+        #expect(relationship.creationInfoID == "_:creationInfo")
+        #expect(relationship.parentID == "urn:spdx:test-id")
+        #expect(relationship.childrenID == ["urn:spdx:https://registry.example.com/package/1.0.0"])
     }
 
     @Test("convertToExternalIdentifiers with multiple registry entries")

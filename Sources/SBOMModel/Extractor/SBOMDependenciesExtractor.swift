@@ -285,9 +285,9 @@ extension SBOMExtractor {
                 SBOMRelationship(
                     id: SBOMIdentifier(value: "\(parent.id.value)-depends-on"),
                     parentID: parent.id,
-                    childrenID: Array(childrenSet.map { $0.id })
+                    childrenID: Array(childrenSet.map { $0.id }).sorted { $0.value < $1.value }
                 )
-            }
+            }.sorted()
         }
 
         let rootPackageID = SBOMExtractor.extractComponentID(from: rootPackage)
@@ -313,7 +313,7 @@ extension SBOMExtractor {
         }
 
         return SBOMDependencies(
-            components: Array(components),
+            components: Array(components).sorted(),
             relationships: processRelationships()
         )
     }
