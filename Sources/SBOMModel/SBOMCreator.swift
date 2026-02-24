@@ -44,6 +44,8 @@ package struct SBOMCreator {
     /// - Returns: An array of paths to the created SBOM files
     /// - Throws: SBOMError if SBOM creation fails
     package func createSBOMsWithLogging() async throws {
+        defer { input.outputStream.flush() }
+        
         input.outputStream.write("Creating SBOMs...\n")
         input.outputStream.flush()
         let sbomStartTime = ContinuousClock.Instant.now
@@ -57,7 +59,6 @@ package struct SBOMCreator {
             input.outputStream.write("- created \(result.spec.concreteSpec) v\(SBOMVersionRegistry.getLatestVersion(for: result.spec)) SBOM at \(result.path.pathString)\n")
         }
         input.outputStream.write("SBOMs created  (\(formattedDuration))\n")
-        input.outputStream.flush()
     }
 
     internal func createSBOMs() async throws -> [SBOMResult] {
