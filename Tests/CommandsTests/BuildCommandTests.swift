@@ -1823,7 +1823,7 @@ extension Triple {
     .tags(
         .TestSize.large,
         Tag.Feature.SBOM
-    ),
+    ), 
 )
 struct BuildSBOMCommandTests {
     
