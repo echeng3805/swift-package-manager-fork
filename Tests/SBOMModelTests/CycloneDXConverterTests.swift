@@ -31,7 +31,8 @@ struct CycloneDXConverterTests {
     func convertToPedigreeWithEmptyCommits() async throws {
         let originator = SBOMOriginator(commits: [])
         let result = try await CycloneDXConverter.convertToPedigree(from: originator)
-        #expect(result.commits?.isEmpty == true)
+        let commits = try #require(result.commits)
+        #expect(commits.isEmpty)
     }
 
     @Test("convertToPedigree with single commit without authors")
