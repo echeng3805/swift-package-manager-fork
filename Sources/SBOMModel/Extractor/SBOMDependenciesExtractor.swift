@@ -91,27 +91,27 @@ extension SBOMExtractor {
         }
 
         // Get dependencies for a module based on the source
-        func getDependencies(forModule module: ResolvedModule) async throws -> [DependencyReference] {
+        func getDependencies(for module: ResolvedModule) async throws -> [DependencyReference] {
             switch source {
             case .buildGraph:
-                return try await getBuildGraphDependencies(forModule: module)
+                return try await getBuildGraphDependencies(for: module)
             case .modulesGraph:
-                return getModulesGraphDependencies(forModule: module)
+                return getModulesGraphDependencies(for: module)
             }
         }
 
         // Get dependencies for a product based on the source
-        func getDependencies(forProduct product: ResolvedProduct) async throws -> [DependencyReference] {
+        func getDependencies(for product: ResolvedProduct) async throws -> [DependencyReference] {
             switch source {
             case .buildGraph:
-                return try await getBuildGraphDependencies(forProduct: product)
+                return try await getBuildGraphDependencies(for: product)
             case .modulesGraph:
-                return getModulesGraphDependencies(forProduct: product)
+                return getModulesGraphDependencies(for: product)
             }
         }
 
         // Get dependencies for a module from build graph
-        func getBuildGraphDependencies(forModule module: ResolvedModule) async throws -> [DependencyReference] {
+        func getBuildGraphDependencies(for module: ResolvedModule) async throws -> [DependencyReference] {
             guard let buildGraph = dependencyGraph,
                   let targetName = await caches.targetName.get(module.id),
                   let targetDeps = buildGraph[targetName] else {
@@ -130,7 +130,7 @@ extension SBOMExtractor {
         }
 
         // Get dependencies for a module from modules graph
-        func getModulesGraphDependencies(forModule module: ResolvedModule) -> [DependencyReference] {
+        func getModulesGraphDependencies(for module: ResolvedModule) -> [DependencyReference] {
             return module.dependencies.map { dependency in
                 switch dependency {
                 case .product(let product, _):
@@ -142,7 +142,7 @@ extension SBOMExtractor {
         }
 
         // Get product dependencies from modules graph
-        func getModulesGraphDependencies(forProduct product: ResolvedProduct) -> [DependencyReference] {
+        func getModulesGraphDependencies(for product: ResolvedProduct) -> [DependencyReference] {
             return product.modules.flatMap { module in
                 module.dependencies.map { dependency in
                     switch dependency {
@@ -156,7 +156,7 @@ extension SBOMExtractor {
         }
 
         // Get dependencies for a product from build graph
-        func getBuildGraphDependencies(forProduct product: ResolvedProduct) async throws -> [DependencyReference] {
+        func getBuildGraphDependencies(for product: ResolvedProduct) async throws -> [DependencyReference] {
             guard let buildGraph = dependencyGraph,
                   let targetDeps = buildGraph[SBOMGraphsConverter.getTargetName(fromProduct: product.name)] else {
                 return []
@@ -187,7 +187,7 @@ extension SBOMExtractor {
                 guard processedModules.insert(currentModule.id).inserted else {
                     continue
                 }
-                let dependencies = try await getDependencies(forModule: currentModule)
+                let dependencies = try await getDependencies(for: currentModule)
                 for dependency in dependencies {
                     switch dependency {
                     case .product(let dependentProduct):
@@ -256,7 +256,7 @@ extension SBOMExtractor {
         func processDependencies(for product: ResolvedProduct) async throws -> [ResolvedProduct] {
             var result = IdentifiableSet<ResolvedProduct>()
             
-            let dependencies = try await getDependencies(forProduct: product)
+            let dependencies = try await getDependencies(for: product)
             
             for dependency in dependencies {
                 switch dependency {
