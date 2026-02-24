@@ -1830,6 +1830,7 @@ struct BuildSBOMCommandTests {
     /// Helper function to verify SBOM creation from stdout
     private func verifySBOMCreated(
         in stdout: String,
+        expectedCount: Int? = nil,
         expectedDirectory: AbsolutePath? = nil,
         message: String = "should produce at least 1 SBOM",
         sourceLocation: SourceLocation = #_sourceLocation,
@@ -1852,6 +1853,11 @@ struct BuildSBOMCommandTests {
             return
         }
         
+        // Verify expected count if specified
+        if let expectedCount = expectedCount {
+            #expect(sbomPaths.count == expectedCount, "Expected \(expectedCount) SBOM(s) but found \(sbomPaths.count)", sourceLocation: sourceLocation)
+        }
+        
         for pathString in sbomPaths {
             let absolutePath = try AbsolutePath(validating: pathString)
             #expect(localFileSystem.exists(absolutePath), "Reported SBOM should exist at \(absolutePath)", sourceLocation: sourceLocation)
@@ -1859,6 +1865,13 @@ struct BuildSBOMCommandTests {
             if let expectedDir = expectedDirectory {
                 #expect(absolutePath.parentDirectory == expectedDir, "SBOM should be created in the expected directory: \(expectedDir)", sourceLocation: sourceLocation)
             }
+        }
+        
+        // If expected directory is specified, verify only the expected number of SBOM files exist there
+        if let expectedDir = expectedDirectory, let expectedCount = expectedCount {
+            let dirContents = try localFileSystem.getDirectoryContents(expectedDir)
+            let sbomFiles = dirContents.filter { $0.hasSuffix(".json") }
+            #expect(sbomFiles.count == expectedCount, "Expected exactly \(expectedCount) SBOM file(s) in \(expectedDir) but found \(sbomFiles.count)", sourceLocation: sourceLocation)
         }
     }
     
@@ -1894,7 +1907,7 @@ struct BuildSBOMCommandTests {
             )
             #expect(stdout.contains("Build complete!"))
             #expect(stdout.contains("SBOMs created"))
-            try verifySBOMCreated(in: stdout, message: "should produce at least 1 SPDX SBOM")
+            try verifySBOMCreated(in: stdout, expectedCount: 1, message: "should produce at least 1 SPDX SBOM")
         }
     }
 
@@ -1930,7 +1943,7 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             #expect(stdout.contains("SBOMs created"))
-            try verifySBOMCreated(in: stdout, message: "should produce at least 1 CycloneDX SBOM")
+            try verifySBOMCreated(in: stdout, expectedCount: 1, message: "should produce at least 1 CycloneDX SBOM")
         }
     }
 
@@ -1948,7 +1961,7 @@ struct BuildSBOMCommandTests {
             )
             #expect(stdout.contains("Build complete!"))
             #expect(stdout.contains("SBOMs created"))
-            try verifySBOMCreated(in: stdout, message: "should produce at least 2 SBOMs")
+            try verifySBOMCreated(in: stdout, expectedCount: 2, message: "should produce at least 2 SBOMs")
         }
     }
 
@@ -1967,7 +1980,7 @@ struct BuildSBOMCommandTests {
             )
             #expect(stdout.contains("Build complete!"))
             #expect(stdout.contains("SBOMs created"))
-            try verifySBOMCreated(in: stdout, message: "should produce at least 1 SBOM from environment variable")
+            try verifySBOMCreated(in: stdout, expectedCount: 1, message: "should produce at least 1 SBOM from environment variable")
         }
     }
 
@@ -1987,7 +2000,7 @@ struct BuildSBOMCommandTests {
             
             #expect(stdout.contains("Build complete!"))
             #expect(stdout.contains("SBOMs created"))
-            try verifySBOMCreated(in: stdout, message: "should produce at least 2 SBOMs from environment variable")
+            try verifySBOMCreated(in: stdout, expectedCount: 2, message: "should produce at least 2 SBOMs from environment variable")
         }
     }
 
@@ -2013,6 +2026,7 @@ struct BuildSBOMCommandTests {
             #expect(stdout.contains("SBOMs created"))
             try verifySBOMCreated(
                 in: stdout,
+                expectedCount: 1,
                 expectedDirectory: customSBOMDir,
                 message: "should produce at least 1 CycloneDX SBOM in custom directory"
             )
@@ -2037,7 +2051,7 @@ struct BuildSBOMCommandTests {
             )
             
             #expect(stdout.contains("SBOMs created"))
-            try verifySBOMCreated(in: stdout, message: "should produce at least 1 SBOM from environment variable")
+            try verifySBOMCreated(in: stdout, expectedCount: 1, message: "should produce at least 1 SBOM from environment variable")
         }
     }
 
@@ -2087,7 +2101,7 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             
-            try verifySBOMCreated(in: stdout, expectedDirectory: customSBOMDir, message: "should produce at least 1 CycloneDX SBOM")
+            try verifySBOMCreated(in: stdout, expectedCount: 2, expectedDirectory: customSBOMDir, message: "should produce at least 2 SBOMs")
         }
     }
 
@@ -2226,7 +2240,7 @@ struct BuildSBOMCommandTests {
             )
             
             #expect(stdout.contains("SBOMs created"))
-            try verifySBOMCreated(in: stdout, message: "should produce SBOM despite invalid environment variables")
+            try verifySBOMCreated(in: stdout, expectedCount: 1, message: "should produce SBOM despite invalid environment variables")
         }
     }
 
