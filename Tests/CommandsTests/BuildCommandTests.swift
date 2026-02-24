@@ -2007,6 +2007,31 @@ struct BuildSBOMCommandTests {
     @Test(
         arguments: SupportedBuildSystemOnAllPlatforms,
     )
+    func buildWithSBOMDirectory(
+        buildSystem: BuildSystemProvider.Kind,
+    ) async throws {
+        try await fixture(name: "DependencyResolution/Internal/Simple") { fixturePath in
+            let customSBOMDir = fixturePath.appending("env-sboms")
+            
+            let (stdout, _) = try await executeSwiftBuild(
+                fixturePath,
+                extraArgs: ["--sbom-spec", "cyclonedx", "--sbom-output-dir", customSBOMDir.pathString],
+                buildSystem: buildSystem,
+            )
+            
+            #expect(stdout.contains("SBOMs created"))
+            try verifySBOMCreated(
+                in: stdout,
+                expectedCount: 1,
+                expectedDirectory: customSBOMDir,
+                message: "should produce at least 1 CycloneDX SBOM in custom directory"
+            )
+        }
+    }
+
+    @Test(
+        arguments: SupportedBuildSystemOnAllPlatforms,
+    )
     func buildWithSBOMDirectoryFromEnvironment(
         buildSystem: BuildSystemProvider.Kind,
     ) async throws {
