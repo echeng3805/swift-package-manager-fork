@@ -7795,7 +7795,7 @@ struct PackageCommandTests {
                     buildSystem: data.buildSystem,
                 )
                 
-                #expect(stderr.contains("SBOMs created"))
+                #expect(stdout.contains("SBOMs created"))
                 #expect(localFileSystem.isDirectory(customSBOMDir))
                 let files = try localFileSystem.getDirectoryContents(customSBOMDir)
                 #expect(files.count == 2, "should produce both CycloneDX and SPDX SBOMs by default")
@@ -7835,12 +7835,12 @@ struct PackageCommandTests {
                     configuration: data.config,
                     buildSystem: data.buildSystem,
                 )
-                #expect(stderr.contains("SBOMs created"))
+                #expect(stdout.contains("SBOMs created"))
 
                 let prefix = " SBOM at "
-                let range = try #require(stderr.range(of: prefix), "Could not find '\(prefix)' in output")
-                let endRange = try #require(stderr[range.upperBound...].range(of: ".json"), "Could not find '.json' in output")
-                let pathString = String(stderr[range.upperBound..<endRange.upperBound])
+                let range = try #require(stdout.range(of: prefix), "Could not find '\(prefix)' in output")
+                let endRange = try #require(stdout[range.upperBound...].range(of: ".json"), "Could not find '.json' in output")
+                let pathString = String(stdout[range.upperBound..<endRange.upperBound])
                 let sbomPath = try AbsolutePath(validating: pathString)
                 
                 #expect(localFileSystem.exists(sbomPath))
@@ -7863,12 +7863,12 @@ struct PackageCommandTests {
                     buildSystem: data.buildSystem,
                 )
 
-                #expect(stderr.contains("SBOMs created"))
+                #expect(stdout.contains("SBOMs created"))
 
                 let prefix = " SBOM at "
-                let range = try #require(stderr.range(of: prefix), "Could not find '\(prefix)' in output")
-                let endRange = try #require(stderr[range.upperBound...].range(of: ".json"), "Could not find '.json' in output")
-                let pathString = String(stderr[range.upperBound..<endRange.upperBound])
+                let range = try #require(stdout.range(of: prefix), "Could not find '\(prefix)' in output")
+                let endRange = try #require(stdout[range.upperBound...].range(of: ".json"), "Could not find '.json' in output")
+                let pathString = String(stdout[range.upperBound..<endRange.upperBound])
                 let sbomPath = try AbsolutePath(validating: pathString)
                 
                 #expect(localFileSystem.exists(sbomPath))
@@ -7892,7 +7892,7 @@ struct PackageCommandTests {
                     configuration: data.config,
                     buildSystem: data.buildSystem,
                 )
-                #expect(stderr.contains("SBOMs created"))
+                #expect(stdout.contains("SBOMs created"))
                 
                 #expect(localFileSystem.isDirectory(customSBOMDir))
                 let files = try localFileSystem.getDirectoryContents(customSBOMDir)
@@ -7913,12 +7913,12 @@ struct PackageCommandTests {
                     configuration: data.config,
                     buildSystem: data.buildSystem,
                 )
-                #expect(stderr.contains("SBOMs created"))
+                #expect(stdout.contains("SBOMs created"))
 
                 let prefix = " SBOM at "
-                let range = try #require(stderr.range(of: prefix), "Could not find '\(prefix)' in output")
-                let endRange = try #require(stderr[range.upperBound...].range(of: ".json"), "Could not find '.json' in output")
-                let pathString = String(stderr[range.upperBound..<endRange.upperBound])
+                let range = try #require(stdout.range(of: prefix), "Could not find '\(prefix)' in output")
+                let endRange = try #require(stdout[range.upperBound...].range(of: ".json"), "Could not find '.json' in output")
+                let pathString = String(stdout[range.upperBound..<endRange.upperBound])
                 let sbomPath = try AbsolutePath(validating: pathString)
                 
                 #expect(localFileSystem.exists(sbomPath))
@@ -7960,12 +7960,12 @@ struct PackageCommandTests {
                     configuration: data.config,
                     buildSystem: data.buildSystem,
                 )
-                #expect(stderr.contains("SBOMs created"))
+                #expect(stdout.contains("SBOMs created"))
 
                 let prefix = " SBOM at "
-                let range = try #require(stderr.range(of: prefix), "Could not find '\(prefix)' in output")
-                let endRange = try #require(stderr[range.upperBound...].range(of: ".json"), "Could not find '.json' in output")
-                let pathString = String(stderr[range.upperBound..<endRange.upperBound])
+                let range = try #require(stdout.range(of: prefix), "Could not find '\(prefix)' in output")
+                let endRange = try #require(stdout[range.upperBound...].range(of: ".json"), "Could not find '.json' in output")
+                let pathString = String(stdout[range.upperBound..<endRange.upperBound])
                 let sbomPath = try AbsolutePath(validating: pathString)
                 
                 #expect(localFileSystem.exists(sbomPath))
@@ -8010,7 +8010,7 @@ struct PackageCommandTests {
                     buildSystem: data.buildSystem,
                 )
 
-                #expect(stderr.contains("SBOMs created"))
+                #expect(stdout.contains("SBOMs created"))
                 #expect(localFileSystem.isDirectory(customSBOMDir))
                 let files = try localFileSystem.getDirectoryContents(customSBOMDir)
                 #expect(files.count == 2)

@@ -1827,14 +1827,14 @@ extension Triple {
 )
 struct BuildSBOMCommandTests {
     
-    /// Helper function to verify SBOM creation from stderr
+    /// Helper function to verify SBOM creation from stdout
     private func verifySBOMCreated(
-        in stderr: String,
+        in stdout: String,
         expectedDirectory: AbsolutePath? = nil,
         message: String = "should produce at least 1 SBOM",
         sourceLocation: SourceLocation = #_sourceLocation,
     ) throws {
-        let lines = stderr.split(separator: "\n")
+        let lines = stdout.split(separator: "\n")
         var sbomPaths: [String] = []
         
         for line in lines {
@@ -1848,7 +1848,7 @@ struct BuildSBOMCommandTests {
         }
         
         guard !sbomPaths.isEmpty else {
-            Issue.record("No SBOM paths found in stderr")
+            Issue.record("No SBOM paths found in stdout")
             return
         }
         
@@ -1875,8 +1875,8 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             #expect(stdout.contains("Build complete!"))
-            #expect(stderr.contains("SBOMs created"))
-            try verifySBOMCreated(in: stderr, message: "should produce at least 1 CycloneDX SBOM")
+            #expect(stdout.contains("SBOMs created"))
+            try verifySBOMCreated(in: stdout, message: "should produce at least 1 CycloneDX SBOM")
         }
     }
 
@@ -1893,8 +1893,8 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             #expect(stdout.contains("Build complete!"))
-            #expect(stderr.contains("SBOMs created"))
-            try verifySBOMCreated(in: stderr, message: "should produce at least 1 SPDX SBOM")
+            #expect(stdout.contains("SBOMs created"))
+            try verifySBOMCreated(in: stdout, message: "should produce at least 1 SPDX SBOM")
         }
     }
 
@@ -1929,8 +1929,8 @@ struct BuildSBOMCommandTests {
                 extraArgs: ["--sbom-spec", "cyclonedx", "--product", "Foo"],
                 buildSystem: buildSystem,
             )
-            #expect(stderr.contains("SBOMs created"))
-            try verifySBOMCreated(in: stderr, message: "should produce at least 1 CycloneDX SBOM")
+            #expect(stdout.contains("SBOMs created"))
+            try verifySBOMCreated(in: stdout, message: "should produce at least 1 CycloneDX SBOM")
         }
     }
 
@@ -1947,8 +1947,8 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             #expect(stdout.contains("Build complete!"))
-            #expect(stderr.contains("SBOMs created"))
-            try verifySBOMCreated(in: stderr, message: "should produce at least 2 SBOMs")
+            #expect(stdout.contains("SBOMs created"))
+            try verifySBOMCreated(in: stdout, message: "should produce at least 2 SBOMs")
         }
     }
 
@@ -1966,8 +1966,8 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             #expect(stdout.contains("Build complete!"))
-            #expect(stderr.contains("SBOMs created"))
-            try verifySBOMCreated(in: stderr, message: "should produce at least 1 SBOM from environment variable")
+            #expect(stdout.contains("SBOMs created"))
+            try verifySBOMCreated(in: stdout, message: "should produce at least 1 SBOM from environment variable")
         }
     }
 
@@ -1986,8 +1986,8 @@ struct BuildSBOMCommandTests {
             )
             
             #expect(stdout.contains("Build complete!"))
-            #expect(stderr.contains("SBOMs created"))
-            try verifySBOMCreated(in: stderr, message: "should produce at least 2 SBOMs from environment variable")
+            #expect(stdout.contains("SBOMs created"))
+            try verifySBOMCreated(in: stdout, message: "should produce at least 2 SBOMs from environment variable")
         }
     }
 
@@ -2010,9 +2010,9 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             
-            #expect(stderr.contains("SBOMs created"))
+            #expect(stdout.contains("SBOMs created"))
             try verifySBOMCreated(
-                in: stderr,
+                in: stdout,
                 expectedDirectory: customSBOMDir,
                 message: "should produce at least 1 CycloneDX SBOM in custom directory"
             )
@@ -2036,8 +2036,8 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             
-            #expect(stderr.contains("SBOMs created"))
-            try verifySBOMCreated(in: stderr, message: "should produce at least 1 SBOM from environment variable")
+            #expect(stdout.contains("SBOMs created"))
+            try verifySBOMCreated(in: stdout, message: "should produce at least 1 SBOM from environment variable")
         }
     }
 
@@ -2048,21 +2048,21 @@ struct BuildSBOMCommandTests {
         buildSystem: BuildSystemProvider.Kind,
     ) async throws {
         try await fixture(name: "DependencyResolution/Internal/Simple") { fixturePath in
-            let (_, stderr) = try await executeSwiftBuild(
+            let (stdout, stderr) = try await executeSwiftBuild(
                 fixturePath,
                 extraArgs: ["--sbom-spec", "spdx"],
                 env: ["SWIFTPM_BUILD_SBOM_SPEC": "cyclonedx"],
                 buildSystem: buildSystem,
             )
             
-            #expect(stderr.contains("SBOMs created"))
+            #expect(stdout.contains("SBOMs created"))
             
             // Verify that command line flag overrides environment variable by checking SBOM path
             let spdxRegex = try Regex(#"created spdx.* v.* SBOM at .*\.json"#)
             let cyclonedxRegex = try Regex(#"created cyclonedx.* v.* SBOM at .*\.json"#)
             
-            #expect(stderr.contains(spdxRegex), "should create SPDX SBOM from command line, not CycloneDX from environment")
-            #expect(!stderr.contains(cyclonedxRegex), "should not create CycloneDX SBOM from environment variable")
+            #expect(stdout.contains(spdxRegex), "should create SPDX SBOM from command line, not CycloneDX from environment")
+            #expect(!stdout.contains(cyclonedxRegex), "should not create CycloneDX SBOM from environment variable")
         }
     }
 
@@ -2075,7 +2075,7 @@ struct BuildSBOMCommandTests {
         try await fixture(name: "DependencyResolution/Internal/Simple") { fixturePath in
             let customSBOMDir = fixturePath.appending("all-env-sboms")
             
-            let (_, stderr) = try await executeSwiftBuild(
+            let (stdout, stderr) = try await executeSwiftBuild(
                 fixturePath,
                 extraArgs: [],
                 env: [
@@ -2087,7 +2087,7 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             
-            try verifySBOMCreated(in: stderr, expectedDirectory: customSBOMDir, message: "should produce at least 1 CycloneDX SBOM")
+            try verifySBOMCreated(in: stdout, expectedDirectory: customSBOMDir, message: "should produce at least 1 CycloneDX SBOM")
         }
     }
 
@@ -2215,7 +2215,7 @@ struct BuildSBOMCommandTests {
     ) async throws {
         try await fixture(name: "DependencyResolution/Internal/Simple") { fixturePath in
             // Valid CLI flag should override invalid environment variable
-            let (_, stderr) = try await executeSwiftBuild(
+            let (stdout, stderr) = try await executeSwiftBuild(
                 fixturePath,
                 extraArgs: ["--sbom-spec", "cyclonedx", "--sbom-filter", "product"],
                 env: [
@@ -2225,8 +2225,8 @@ struct BuildSBOMCommandTests {
                 buildSystem: buildSystem,
             )
             
-            #expect(stderr.contains("SBOMs created"))
-            try verifySBOMCreated(in: stderr, message: "should produce SBOM despite invalid environment variables")
+            #expect(stdout.contains("SBOMs created"))
+            try verifySBOMCreated(in: stdout, message: "should produce SBOM despite invalid environment variables")
         }
     }
 
