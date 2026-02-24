@@ -47,7 +47,7 @@ package struct SBOMCreator {
         defer { input.outputStream.flush() }
         
         input.outputStream.write("Creating SBOMs...\n")
-        input.outputStream.flush()
+        input.outputStream.flush() // so users see "Creating SBOMs" message
         let sbomStartTime = ContinuousClock.Instant.now
         
         let results = try await createSBOMs()
@@ -91,3 +91,4 @@ package struct SBOMCreator {
         return results
     }
 }
+
