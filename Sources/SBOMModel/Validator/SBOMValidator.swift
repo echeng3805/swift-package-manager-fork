@@ -42,8 +42,7 @@ internal actor SBOMSchemaReferenceCache {
 }
 
 
-// TODO: echeng3805
-// use a library? or maybe move this all to test code?
+// TODO: https://github.com/swiftlang/swift-package-manager/issues/9768
 // MARK: - Base Validator
 
 struct SBOMValidator: SBOMValidatorProtocol {
