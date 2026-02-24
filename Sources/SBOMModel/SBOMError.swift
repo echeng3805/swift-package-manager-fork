@@ -21,7 +21,7 @@ internal enum SBOMGenerationError: Error, LocalizedError, CustomStringConvertibl
     case failedToWriteSBOM
     case noSpecsProvided
 
-    internal var errorDescription: String {
+    internal var errorDescription: String? {
         switch self {
         case .unexpectedSpecType(let expected, let actual):
             "Expected \(expected) spec but got \(actual.concreteSpec)"
@@ -46,7 +46,7 @@ package enum SBOMCommandError: Error, LocalizedError {
     case invalidFilterValue(value: String)
     case invalidSpecValue(value: String)
     
-    public var errorDescription: String {
+    public var errorDescription: String? {
         switch self {
         case .noSpecArg:
             return "No SBOM specification argument provided. Use --sbom-spec or SWIFTPM_BUILD_SBOM_SPEC to specify the SBOM format."
@@ -72,7 +72,7 @@ internal enum SBOMSchemaError: Error, LocalizedError, CustomStringConvertible {
     /// Bundle not found (validation will be skipped)
     case bundleNotFound(bundleName: String)
     
-    internal var errorDescription: String {
+    internal var errorDescription: String? {
         switch self {
         case .schemaFileNotFound(let filename, let bundlePath):
             "SBOM schema file '\(filename).json' not found in bundle: \(bundlePath)"
@@ -95,7 +95,7 @@ internal enum SBOMConverterError: Error, LocalizedError, CustomStringConvertible
     /// Missing required metadata for conversion
     case missingRequiredMetadata(message: String)
 
-    internal var errorDescription: String {
+    internal var errorDescription: String? {
         switch self {
         case .missingRequiredMetadata(let message):
             "Missing required metadata: \(message)"
@@ -117,7 +117,7 @@ internal enum SBOMExtractorError: Error, LocalizedError, CustomStringConvertible
     case noBuildGraph(context: String)
     /// Product not found in package
     case productNotFound(productName: String, packageIdentity: String)
-    internal var errorDescription: String {
+    internal var errorDescription: String? {
         switch self {
         case .noRootPackage(let context):
             "No root package found in package graph, cannot \(context)"
@@ -139,7 +139,7 @@ internal enum SBOMExtractorError: Error, LocalizedError, CustomStringConvertible
 internal enum SBOMEncoderError: Error, LocalizedError, CustomStringConvertible {
     /// Failed to convert SBOM to JSON object
     case jsonConversionFailed(message: String)
-    internal var errorDescription: String {
+    internal var errorDescription: String? {
         switch self {
         case .jsonConversionFailed(let message):
             "Failed to convert SBOM to JSON: \(message)"
@@ -167,7 +167,7 @@ internal enum SBOMValidatorError: Error, LocalizedError, CustomStringConvertible
     case schemaComposition(path: String, message: String)
     /// Constraint violation (min/max, pattern, etc.)
     case constraintViolation(path: String, message: String)
-    internal var errorDescription: String {
+    internal var errorDescription: String? {
         switch self {
         case .notSchemaViolation(let path, let valueDescription):
             "Value at \(path) matches 'not' schema (should not match). Value: \(valueDescription)"
