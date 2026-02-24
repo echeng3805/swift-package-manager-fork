@@ -314,7 +314,7 @@ internal struct SPDXConverter {
 
     internal static func convertToGraph(from document: SBOMDocument, spec: SBOMSpec) async throws -> SPDXGraph {
         guard spec.supportsSPDX else {
-            throw SBOMError.unexpectedSpecType(expected: "spdx", actual: spec)
+            throw SBOMGenerationError.unexpectedSpecType(expected: "spdx", actual: spec)
         }
 
         let agents = await convertToAgent(from: document.metadata)

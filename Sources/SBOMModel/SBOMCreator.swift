@@ -42,7 +42,7 @@ package struct SBOMCreator {
     /// the `swift build` and `swift package generate-sbom` commands.
     ///
     /// - Returns: An array of paths to the created SBOM files
-    /// - Throws: SBOMError if SBOM creation fails
+    /// - Throws: SBOMGenerationError if SBOM creation fails
     package func createSBOMsWithLogging() async throws {
         defer { input.outputStream.flush() }
         
@@ -63,7 +63,7 @@ package struct SBOMCreator {
 
     internal func createSBOMs() async throws -> [SBOMResult] {
         guard !input.specs.isEmpty else {
-            throw SBOMError.noSpecsProvided
+            throw SBOMGenerationError.noSpecsProvided
         }
         
         let extractor = SBOMExtractor(
@@ -85,7 +85,7 @@ package struct SBOMCreator {
         )
 
         guard !results.isEmpty else {
-            throw SBOMError.failedToWriteSBOM
+            throw SBOMGenerationError.failedToWriteSBOM
         }
 
         return results

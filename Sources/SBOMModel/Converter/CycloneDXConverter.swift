@@ -57,7 +57,7 @@ internal struct CycloneDXConverter {
         // case .cyclonedx2:
         //     return CycloneDXConstants.cyclonedx2Schema
         case .spdx3:
-            throw SBOMError.unexpectedSpecType(expected: "cyclonedx", actual: spec)
+            throw SBOMGenerationError.unexpectedSpecType(expected: "cyclonedx", actual: spec)
         }
     }
 
@@ -159,7 +159,7 @@ internal struct CycloneDXConverter {
         spec: SBOMSpec
     ) async throws -> CycloneDXDocument {
         guard spec.supportsCycloneDX else {
-            throw SBOMError.unexpectedSpecType(expected: "cyclonedx", actual: spec)
+            throw SBOMGenerationError.unexpectedSpecType(expected: "cyclonedx", actual: spec)
         }
 
         var components: [CycloneDXComponent] = []
