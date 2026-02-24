@@ -155,102 +155,108 @@ struct CycloneDXConverterTests {
         #expect(cdxAuthor.email == "john@example.com")
     }
 
-    @Test("convertToComponent with all categories")
-    func convertToComponentWithAllCategories() async throws {
-        let categories: [(SBOMComponent.Category, CycloneDXComponent.Category)] = [
-            (.application, .application),
+    @Test(
+        "convertToComponent with category",
+        arguments: [
+            (SBOMComponent.Category.application, CycloneDXComponent.Category.application),
             (.framework, .framework),
             (.library, .library),
             (.file, .file),
         ]
+    )
+    func convertToComponentWithCategory(
+        sbomCategory: SBOMComponent.Category,
+        expectedCDXCategory: CycloneDXComponent.Category
+    ) async throws {
+        let component = SBOMComponent(
+            category: sbomCategory,
+            id: SBOMIdentifier(value: "test-id"),
+            purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
+            name: "TestComponent",
+            version: SBOMComponent.Version(revision: "1.0.0"),
+            originator: SBOMOriginator(commits: nil),
+            scope: .runtime,
+            entity: .product
+        )
 
-        for (sbomCategory, expectedCDXCategory) in categories {
-            let component = SBOMComponent(
-                category: sbomCategory,
-                id: SBOMIdentifier(value: "test-id"),
-                purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
-                name: "TestComponent",
-                version: SBOMComponent.Version(revision: "1.0.0"),
-                originator: SBOMOriginator(commits: nil),
-                scope: .runtime,
-                entity: .product
-            )
+        let result = try await CycloneDXConverter.convertToComponent(from: component)
 
-            let result = try await CycloneDXConverter.convertToComponent(from: component)
-
-            #expect(result.type == expectedCDXCategory)
-            #expect(result.bomRef == "test-id")
-            #expect(result.name == "TestComponent")
-            #expect(result.version == "1.0.0")
-            #expect(result.scope == .required)
-            #expect(result.purl == "pkg:swift/test@1.0.0")
-        }
+        #expect(result.type == expectedCDXCategory)
+        #expect(result.bomRef == "test-id")
+        #expect(result.name == "TestComponent")
+        #expect(result.version == "1.0.0")
+        #expect(result.scope == .required)
+        #expect(result.purl == "pkg:swift/test@1.0.0")
     }
 
-    @Test("convertToComponent with all entities")
-    func convertToComponentWithAllEntities() async throws {
-        let entities: [(SBOMComponent.Entity, String)] = [
-            (.package, SBOMComponent.Entity.package.rawValue),
+    @Test(
+        "convertToComponent with entity",
+        arguments: [
+            (SBOMComponent.Entity.package, SBOMComponent.Entity.package.rawValue),
             (.product, SBOMComponent.Entity.product.rawValue),
         ]
+    )
+    func convertToComponentWithEntity(
+        sbomEntity: SBOMComponent.Entity,
+        sbomEntityString: String
+    ) async throws {
+        let component = SBOMComponent(
+            category: .library,
+            id: SBOMIdentifier(value: "test-id"),
+            purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
+            name: "TestComponent",
+            version: SBOMComponent.Version(revision: "1.0.0"),
+            originator: SBOMOriginator(commits: nil),
+            scope: .test,
+            entity: sbomEntity
+        )
 
-        for (sbomEntity, sbomEntityString) in entities {
-            let component = SBOMComponent(
-                category: .library,
-                id: SBOMIdentifier(value: "test-id"),
-                purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
-                name: "TestComponent",
-                version: SBOMComponent.Version(revision: "1.0.0"),
-                originator: SBOMOriginator(commits: nil),
-                scope: .test,
-                entity: sbomEntity
-            )
+        let result = try await CycloneDXConverter.convertToComponent(from: component)
 
-            let result = try await CycloneDXConverter.convertToComponent(from: component)
-
-            #expect(result.type == .library)
-            #expect(result.scope == .excluded)
-            #expect(result.bomRef == "test-id")
-            #expect(result.name == "TestComponent")
-            #expect(result.version == "1.0.0")
-            #expect(result.purl == "pkg:swift/test@1.0.0")
-            let properties = try #require(result.properties)
-            #expect(properties.count == 1)
-            #expect(properties[0].name == "swift-entity")
-            #expect(properties[0].value == sbomEntityString)
-        }
+        #expect(result.type == .library)
+        #expect(result.scope == .excluded)
+        #expect(result.bomRef == "test-id")
+        #expect(result.name == "TestComponent")
+        #expect(result.version == "1.0.0")
+        #expect(result.purl == "pkg:swift/test@1.0.0")
+        let properties = try #require(result.properties)
+        #expect(properties.count == 1)
+        #expect(properties[0].name == "swift-entity")
+        #expect(properties[0].value == sbomEntityString)
     }
 
-    @Test("convertToComponent with all scopes")
-    func convertToComponentWithAllScopes() async throws {
-        let scopes: [(SBOMComponent.Scope?, CycloneDXComponent.Scope)] = [
-            (.runtime, .required),
-            (.optional, .optional),
-            (.test, .excluded),
-            (nil, .required),
+    @Test(
+        "convertToComponent with scope",
+        arguments: [
+            (Optional(SBOMComponent.Scope.runtime), CycloneDXComponent.Scope.required),
+            (Optional(.optional), .optional),
+            (Optional(.test), .excluded),
+            (Optional<SBOMComponent.Scope>.none, .required),
         ]
+    )
+    func convertToComponentWithScope(
+        sbomScope: SBOMComponent.Scope?,
+        expectedCDXScope: CycloneDXComponent.Scope
+    ) async throws {
+        let component = SBOMComponent(
+            category: .library,
+            id: SBOMIdentifier(value: "test-id"),
+            purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
+            name: "TestComponent",
+            version: SBOMComponent.Version(revision: "1.0.0"),
+            originator: SBOMOriginator(commits: nil),
+            scope: sbomScope,
+            entity: .product
+        )
 
-        for (sbomScope, expectedCDXScope) in scopes {
-            let component = SBOMComponent(
-                category: .library,
-                id: SBOMIdentifier(value: "test-id"),
-                purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
-                name: "TestComponent",
-                version: SBOMComponent.Version(revision: "1.0.0"),
-                originator: SBOMOriginator(commits: nil),
-                scope: sbomScope,
-                entity: .product
-            )
+        let result = try await CycloneDXConverter.convertToComponent(from: component)
 
-            let result = try await CycloneDXConverter.convertToComponent(from: component)
-
-            #expect(result.type == .library)
-            #expect(result.scope == expectedCDXScope)
-            #expect(result.bomRef == "test-id")
-            #expect(result.name == "TestComponent")
-            #expect(result.version == "1.0.0")
-            #expect(result.purl == "pkg:swift/test@1.0.0")
-        }
+        #expect(result.type == .library)
+        #expect(result.scope == expectedCDXScope)
+        #expect(result.bomRef == "test-id")
+        #expect(result.name == "TestComponent")
+        #expect(result.version == "1.0.0")
+        #expect(result.purl == "pkg:swift/test@1.0.0")
     }
 
     @Test("convertToComponent with pedigree")

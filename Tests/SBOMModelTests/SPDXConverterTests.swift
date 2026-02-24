@@ -321,73 +321,77 @@ struct SPDXConverterTests {
         #expect(documentUnwrapped.rootElementIDs == [sbomUnwrapped.id])
     }
 
-    @Test("convertToPackage with all categories")
-    func convertToPackageWithAllCategories() async throws {
-        let categories: [(SBOMComponent.Category, SPDXPackage.Purpose)] = [
-            (.application, .application),
+    @Test(
+        "convertToPackage with category",
+        arguments: [
+            (SBOMComponent.Category.application, SPDXPackage.Purpose.application),
             (.framework, .framework),
             (.library, .library),
             (.file, .file),
         ]
+    )
+    func convertToPackageWithCategory(
+        sbomCategory: SBOMComponent.Category,
+        expectedSPDXPurpose: SPDXPackage.Purpose
+    ) async throws {
+        let component = SBOMComponent(
+            category: sbomCategory,
+            id: SBOMIdentifier(value: "test-id"),
+            purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
+            name: "TestComponent",
+            version: SBOMComponent.Version(revision: "1.0.0"),
+            originator: SBOMOriginator(commits: nil),
+            description: "Test description",
+            scope: .runtime,
+            entity: .product
+        )
 
-        for (sbomCategory, expectedSPDXPurpose) in categories {
-            let component = SBOMComponent(
-                category: sbomCategory,
-                id: SBOMIdentifier(value: "test-id"),
-                purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
-                name: "TestComponent",
-                version: SBOMComponent.Version(revision: "1.0.0"),
-                originator: SBOMOriginator(commits: nil),
-                description: "Test description",
-                scope: .runtime,
-                entity: .product
-            )
+        let result = try await SPDXConverter.convertToPackage(from: component)
 
-            let result = try await SPDXConverter.convertToPackage(from: component)
-
-            #expect(result.id == "urn:spdx:test-id")
-            #expect(result.type == .SoftwarePackage)
-            #expect(result.purpose == expectedSPDXPurpose)
-            #expect(result.purl == "pkg:swift/test@1.0.0")
-            #expect(result.name == "TestComponent")
-            #expect(result.version == "1.0.0")
-            #expect(result.creationInfoID == "_:creationInfo")
-            #expect(result.description == "Test description")
-        }
+        #expect(result.id == "urn:spdx:test-id")
+        #expect(result.type == .SoftwarePackage)
+        #expect(result.purpose == expectedSPDXPurpose)
+        #expect(result.purl == "pkg:swift/test@1.0.0")
+        #expect(result.name == "TestComponent")
+        #expect(result.version == "1.0.0")
+        #expect(result.creationInfoID == "_:creationInfo")
+        #expect(result.description == "Test description")
     }
 
-    @Test("convertToPackage with all entites")
-    func convertToPackageWithAllEntities() async throws {
-        let entities: [(SBOMComponent.Entity, String)] = [
-            (.package, SBOMComponent.Entity.package.rawValue),
+    @Test(
+        "convertToPackage with entity",
+        arguments: [
+            (SBOMComponent.Entity.package, SBOMComponent.Entity.package.rawValue),
             (.product, SBOMComponent.Entity.product.rawValue),
         ]
+    )
+    func convertToPackageWithEntity(
+        sbomEntity: SBOMComponent.Entity,
+        sbomEntityString: String
+    ) async throws {
+        let component = SBOMComponent(
+            category: .application,
+            id: SBOMIdentifier(value: "test-id"),
+            purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
+            name: "TestComponent",
+            version: SBOMComponent.Version(revision: "1.0.0"),
+            originator: SBOMOriginator(commits: nil),
+            description: "Test description",
+            scope: .runtime,
+            entity: sbomEntity
+        )
 
-        for (sbomEntity, sbomEntityString) in entities {
-            let component = SBOMComponent(
-                category: .application,
-                id: SBOMIdentifier(value: "test-id"),
-                purl: PURL(scheme: "pkg", type: "swift", name: "test", version: "1.0.0"),
-                name: "TestComponent",
-                version: SBOMComponent.Version(revision: "1.0.0"),
-                originator: SBOMOriginator(commits: nil),
-                description: "Test description",
-                scope: .runtime,
-                entity: sbomEntity
-            )
+        let result = try await SPDXConverter.convertToPackage(from: component)
 
-            let result = try await SPDXConverter.convertToPackage(from: component)
-
-            #expect(result.id == "urn:spdx:test-id")
-            #expect(result.type == .SoftwarePackage)
-            #expect(result.purpose == .application)
-            #expect(result.purl == "pkg:swift/test@1.0.0")
-            #expect(result.name == "TestComponent")
-            #expect(result.version == "1.0.0")
-            #expect(result.creationInfoID == "_:creationInfo")
-            #expect(result.description == "Test description")
-            #expect(result.summary == sbomEntityString)
-        }
+        #expect(result.id == "urn:spdx:test-id")
+        #expect(result.type == .SoftwarePackage)
+        #expect(result.purpose == .application)
+        #expect(result.purl == "pkg:swift/test@1.0.0")
+        #expect(result.name == "TestComponent")
+        #expect(result.version == "1.0.0")
+        #expect(result.creationInfoID == "_:creationInfo")
+        #expect(result.description == "Test description")
+        #expect(result.summary == sbomEntityString)
     }
 
     @Test("convertToPackage with nil description")
