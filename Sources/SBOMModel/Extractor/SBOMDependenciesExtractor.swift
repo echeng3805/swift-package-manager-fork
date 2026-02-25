@@ -19,11 +19,6 @@ import SourceControl
 import TSCUtility
 
 extension SBOMExtractor {
-    enum DependencySource {
-        case buildGraph
-        case modulesGraph
-    }
-
     enum DependencyReference {
         case product(ResolvedProduct)
         case module(ResolvedModule)
@@ -68,9 +63,18 @@ extension SBOMExtractor {
         }
 
         let filterStrategy = filter.createStrategy()
-        let source = dependencyGraph != nil ? DependencySource.buildGraph : DependencySource.modulesGraph
-        if source == .buildGraph {
+        
+        // Create the appropriate dependency source strategy
+        let dependencySource: DependencySourceStrategy
+        if let buildGraph = dependencyGraph {
             await self.populateTargetNameCache()
+            dependencySource = BuildGraphDependencySource(
+                dependencyGraph: buildGraph,
+                modulesGraph: modulesGraph,
+                caches: caches
+            )
+        } else {
+            dependencySource = ModulesGraphDependencySource(modulesGraph: modulesGraph)
         }
         
         var components: Set<SBOMComponent> = []
@@ -90,87 +94,14 @@ extension SBOMExtractor {
             }
         }
 
-        // Get dependencies for a module based on the source
+        // Get dependencies using the strategy pattern
         func getDependencies(for module: ResolvedModule) async throws -> [DependencyReference] {
-            switch source {
-            case .buildGraph:
-                return try await getBuildGraphDependencies(for: module)
-            case .modulesGraph:
-                return getModulesGraphDependencies(for: module)
-            }
+            return try await dependencySource.getDependencies(for: module)
         }
 
-        // Get dependencies for a product based on the source
+        // Get dependencies using the strategy pattern
         func getDependencies(for product: ResolvedProduct) async throws -> [DependencyReference] {
-            switch source {
-            case .buildGraph:
-                return try await getBuildGraphDependencies(for: product)
-            case .modulesGraph:
-                return getModulesGraphDependencies(for: product)
-            }
-        }
-
-        // Get dependencies for a module from build graph
-        func getBuildGraphDependencies(for module: ResolvedModule) async throws -> [DependencyReference] {
-            guard let buildGraph = dependencyGraph,
-                  let targetName = await caches.targetName.get(module.id),
-                  let targetDeps = buildGraph[targetName] else {
-                return []
-            }
-            
-            return targetDeps.compactMap { targetDep in
-                if let product = SBOMGraphsConverter.toProduct(fromTarget: targetDep, modulesGraph: modulesGraph) {
-                    return .product(product)
-                } else if let module = SBOMGraphsConverter.toModule(fromTarget: targetDep, modulesGraph: modulesGraph) {
-                    return .module(module)
-                }
-                // TODO: echeng3805, print a warning for targets not in modules graph (ignoring resource bundles)
-                return nil
-            }
-        }
-
-        // Get dependencies for a module from modules graph
-        func getModulesGraphDependencies(for module: ResolvedModule) -> [DependencyReference] {
-            return module.dependencies.map { dependency in
-                switch dependency {
-                case .product(let product, _):
-                    return .product(product)
-                case .module(let module, _):
-                    return .module(module)
-                }
-            }
-        }
-
-        // Get product dependencies from modules graph
-        func getModulesGraphDependencies(for product: ResolvedProduct) -> [DependencyReference] {
-            return product.modules.flatMap { module in
-                module.dependencies.map { dependency in
-                    switch dependency {
-                    case .product(let product, _):
-                        return .product(product)
-                    case .module(let module, _):
-                        return .module(module)
-                    }
-                }
-            }
-        }
-
-        // Get dependencies for a product from build graph
-        func getBuildGraphDependencies(for product: ResolvedProduct) async throws -> [DependencyReference] {
-            guard let buildGraph = dependencyGraph,
-                  let targetDeps = buildGraph[SBOMGraphsConverter.getTargetName(fromProduct: product.name)] else {
-                return []
-            }
-            
-            return targetDeps.compactMap { targetDep in
-                if let product = SBOMGraphsConverter.toProduct(fromTarget: targetDep, modulesGraph: modulesGraph) {
-                    return .product(product)
-                } else if let module = SBOMGraphsConverter.toModule(fromTarget: targetDep, modulesGraph: modulesGraph) {
-                    return .module(module)
-                }
-                // TODO: echeng3805, print a warning for targets not in modules graph?
-                return nil
-            }
+            return try await dependencySource.getDependencies(for: product)
         }
 
         // Processes modules recursively and returns a list of products to process.
